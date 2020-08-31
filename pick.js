@@ -36,3 +36,13 @@ nightShift[1].score = 2;
 nightShift[2].score = 3;
 nightShift[3].score = 4;
 nightShift[4].score = 3;
+
+function pickShift(){
+    // let memberNum = 0;
+    let day = 8;
+    for(let i = 0; i < day; i++) {
+        for(let j = 0; j < cctv[i].length; j++) {
+            
+        }
+    }
+}
