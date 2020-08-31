@@ -1,3 +1,8 @@
-#title-name {
+body{
+    margin: 10px;
+}
+#title-name 
+{
+    position: relative;
     text-align: center;
 }
