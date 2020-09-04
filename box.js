@@ -99,3 +99,39 @@ cctv[14].score = 0.5;
 cctv[18].score = 4;
 cctv[20].score = 2;
 cctv[22].score = 2;
+
+
+
+
+
+
+
+
+// for(let i = 0; i < week; i++)
+// {
+//     let numberNightShift = 4; // 불침번 근무 개수
+//     nightShift[i] = new Array(numberNightShift); // nightShift[7][4]
+//     for(let j = 0; j < numberNightShift; j++)
+//     {
+//         if(i < weekday) // 평일 근무 점수
+//         {
+//             nightShift[i][j] = new work(5, 1);
+//         }
+//         else // 주말 근무 점수
+//         {
+//             nightShift[i][j] = new work(0, 1);
+//         }
+//     }
+// }
+// // *** 불침번 근무 생성 및 근무 별 점수 초기화
+
+// for(let i = 0; i < week; i++)
+// {
+//     let numberCctvShift = 10; // cctv 근무 개수
+//     cctvShift[i] = new Array(numberCctvShift);
+//     for(let j = 0; j < numberCctvShift; j++)
+//     {
+//         cctvShift[i][j] = new work(0, 1);
+//     }
+// }
+// // *** cctv 근무 생성 및 근무 별 점수 초기화
