@@ -1,8 +1,36 @@
-body{
-    margin: 10px;
-}
-#title-name 
+body
 {
-    position: relative;
+    margin: 20px;
+}
+
+.top
+{
+    text-align: center;
+    margin: 30px;
+}
+
+.main
+{
     text-align: center;
 }
+
+.bottom
+{
+    text-align: center;
+}
+/* 
+#title-name 
+{
+    text-align: center;
+    margin: 30px;
+}
+
+table
+{
+    text-align: center;    
+}
+
+table td
+{
+    margin: 20px;
+} */

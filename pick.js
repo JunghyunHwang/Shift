@@ -1,7 +1,6 @@
 let weekday = 5;
 let week = 7;
 let shift = [];
-let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"];
 let members = []; // 나중에 엑셀 연결 해서 가져옴
 let zeroPointMembers = [];
 let onePointMembers = [];
@@ -10,20 +9,23 @@ let sixPointMembers = [];
 let hardWorkMembers = [];
 let doNotWorkMemebers = [];
 let shiftsTotal = 0;
+let monday = document.getElementById('mon');
+monday.innerText = "Fuck";
 
-function work(name, score, cnt)
+function work(name, score, cnt, day)
 {
     this.name = name
     this.score = score;
     this.count = cnt;
+    this.day = day;
 }
 
 function loadMembers()
 {
-    for(let i = 0; i < 46; i++)
+    for(let i = 0; i < 28; i++)
     {
         members[i] = i;
-        members[i] = new work(i, 0, 0);
+        members[i] = new work(i, 0, 0, 0);
     }
 }
 
@@ -55,6 +57,7 @@ for(let i = 0; i < week; i++)
 {
     let numberNightShift = 4; // 불침번 근무 개수
     let numberCctvShift = 10; // cctv 근무 개수
+    let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"];
     shiftsTotal = numberNightShift + numberCctvShift // onedayShiftTotal
     shiftsTotal = (i < weekday) ? shiftsTotal : shiftsTotal + 2; // 주말 위병소 근무 때문에
     shift[i] = new Array(shiftsTotal);
@@ -63,11 +66,11 @@ for(let i = 0; i < week; i++)
     {
         if(j == 7)// shift[i][7]는 18~20이고, 매일 5점 짜리 근무임
         {
-            shift[i][j] = new work(shiftName[j], 5, 1);
+            shift[i][j] = new work(shiftName[j], 5, 1, i);
         }
         else
         {
-            shift[i][j] = new work(shiftName[j], 1, 1); // 모든 근무 점수, 카운트 0으로 초기화
+            shift[i][j] = new work(shiftName[j], 1, 1, i); // 모든 근무 점수, 카운트 0으로 초기화
         }
     }
 
@@ -92,9 +95,12 @@ shift[6][9].score = 5; // 일요일 cctv 말번
 shift[5][14].score = 5;
 shift[5][15].score = 5;
 
-console.log(shift);
-
 // *** 근무 짜기 전 멤버들과 근무 설정
+
+loadMembers();
+let membersTotal = members.length;
+memberCategory(membersTotal);
+let shiftCount = 0; ////
 
 function pickNum (maxNum)
 {
@@ -102,99 +108,90 @@ function pickNum (maxNum)
     return randomNum;
 }
 
-loadMembers();
-let membersTotal = members.length;
-memberCategory(membersTotal);
+// day에 정보를 담아서 보내는거야 예를 들어 총 인원이 몇 
+function calculate(here, next, score, day)
+{
+    let selectedNum = pickNum(here.length);
+    let dayDistance = day - here[selectedNum].day
+    let today;
+
+    if(dayDistance < 2 && day >= 2) // 근무와 근무 사이 최소 1일 틈을 주기 위해
+    {
+        selectedNum = pickNum(here.length);
+    }
+
+    today = here[selectedNum].name;
+    shiftCount++; ////
+    here[selectedNum].score += score;
+    here[selectedNum].day = day;
+    here[selectedNum].count++;
+    next.push(here[selectedNum]);
+    here.splice(selectedNum, 1);
+    return today;
+}
 
 for(let i = 0; i < week; i++)
 {
     let numberNightShift = 4;
     let numberCctvShift = 10;
+    let todayShift = [];
+    let yoill = ["Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"];
     shiftsTotal = numberNightShift + numberCctvShift;
     shiftsTotal = (i < weekday) ? shiftsTotal : shiftsTotal + 2;
     
     for(let j = 0; j < shiftsTotal; j++)
     {
         let point = shift[i][j].score;
-        let selectedNum = 0;
 
         switch(point)
         {
             case 1:
                 if(zeroPointMembers.length)
                 {
-                    selectedNum = pickNum(zeroPointMembers.length);
-                    zeroPointMembers[selectedNum].score += point;
-                    zeroPointMembers[selectedNum].count++;
-                    onePointMembers.push(zeroPointMembers[selectedNum]);
-                    zeroPointMembers.splice(selectedNum, 1);
+                    todayShift[j] = calculate(zeroPointMembers, onePointMembers, point, i);
                 }
                 else if(!fivePointMembers.length)
                 {
                     if(!sixPointMembers.length)
                     {
-                        selectedNum = pickNum(hardWorkMembers.length);
-                        hardWorkMembers[selectedNum].score += point;
-                        hardWorkMembers[selectedNum].count++
-                        doNotWorkMemebers.push(hardWorkMembers[selectedNum]);
-                        hardWorkMembers.splice(selectedNum, 1);
+                        todayShift[j] = calculate(hardWorkMembers, doNotWorkMemebers, point, i);
                     }
                     else
                     {
-                        selectedNum = pickNum(sixPointMembers.length);
-                        sixPointMembers[selectedNum].score += point;
-                        sixPointMembers[selectedNum].count++
-                        hardWorkMembers.push(sixPointMembers[selectedNum]);
-                        sixPointMembers.splice(selectedNum, 1);
+                        todayShift[j] = calculate(sixPointMembers, hardWorkMembers, point, i);
                     }
                 }
                 else // fivePointMembers
                 {
-                    selectedNum = pickNum(fivePointMembers.length);
-                    fivePointMembers[selectedNum].score += point;
-                    fivePointMembers[selectedNum].count++
-                    sixPointMembers.push(fivePointMembers[selectedNum]);
-                    fivePointMembers.splice(selectedNum, 1);
+                    todayShift[j] = calculate(fivePointMembers, sixPointMembers, point, i);
                 }
                 break;
             case 5:
                 if(zeroPointMembers.length)
                 {
-                    selectedNum = pickNum(zeroPointMembers.length);
-                    zeroPointMembers[selectedNum].score += point;
-                    zeroPointMembers[selectedNum].count++;
-                    fivePointMembers.push(zeroPointMembers[selectedNum]);
-                    zeroPointMembers.splice(selectedNum, 1);
+                    todayShift[j] = calculate(zeroPointMembers, fivePointMembers, point, i);
                 }
                 else if(!onePointMembers.length)
                 {
                     if(!sixPointMembers.length)
                     {
-                        selectedNum = pickNum(hardWorkMembers.length);
-                        hardWorkMembers[selectedNum].score += point;
-                        hardWorkMembers[selectedNum].count++
-                        doNotWorkMemebers.push(hardWorkMembers[selectedNum]);
-                        hardWorkMembers.splice(selectedNum, 1);
+                        todayShift[j] = calculate(hardWorkMembers, doNotWorkMemebers, point, i);
                     }
                     else
                     {
-                        selectedNum = pickNum(sixPointMembers.length);
-                        sixPointMembers[selectedNum].score += point;
-                        sixPointMembers[selectedNum].count++
-                        doNotWorkMemebers.push(sixPointMembers[selectedNum]);
-                        sixPointMembers.splice(selectedNum, 1);
+                        todayShift[j] = calculate(sixPointMembers, doNotWorkMemebers, point, i);
                     }
                 }
                 else // onePointMembers
                 {
-                    selectedNum = pickNum(onePointMembers.length);
-                    onePointMembers[selectedNum].score += point;
-                    onePointMembers[selectedNum].count++;
-                    sixPointMembers.push(onePointMembers[selectedNum]);
-                    onePointMembers.splice(selectedNum, 1);
+                    todayShift[j] = calculate(onePointMembers, sixPointMembers, point, i);
                 }
+                break;
+            default :
+                console.log("Unknown type");
                 break;
         }
     }
+    console.log(`${yoill[i]} : ${todayShift}`);
 }
-console.log(members);
+console.log(shiftCount);
