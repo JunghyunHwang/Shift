@@ -1,3 +1,5 @@
+// Pick members
+
 let weekday = 5;
 let week = 7;
 let shiftCount = 0;
