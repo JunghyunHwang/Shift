@@ -90,7 +90,7 @@ function checkMembersDay(here, day)
 
 function calculate(here, next, score, day)
 {
-    let pass = 0;
+    let pass = 0; // Fix true or false
     let randomPerson = 0;
     let len = here.length;
     if(day === 0)
