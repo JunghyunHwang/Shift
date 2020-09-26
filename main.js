@@ -190,3 +190,4 @@ for(let i = 0; i < week; i++)
     console.log(`${yoill[i]} : ${todayShift}`);
 }
 console.log(shiftCount);
+console.log(members.length);
