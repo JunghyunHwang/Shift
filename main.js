@@ -12,7 +12,7 @@ let sixPointMembers = [];
 let hardWorkMembers = [];
 let doNotWorkMemebers = [];
 let shiftsTotal = 0;
-let person = ["길윤재", "황중현", "이근혁", "서동휘", "나종원", "박시현", "이관진", "임석범", "황인성", "류희성", "복병수", "김민수", "김종훈", "김정현", "백지용", "홍우진", "김민수2", "김수환", "김승진", "손건우", "강우석", "송강산", "김석희", "김선규", "박태규", "공민식", "오도경", "홍성원", "최현준", "권오복", "최재성", "김창민", "이영한" , "박준서", "김수원", "김건호", "강건호", "김정원"];
+let person = ["길윤재", "황중현", "서동휘", "나종원", "박시현", "이관진", "임석범", "황인성", "류희성", "복병수", "김민수", "김종훈", "김정현", "백지용", "홍우진", "김민수2", "김수환", "김승진", "손건우", "강우석", "송강산", "김석희", "김선규", "박태규", "공민식", "오도경", "홍성원", "최현준", "권오복", "최재성", "김창민", "이영한" , "박준서", "김수원", "김건호", "강건호", "김정원"];
 
 function work(name, score, cnt, day)
 {
@@ -26,7 +26,7 @@ for(let i = 0; i < week; i++)
 {
     let numberNightShift = 4; // 불침번 근무 개수
     let numberCctvShift = 10; // cctv 근무 개수
-    let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"];
+    let shiftName = ["cctv04", "cctv06", "cctv08", "cctv10", "cctv12", "cctv14", "cctv16", "cctv18", "cctv20", "cctv22", "nightshift_Firstfirst", "nightshift_Second", "nightshift_Third", "nightshift_Fourth", "guardhouse1", "guardhouse2"];
     shiftsTotal = numberNightShift + numberCctvShift
     shiftsTotal = (i < weekday) ? shiftsTotal : shiftsTotal + 2; // 주말 위병소 근무 때문에
     shift[i] = new Array(shiftsTotal);
@@ -93,10 +93,12 @@ function calculate(here, next, score, day)
     let pass = 0; // Fix true or false
     let randomPerson = 0;
     let len = here.length;
+    /*
     if(day === 0)
     {
         len -= 16; // 저번주 일요일에 근무 한 사람 뺌
     }
+    */
     
     while(pass < 1)
     {
@@ -187,7 +189,10 @@ for(let i = 0; i < week; i++)
                 break;
         }
     }
+    let dia = document.querySelectorAll(`#${yoill[i]}`);
+    for(let i = 0; i < todayShift.length; i++)
+    {
+        dia[i].textContent = todayShift[i]
+    }
     console.log(`${yoill[i]} : ${todayShift}`);
 }
-console.log(shiftCount);
-console.log(members.length);

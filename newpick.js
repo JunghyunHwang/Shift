@@ -1,7 +1,15 @@
 let weekday = 5;
 let week = 7;
 let shift = [];
-let members = [];
+let members = 
+{
+    zero : new Array(),
+    one : new Array(),
+    two : new Array(),
+    three : new Array(),
+    four : new Array(),
+    five : new Array()
+}
 let weekShiftsTotal = 0;
 let moreWorkers = [];
 let lessWorkers = [];
@@ -11,6 +19,8 @@ let twoPointMembers = [];
 let threePointMembers = [];
 let fourPointMembers = [];
 let fivePointMembers = [];
+let totalScore = 0;
+let avgScore = 0;
 
 function work(name, score, cnt, day)
 {
@@ -20,6 +30,15 @@ function work(name, score, cnt, day)
     this.day = day;
 }
 
+function info(name, score, cnt, day, avgScore)
+{
+    this.name = name
+    this.score = score;
+    this.count = cnt;
+    this.day = day;
+    this.needScore = avgScore;
+}
+
 for(let i = 0; i < week; i++)
 {
     let numberNightShift = 4; // 불침번 근무 개수
@@ -27,8 +46,8 @@ for(let i = 0; i < week; i++)
     let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"];
     let weekdayShiftScore = [4, 3, 2, 1, 2, 1, 1, 5, 3, 2, 2, 3, 5, 3];
     let friShiftScore = [4, 3, 2, 1, 2, 1, 1, 5, 3, 1, 1, 1, 3, 2];
-    let satShiftScore = [3, 3, 3, 3, 4, 4, 4, 5, 3, 1, 1, 1, 3, 2, 5];
-    let sunShiftScore = [3, 3, 3, 3, 3, 3, 2, 4, 2, 2, 2, 3, 4, 3, 5];
+    let satShiftScore = [3, 3, 3, 3, 4, 4, 4, 5, 3, 1, 1, 1, 3, 2, 5, 5];
+    let sunShiftScore = [3, 3, 3, 3, 3, 3, 2, 4, 2, 2, 2, 3, 4, 3, 5, 5];
     let dayShiftsTotal = numberNightShift + numberCctvShift
     dayShiftsTotal = (i < weekday) ? dayShiftsTotal : dayShiftsTotal + 2; // 주말 위병소 근무 때문에
     weekShiftsTotal += dayShiftsTotal;
@@ -39,6 +58,7 @@ for(let i = 0; i < week; i++)
         for(let j = 0; j < dayShiftsTotal; j++)
         {
             shift[i][j] = new work(shiftName[j], weekdayShiftScore[j], 1, i);
+            totalScore += weekdayShiftScore[j];
         }
     }
     else if(i === weekday - 1) // Friday
@@ -46,6 +66,7 @@ for(let i = 0; i < week; i++)
         for(let j = 0; j < dayShiftsTotal; j++)
         {
             shift[i][j] = new work(shiftName[j], friShiftScore[j], 1, i);
+            totalScore += friShiftScore[j];
         }
     }
     else if(i === weekday) // Satday
@@ -53,6 +74,7 @@ for(let i = 0; i < week; i++)
         for(let j = 0; j < dayShiftsTotal; j++)
         {
             shift[i][j] = new work(shiftName[j], satShiftScore[j], 1, i);
+            totalScore += satShiftScore[j];
         }
     }
     else // Sunday
@@ -60,6 +82,7 @@ for(let i = 0; i < week; i++)
         for(let j = 0; j < dayShiftsTotal; j++)
         {
             shift[i][j] = new work(shiftName[j], sunShiftScore[j], 1, i);
+            totalScore += sunShiftScore[j];
         }
     }
 }
@@ -68,13 +91,19 @@ function loadMembers() // 나중에 엑셀
 {
     for(let i = 0; i < person.length; i++)
     {
-        members[i] = new work(person[i], 0, 0, 0);
+        members.zero[i] = new info(person[i], 0, 0, 0, 0);
     }
 }
-
 loadMembers();
 
-//*** 근무 및 인원 초기화 끝
+avgScore = Math.ceil(totalScore / members.zero.length);
+
+for(let i = 0; i < person.length; i++) // 너무 비효율
+{
+    members.zero[i].needScore = avgScore;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////*** 근무 및 인원 초기화 끝
 
 function classifyByMoreOrLess(oneNum, twoNum, threeNum, fourNum, fiveNum)
 {
@@ -149,12 +178,10 @@ function classifyByMoreOrLess(oneNum, twoNum, threeNum, fourNum, fiveNum)
                             moreWorkers.push(fivePointMembers[i]);
                         }
                     }
-                    /* /// 이 상황이 나올 수 있나?
                     else
                     {
-
+                        console.log("That is impossible");
                     }
-                    */
                 }
             }
         }
@@ -169,12 +196,12 @@ function pick()
     let threePointNum = 0;
     let fourPointNum = 0;
     let fivePointNum = 0;
-    let needScore;
 
     for(let i = 0; i < week; i++)
     {
         let numberNightShift = 4;
         let numberCctvShift = 10;
+        let pingpong = 0;
         let todayShift = [];
         let yoill = ["Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"];
         let dayShiftsTotal = numberNightShift + numberCctvShift;
@@ -192,9 +219,10 @@ function pick()
             else if(shiftCount < members.length - 1)
             {
                 randomPerson = Math.floor(Math.random() * members.length - 1) + 1;
-                members[randomPerson].score += score;
-                members[randomPerson].day = day;
+                members[randomPerson].score += point;
+                members[randomPerson].day = shift[i][j].day;
                 members[randomPerson].count++;
+                members[randomPerson].needScore -= point;
                 switch(point) // How many point
                 {
                     case 1:
@@ -224,6 +252,32 @@ function pick()
             }
             else /// 모두 한번씩 하고 난 후
             {
+                switch(shiftCount % 2) // more에 있는 인원 less에 있는 인원 한번씩 돌아 가면서 픽
+                {
+                    case 0: // moreWorkers 픽
+                        if(moreWorkers.length)
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
+                        break;
+                    case 1: // lessWorkers 픽
+                        if(lessWorkers.length)
+                        {
+
+                        }
+                        else
+                        {
+                            
+                        }
+                        break;
+                    default:
+                        console.log("Unknown type");
+                }
+
                 randomPerson = Math.floor(Math.random() * members.length - 1) + 1;
                 members[randomPerson].score += score;
                 members[randomPerson].day = day;
@@ -234,6 +288,7 @@ function pick()
         console.log(`${yoill[i]} : ${todayShift}`);
     }
 }
+pick();
 
 ///// 여러값을 리턴 받을때
 /*
@@ -248,7 +303,5 @@ let dCodes = codes[0];
 let dCodes2 = codes[1];
 */
 
-
-console.log(moreWorkNum);
 console.log(weekShiftsTotal);
 //*** 근무 및 인원 초기화 끝

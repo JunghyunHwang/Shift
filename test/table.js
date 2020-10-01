@@ -23,7 +23,6 @@ function createTable()
 */
 
 let yoill = ["Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"];
-let week = [];
 
 for(let i = 0; i < yoill.length; i++)
 {
