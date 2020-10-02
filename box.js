@@ -57,3 +57,88 @@ function pickNum (availableNum, maxNum)
 
 // let btnSetShift = document.getElementById('setShift');
 // btnSetShift.addEventListener('click', );
+
+/*
+function classifyByMoreOrLess(oneNum, twoNum, threeNum, fourNum, fiveNum)
+{
+    let moreWorkerNum = weekShiftsTotal % members.length; // 더 많이 근무 하는 사람의 수
+    let lessWorkNum = members.length - moreWorkerNum; // 덜 근무 하는 사람의 수
+    let remainingCnt = 0;
+
+    if(oneNum >= moreWorkerNum)
+    {
+        for(let i = 0; i < moreWorkerNum; i++)
+        {
+            moreWorkers.push(onePointMembers[i]);
+        }
+    }
+    else
+    {
+        for(let i = 0; i < oneNum; i++)
+        {
+            moreWorkers.push(onePointMembers[i]);
+        }
+        remainingCnt = moreWorkerNum - moreWorkers.length;
+
+        if(twoNum >= remainingCnt)
+        {
+            for(let i = 0; i < remainingCnt; i++)
+            {
+                moreWorkers.push(twoPointMembers[i]);
+            }
+        }
+        else
+        {
+            for(let i = 0; i < twoNum; i++)
+            {
+                moreWorkers.push(twoPointMembers[i]);
+            }
+            remainingCnt = moreWorkerNum - moreWorkers.length;
+            
+            if(threeNum >= remainingCnt)
+            {
+                for(let i = 0; i < remainingCnt; i++)
+                {
+                    moreWorkers.push(threePointMembers[i]);
+                }
+            }
+            else
+            {
+                for(let i = 0; i < threeNum; i++)
+                {
+                    moreWorkers.push(threePointMembers[i]);
+                }
+                remainingCnt = moreWorkerNum - moreWorkers.length;
+
+                if(fourNum >= remainingCnt)
+                {
+                    for(let i = 0; i < remainingCnt; i++)
+                    {
+                        moreWorkers.push(fourPointMembers[i]);
+                    }
+                }
+                else
+                {
+                    for(let i = 0; i < fourNum; i++)
+                    {
+                        moreWorkers.push(fourPointMembers[i]);
+                    }
+                    remainingCnt = moreWorkerNum - moreWorkers.length;
+
+                    if(fiveNum >= remainingCnt)
+                    {
+                        for(let i = 0; i < remainingCnt; i++)
+                        {
+                            moreWorkers.push(fivePointMembers[i]);
+                        }
+                    }
+                    else
+                    {
+                        console.log("That is impossible");
+                    }
+                }
+            }
+        }
+    }
+}
+*/

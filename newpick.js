@@ -1,26 +1,18 @@
+/*
+    근무 짜는 프로그램
+*/
+
+
+// possiblePeople에 픽 된 사람이 어느 만약 스코어가 1이면 one 2면 two 3이면 three
+// 점수와 날짜 그리고 카운트 올리는 함수
+// 배열간 이동 
+
 let weekday = 5;
 let week = 7;
 let shift = [];
-let members = 
-{
-    zero : new Array(),
-    one : new Array(),
-    two : new Array(),
-    three : new Array(),
-    four : new Array(),
-    five : new Array()
-}
+let members = [];
 let weekShiftsTotal = 0;
-let moreWorkers = [];
-let lessWorkers = [];
 let person = ["길윤재", "황중현", "이근혁", "서동휘", "나종원", "박시현", "이관진", "임석범", "황인성", "류희성", "복병수", "김민수", "김종훈", "김정현", "백지용", "홍우진", "김민수2", "김수환", "김승진", "손건우", "강우석", "송강산", "김석희", "김선규", "박태규", "공민식", "오도경", "홍성원", "최현준", "권오복", "최재성", "김창민", "이영한" , "박준서", "김수원", "김건호", "강건호", "김정원"];
-let onePointMembers = [];
-let twoPointMembers = [];
-let threePointMembers = [];
-let fourPointMembers = [];
-let fivePointMembers = [];
-let totalScore = 0;
-let avgScore = 0;
 
 function work(name, score, cnt, day)
 {
@@ -30,32 +22,31 @@ function work(name, score, cnt, day)
     this.day = day;
 }
 
-function info(name, score, cnt, day, avgScore)
+function info(name, score, cnt, day)
 {
     this.name = name
     this.score = score;
     this.count = cnt;
     this.day = day;
-    this.needScore = avgScore;
 }
 
 for(let i = 0; i < week; i++)
 {
     let numberNightShift = 4; // 불침번 근무 개수
     let numberCctvShift = 10; // cctv 근무 개수
-    let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"];
-    let weekdayShiftScore = [4, 3, 2, 1, 2, 1, 1, 5, 3, 2, 2, 3, 5, 3];
-    let friShiftScore = [4, 3, 2, 1, 2, 1, 1, 5, 3, 1, 1, 1, 3, 2];
-    let satShiftScore = [3, 3, 3, 3, 4, 4, 4, 5, 3, 1, 1, 1, 3, 2, 5, 5];
-    let sunShiftScore = [3, 3, 3, 3, 3, 3, 2, 4, 2, 2, 2, 3, 4, 3, 5, 5];
-    let dayShiftsTotal = numberNightShift + numberCctvShift
-    dayShiftsTotal = (i < weekday) ? dayShiftsTotal : dayShiftsTotal + 2; // 주말 위병소 근무 때문에
-    weekShiftsTotal += dayShiftsTotal;
-    shift[i] = new Array(dayShiftsTotal);
+    let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"]; // Sever data
+    let weekdayShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 2, 3, 2]; // Sever data
+    let friShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 1, 3, 2]; // Sever data
+    let satShiftScore = [2, 2, 2, 2, 2, 3, 3, 3, 3, 1, 1, 1, 2, 2, 3, 3]; // Sever data
+    let sunShiftScore = [2, 2, 2, 3, 3, 3, 2, 3, 2, 2, 2, 2, 3, 2, 3, 3]; // Sever data
+    let aDayShiftsTotal = numberNightShift + numberCctvShift
+    aDayShiftsTotal = (i < weekday) ? aDayShiftsTotal : aDayShiftsTotal + 2; // 주말 위병소 근무 때문에
+    weekShiftsTotal += aDayShiftsTotal;
+    shift[i] = new Array(aDayShiftsTotal);
 
     if(i < weekday - 1) // Monday ~ Thursday
     {
-        for(let j = 0; j < dayShiftsTotal; j++)
+        for(let j = 0; j < aDayShiftsTotal; j++)
         {
             shift[i][j] = new work(shiftName[j], weekdayShiftScore[j], 1, i);
             totalScore += weekdayShiftScore[j];
@@ -63,7 +54,7 @@ for(let i = 0; i < week; i++)
     }
     else if(i === weekday - 1) // Friday
     {
-        for(let j = 0; j < dayShiftsTotal; j++)
+        for(let j = 0; j < aDayShiftsTotal; j++)
         {
             shift[i][j] = new work(shiftName[j], friShiftScore[j], 1, i);
             totalScore += friShiftScore[j];
@@ -71,7 +62,7 @@ for(let i = 0; i < week; i++)
     }
     else if(i === weekday) // Satday
     {
-        for(let j = 0; j < dayShiftsTotal; j++)
+        for(let j = 0; j < aDayShiftsTotal; j++)
         {
             shift[i][j] = new work(shiftName[j], satShiftScore[j], 1, i);
             totalScore += satShiftScore[j];
@@ -79,7 +70,7 @@ for(let i = 0; i < week; i++)
     }
     else // Sunday
     {
-        for(let j = 0; j < dayShiftsTotal; j++)
+        for(let j = 0; j < aDayShiftsTotal; j++)
         {
             shift[i][j] = new work(shiftName[j], sunShiftScore[j], 1, i);
             totalScore += sunShiftScore[j];
@@ -87,221 +78,143 @@ for(let i = 0; i < week; i++)
     }
 }
 
-function loadMembers() // 나중에 엑셀
+function loadMembers(zero) // 나중에 엑셀
 {
     for(let i = 0; i < person.length; i++)
     {
-        members.zero[i] = new info(person[i], 0, 0, 0, 0);
+        members[i] = new info(person[i], 0, 0, 0);
+        zero[i] = members[i];
     }
-}
-loadMembers();
-
-avgScore = Math.ceil(totalScore / members.zero.length);
-
-for(let i = 0; i < person.length; i++) // 너무 비효율
-{
-    members.zero[i].needScore = avgScore;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////*** 근무 및 인원 초기화 끝
 
-function classifyByMoreOrLess(oneNum, twoNum, threeNum, fourNum, fiveNum)
-{
-    let moreWorkerNum = weekShiftsTotal % members.length; // 더 많이 근무 하는 사람의 수
-    let lessWorkNum = members.length - moreWorkerNum; // 덜 근무 하는 사람의 수
-    let remainingCnt = 0;
-
-    if(oneNum >= moreWorkerNum)
-    {
-        for(let i = 0; i < moreWorkerNum; i++)
-        {
-            moreWorkers.push(onePointMembers[i]);
-        }
-    }
-    else
-    {
-        for(let i = 0; i < oneNum; i++)
-        {
-            moreWorkers.push(onePointMembers[i]);
-        }
-        remainingCnt = moreWorkerNum - moreWorkers.length;
-
-        if(twoNum >= remainingCnt)
-        {
-            for(let i = 0; i < remainingCnt; i++)
-            {
-                moreWorkers.push(twoPointMembers[i]);
-            }
-        }
-        else
-        {
-            for(let i = 0; i < twoNum; i++)
-            {
-                moreWorkers.push(twoPointMembers[i]);
-            }
-            remainingCnt = moreWorkerNum - moreWorkers.length;
-            
-            if(threeNum >= remainingCnt)
-            {
-                for(let i = 0; i < remainingCnt; i++)
-                {
-                    moreWorkers.push(threePointMembers[i]);
-                }
-            }
-            else
-            {
-                for(let i = 0; i < threeNum; i++)
-                {
-                    moreWorkers.push(threePointMembers[i]);
-                }
-                remainingCnt = moreWorkerNum - moreWorkers.length;
-
-                if(fourNum >= remainingCnt)
-                {
-                    for(let i = 0; i < remainingCnt; i++)
-                    {
-                        moreWorkers.push(fourPointMembers[i]);
-                    }
-                }
-                else
-                {
-                    for(let i = 0; i < fourNum; i++)
-                    {
-                        moreWorkers.push(fourPointMembers[i]);
-                    }
-                    remainingCnt = moreWorkerNum - moreWorkers.length;
-
-                    if(fiveNum >= remainingCnt)
-                    {
-                        for(let i = 0; i < remainingCnt; i++)
-                        {
-                            moreWorkers.push(fivePointMembers[i]);
-                        }
-                    }
-                    else
-                    {
-                        console.log("That is impossible");
-                    }
-                }
-            }
-        }
-    }
-}
-
 function pick()
 {
     let shiftCount = 0;
-    let onePointNum = 0;
-    let twoPointNum = 0;
-    let threePointNum = 0;
-    let fourPointNum = 0;
-    let fivePointNum = 0;
+    let zeroPointMembers = [];
+    let onePointMembers = [];
+    let twoPointMembers = [];
+    let threePointMembers = [];
+
+    loadMembers(zeroPointMembers);
 
     for(let i = 0; i < week; i++)
     {
-        let numberNightShift = 4;
-        let numberCctvShift = 10;
-        let pingpong = 0;
-        let todayShift = [];
+        let numberNightShift = 4; // Sever data
+        let numberCctvShift = 10; // Sever data
+        let todayWorker = [];
         let yoill = ["Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"];
-        let dayShiftsTotal = numberNightShift + numberCctvShift;
-        dayShiftsTotal = (i < weekday) ? dayShiftsTotal : dayShiftsTotal + 2;
+        let aDayShiftsTotal = numberNightShift + numberCctvShift;
+        aDayShiftsTotal = (i < weekday) ? aDayShiftsTotal : aDayShiftsTotal + 2;
         
-        for(let j = 0; j < dayShiftsTotal; j++)
+        for(let j = 0; j < aDayShiftsTotal; j++)
         {
             let point = shift[i][j].score;
+            let day = shift[i][j].day;
             let randomPerson = 0;
+            let possiblePeople = [];
+            let tempArray = [];
+            let tempScore = 0;
 
-            if(shiftCount === members.length - 1) // 모두가 근무를 한번씩 한 순간
+            switch(point)
             {
-                classifyByMoreOrLess(onePointNum, twoPointNum, threePointNum, fourPointNum, fivePointNum);
-            }
-            else if(shiftCount < members.length - 1)
-            {
-                randomPerson = Math.floor(Math.random() * members.length - 1) + 1;
-                members[randomPerson].score += point;
-                members[randomPerson].day = shift[i][j].day;
-                members[randomPerson].count++;
-                members[randomPerson].needScore -= point;
-                switch(point) // How many point
-                {
-                    case 1:
-                        onePointNum++;
-                        onePointMembers.push(members[randomPerson]);
-                        break;
-                    case 2:
-                        twoPointNum++
-                        twoPointMembers.push(members[randomPerson]);
-                        break;
-                    case 3:
-                        threePointNum++
-                        threePointMembers.push(members[randomPerson]);
-                        break;
-                    case 4:
-                        fourPointNum++
-                        fourPointMembers.push(members[randomPerson]);
-                        break;
-                    case 5:
-                        fivePointNum++
-                        fivePointMembers.push(members[randomPerson]);
-                        break;
-                    default :
-                        console.log("Unknown type");
-                        break;
-                }
-            }
-            else /// 모두 한번씩 하고 난 후
-            {
-                switch(shiftCount % 2) // more에 있는 인원 less에 있는 인원 한번씩 돌아 가면서 픽
-                {
-                    case 0: // moreWorkers 픽
-                        if(moreWorkers.length)
-                        {
-
-                        }
-                        else
-                        {
-
-                        }
-                        break;
-                    case 1: // lessWorkers 픽
-                        if(lessWorkers.length)
-                        {
-
-                        }
-                        else
-                        {
-                            
-                        }
-                        break;
-                    default:
-                        console.log("Unknown type");
-                }
-
-                randomPerson = Math.floor(Math.random() * members.length - 1) + 1;
-                members[randomPerson].score += score;
-                members[randomPerson].day = day;
-                members[randomPerson].count++;
+                case 1:
+                    if(zeroPointMembers.length)
+                    {
+                        randomPerson = Math.floor(Math.random() * zeroPointMembers.length - 1) + 1;
+                        zeroPointMembers[randomPerson].score = point;
+                        zeroPointMembers[randomPerson].day = day;
+                        zeroPointMembers[randomPerson].count++;
+                        onePointMembers.push(zeroPointMembers[randomPerson]);
+                        zeroPointMembers.splice(randomPerson, 1);
+                        todayWorker[j] = zeroPointMembers[randomPerson];
+                    }
+                    else if(!twoPointMembers.length && !threePointMembers.length)
+                    {
+                        randomPerson = Math.floor(Math.random() * onePointMembers.length - 1) + 1;
+                        onePointMembers[randomPerson].score = point; // 이런 경우에는 카운트 가장 적은 사람이
+                        onePointMembers[randomPerson].day = day;
+                        onePointMembers[randomPerson].count++;
+                        todayWorker[j] = onePointMembers[randomPerson];
+                    }
+                    else
+                    {
+                        possiblePeople = twoPointMembers.concat(threePointMembers);
+                        randomPerson = Math.floor(Math.random() * possiblePeople.length - 1) + 1;
+                        possiblePeople[randomPerson].score = point;
+                        possiblePeople[randomPerson].day = day;
+                        possiblePeople[randomPerson].count++;
+                        onePointMembers.push(possiblePeople[randomPerson]);
+                        zeroPointMembers.splice(randomPerson, 1);
+                        todayWorker[j] = possiblePeople[randomPerson];
+                    }
+                    break;
+                case 2:
+                    if(zeroPointMembers.length)
+                    {
+                        randomPerson = Math.floor(Math.random() * zeroPointMembers.length - 1) + 1;
+                        zeroPointMembers[randomPerson].score = point;
+                        zeroPointMembers[randomPerson].day = day;
+                        zeroPointMembers[randomPerson].count++;
+                        todayWorker[j] = zeroPointMembers[randomPerson];
+                    }
+                    else
+                    {
+                        tempArray = onePointMembers.concat(twoPointMembers);
+                        possiblePeople = tempArray.concat(threePointMembers);
+                        randomPerson = Math.floor(Math.random() * possiblePeople.length - 1) + 1;
+                        possiblePeople[randomPerson].score = point;
+                        possiblePeople[randomPerson].day = day;
+                        possiblePeople[randomPerson].count++;
+                        todayWorker[j] = possiblePeople[randomPerson];
+                    }
+                    break;
+                case 3:
+                    if(zeroPointMembers.length)
+                    {
+                        randomPerson = Math.floor(Math.random() * members.length - 1) + 1;
+                    }
+                    else if(!onePointMembers.length && !twoPointMembers.length)
+                    {
+                        randomPerson = Math.floor(Math.random() * members.length - 1) + 1;
+                        threePointMembers[randomPerson].score = point; // 이런 경우에는 카운트 가장 적은 사람이
+                        threePointMembers[randomPerson].day = day;
+                        threePointMembers[randomPerson].count++;
+                        todayWorker[j] = threePointMembers[randomPerson];
+                    }
+                    else
+                    {
+                        possiblePeople = onePointMembers.concat(twoPointMembers);
+                        randomPerson = Math.floor(Math.random() * possiblePeople.length - 1) + 1;
+                        possiblePeople[randomPerson].score = point;
+                        possiblePeople[randomPerson].day = day;
+                        possiblePeople[randomPerson].count++;
+                        todayWorker[j] = possiblePeople[randomPerson];
+                    }
+                    break;
+                default:
+                    alert("Unknown type");
+                    break;
             }
             shiftCount++;
         }
-        console.log(`${yoill[i]} : ${todayShift}`);
+        console.log(`${yoill[i]} : ${todayWorker}`);
     }
 }
 pick();
 
-///// 여러값을 리턴 받을때
 /*
-var newCodes = function() {
-    var dCodes = fg.codecsCodes.rs;
-    var dCodes2 = fg.codecsCodes2.rs;
-    return [dCodes, dCodes2];
-};
+    여러값을 리턴 받을때
 
-let codes = newCodes();
-let dCodes = codes[0];
-let dCodes2 = codes[1];
+    var newCodes = function()
+    {
+        var dCodes = fg.codecsCodes.rs;
+        var dCodes2 = fg.codecsCodes2.rs;
+        return [dCodes, dCodes2];
+    };
+
+    let codes = newCodes();
+    let dCodes = codes[0];
+    let dCodes2 = codes[1];
 */
-
-console.log(weekShiftsTotal);
-//*** 근무 및 인원 초기화 끝
