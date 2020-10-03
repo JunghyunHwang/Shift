@@ -2,10 +2,10 @@
     근무 짜는 프로그램
 */
 
-
-// possiblePeople에 픽 된 사람이 어느 만약 스코어가 1이면 one 2면 two 3이면 three
-// 점수와 날짜 그리고 카운트 올리는 함수
-// 배열간 이동 
+/* 
+    1. case 2 일때 해결하고 나머지 검토 후 사이트 가서 확인
+    2. 최소 하루 걸러 근무 들어가게
+*/
 
 let weekday = 5;
 let week = 7;
@@ -98,100 +98,17 @@ function controlInfo(selected, point, day)
     selected.count++;
 }
 
-function pickAndClassify(one, two, three, point, day) // return person(object)
+function pickAndClassify(from, to, point, day)
 {
-    let possible = [];
-    let random = [];
-    let tempArray = [];
-    let tempScore = 0;
+    let randomPerson = 0;
+    randomPerson = Math.floor(Math.random() * from.length - 1) + 1; // 하루걸러
+    controlInfo(from[randomPerson], point, day);
+    let todaySlave = from[randomPerson].name;
 
-    tempArray = one.concat(two);
-    possible = tempArray.concat(three);
-    random = Math.floor(Math.random() * possible.length - 1) + 1;
-    tempScore = possible[random].score;
-    controlInfo(possible[random], point, day);
+    to.push(from[randomPerson]);
+    from.splice(randomPerson, 1);
 
-    if(!one.length)
-    {
-        if(tempScore === 2)
-        {
-            for(let i = 0; i < two.length; i++)
-            {
-                if(two[i].id === possible[random].id)
-                {
-                    one = two[i];
-                    two.splice(i, 1);
-                    return one;
-                }
-            }
-        }
-        else // tempScore === 3
-        {
-            for(let i = 0; i < three.length; i++)
-            {
-                if(three[i].id === possible[random].id)
-                {
-                    one = three[i];
-                    three.splice(i, 1);
-                    return one;
-                }
-            }
-        }
-    }
-    else if(!two.length)
-    {
-        if(tempScore === 1)
-        {
-            for(let i = 0; i < one.length; i++)
-            {
-                if(one[i].id === possible[random].id)
-                {
-                    two = one[i];
-                    one.splice(i, 1);
-                    return two;
-                }
-            }
-        }
-        else // tempScore === 3
-        {
-            for(let i = 0; i < three.length; i++)
-            {
-                if(three[i].id === possible[random].id)
-                {
-                    two = three[i]
-                    three.splice(i, 1);
-                    return two;
-                }
-            }
-        }
-    }
-    else
-    {
-        if(tempScore === 1)
-        {
-            for(let i = 0; i < one.length; i++)
-            {
-                if(one[i].id === possible[random].id)
-                {
-                    three = one[i];
-                    one.splice(i, 1);
-                    return three;
-                }
-            }
-        }
-        else // tempScore === 2
-        {
-            for(let i = 0; i < two.length; i++)
-            {
-                if(two[i].id === possible[random].id)
-                {
-                    three = two[i];
-                    two.splice(i, 1);
-                    return three;
-                }
-            }
-        }
-    }
+    return todaySlave;
 }
 
 function pick()
@@ -216,73 +133,120 @@ function pick()
         {
             let point = shift[i][j].score;
             let day = i;
-            let randomPerson = 0;
-            let selectedPerson; // change name
+            let randomNum = 0;
 
             switch(point)
             {
                 case 1:
                     if(zeroPointMembers.length)
                     {
-                        randomPerson = Math.floor(Math.random() * zeroPointMembers.length - 1) + 1;
-                        controlInfo(zeroPointMembers[randomPerson], point, day);
-                        todayWorker[j] = zeroPointMembers[randomPerson].name;
-                        onePointMembers.push(zeroPointMembers[randomPerson]);
-                        zeroPointMembers.splice(randomPerson, 1);
+                        todayWorker[j] = pickAndClassify(zeroPointMembers, onePointMembers, point, day);
                     }
-                    else if(!twoPointMembers.length && !threePointMembers.length) // only remain onePointMembers
+                    else if(!twoPointMembers.length || !threePointMembers.length)
                     {
-                        randomPerson = Math.floor(Math.random() * onePointMembers.length - 1) + 1;
-                        onePointMembers[randomPerson].score = point; // 이런 경우에는 카운트 가장 적은 사람이
-                        onePointMembers[randomPerson].day = day;
-                        onePointMembers[randomPerson].count++;
-                        todayWorker[j] = onePointMembers[randomPerson].name;
+                        if(!twoPointMembers.length)
+                        {
+                            todayWorker[j] = pickAndClassify(threePointMembers, onePointMembers, point, day);
+                        }
+                        else if(!threePointMembers.length)
+                        {
+                            todayWorker[j] = pickAndClassify(twoPointMembers, onePointMembers, point, day);
+                        }
+                        else // only remain onePointMembers
+                        {
+                            randomNum = Math.floor(Math.random() * onePointMembers.length - 1) + 1;
+                            onePointMembers[randomNum].score = point; // 이런 경우에는 카운트 가장 적은 사람이
+                            onePointMembers[randomNum].day = day;
+                            onePointMembers[randomNum].count++;
+                            todayWorker[j] = onePointMembers[randomNum].name;
+                        }
                     }
                     else
                     {
-                        selectedPerson = pickAndClassify([], twoPointMembers, threePointMembers, point, day);
-                        onePointMembers.push(selectedPerson);
-                        todayWorker[j] = selectedPerson.name;
+                        randomNum = Math.floor(Math.random() * 100 + 1); // random 1 ~ 100
+                        if(randomNum % 2 === 0)
+                        {
+                            todayWorker[j] = pickAndClassify(twoPointMembers, onePointMembers, point, day);
+                        }
+                        else
+                        {
+                            todayWorker[j] = pickAndClassify(threePointMembers, onePointMembers, point, day);
+                        }
                     }
                     break;
                 case 2:
                     if(zeroPointMembers.length)
                     {
-                        randomPerson = Math.floor(Math.random() * zeroPointMembers.length - 1) + 1;
-                        controlInfo(zeroPointMembers[randomPerson], point, day);
-                        todayWorker[j] = zeroPointMembers[randomPerson].name;
-                        twoPointMembers.push(zeroPointMembers[randomPerson]);
-                        zeroPointMembers.splice(randomPerson, 1);
+                        todayWorker[j] = pickAndClassify(zeroPointMembers, twoPointMembers, point, day);
                     }
                     else
                     {
-                        selectedPerson = pickAndClassify(onePointMembers, [], threePointMembers, point, day);
-                        twoPointMembers.push(selectedPerson);
-                        todayWorker[j] = selectedPerson.name;
+                        // randomNum = Math.floor(Math.random() * 3 + 1); 비어있으면 에러남
+                        randomNum = 3;
+                        if(!onePointMembers.length)
+                        {
+                            todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
+                        }
+                        else if(!twoPointMembers.length)
+                        {
+                            todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
+                        }
+                        else if(!threePointMembers)
+                        {
+
+                        }
+                        else
+                        {
+                            if(randomNum === 1)
+                            {
+                                todayWorker[j] = pickAndClassify(onePointMembers, twoPointMembers, point, day);
+                            }
+                            else if(randomNum === 2)
+                            {
+                                todayWorker[j] = pickAndClassify(twoPointMembers, twoPointMembers, point, day);
+                            }
+                            else
+                            {
+                                todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
+                            }
+                        }
                     }
                     break;
                 case 3:
                     if(zeroPointMembers.length)
                     {
-                        randomPerson = Math.floor(Math.random() * zeroPointMembers.length - 1) + 1;
-                        controlInfo(zeroPointMembers[randomPerson], point, day);
-                        todayWorker[j] = zeroPointMembers[randomPerson].name;
-                        threePointMembers.push(zeroPointMembers[randomPerson]);
-                        zeroPointMembers.splice(randomPerson, 1);
+                        todayWorker[j] = pickAndClassify(zeroPointMembers, threePointMembers, point, day);
                     }
-                    else if(!onePointMembers.length && !twoPointMembers.length) // only remain threePointMembers
+                    else if(!onePointMembers.length || !twoPointMembers.length)
                     {
-                        randomPerson = Math.floor(Math.random() * members.length - 1) + 1;
-                        threePointMembers[randomPerson].score = point; // 이런 경우에는 카운트 가장 적은 사람이
-                        threePointMembers[randomPerson].day = day;
-                        threePointMembers[randomPerson].count++;
-                        todayWorker[j] = threePointMembers[randomPerson].name;
+                        if(!onePointMembers.length)
+                        {
+                            todayWorker[j] = pickAndClassify(twoPointMembers, threePointMembers, point, day);
+                        }
+                        else if(!twoPointMembers.length)
+                        {
+                            todayWorker[j] = pickAndClassify(onePointMembers, threePointMembers, point, day);
+                        }
+                        else // only remain threePointMembers
+                        {
+                            randomNum = Math.floor(Math.random() * threePointMembers.length - 1) + 1;
+                            threePointMembers[randomNum].score = point; // 이런 경우에는 카운트 가장 적은 사람이
+                            threePointMembers[randomNum].day = day;
+                            threePointMembers[randomNum].count++;
+                            todayWorker[j] = threePointMembers[randomNum].name;
+                        }
                     }
                     else
                     {
-                        selectedPerson = pickAndClassify(onePointMembers, twoPointMembers, [], point, day);
-                        threePointMembers.push(selectedPerson);
-                        todayWorker[j] = selectedPerson.name;
+                        randomNum = Math.floor(Math.random() * 100 + 1); // random 1 ~ 100
+                        if(randomNum % 2 === 0)
+                        {
+                            todayWorker[j] = pickAndClassify(onePointMembers, threePointMembers, point, day);
+                        }
+                        else
+                        {
+                            todayWorker[j] = pickAndClassify(twoPointMembers, threePointMembers, point, day);
+                        }
                     }
                     break;
                 default:
@@ -294,18 +258,3 @@ function pick()
     }
 }
 pick();
-
-/*
-    여러값을 리턴 받을때
-
-    var newCodes = function()
-    {
-        var dCodes = fg.codecsCodes.rs;
-        var dCodes2 = fg.codecsCodes2.rs;
-        return [dCodes, dCodes2];
-    };
-
-    let codes = newCodes();
-    let dCodes = codes[0];
-    let dCodes2 = codes[1];
-*/
