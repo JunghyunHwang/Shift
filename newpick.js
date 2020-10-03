@@ -12,6 +12,7 @@ let week = 7;
 let shift = [];
 let members = [];
 let weekShiftsTotal = 0;
+let totalScore = 0;
 let person = ["길윤재", "황중현", "이근혁", "서동휘", "나종원", "박시현", "이관진", "임석범", "황인성", "류희성", "복병수", "김민수", "김종훈", "김정현", "백지용", "홍우진", "김민수2", "김수환", "김승진", "손건우", "강우석", "송강산", "김석희", "김선규", "박태규", "공민식", "오도경", "홍성원", "최현준", "권오복", "최재성", "김창민", "이영한" , "박준서", "김수원", "김건호", "강건호", "김정원"];
 
 function work(name, score, cnt, day)
@@ -22,8 +23,9 @@ function work(name, score, cnt, day)
     this.day = day;
 }
 
-function info(name, score, cnt, day)
+function info(id, name, score, cnt, day)
 {
+    this.id = id;
     this.name = name
     this.score = score;
     this.count = cnt;
@@ -82,16 +84,118 @@ function loadMembers(zero) // 나중에 엑셀
 {
     for(let i = 0; i < person.length; i++)
     {
-        members[i] = new info(person[i], 0, 0, 0);
+        members[i] = new info(i, person[i], 0, 0, 0);
         zero[i] = members[i];
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////*** 근무 및 인원 초기화 끝
 
+function controlInfo(selected, point, day)
+{
+    selected.score = point;
+    selected.day = day;
+    selected.count++;
+}
+
+function pickAndClassify(one, two, three, point, day) // return person(object)
+{
+    let possible = [];
+    let random = [];
+    let tempArray = [];
+    let tempScore = 0;
+
+    tempArray = one.concat(two);
+    possible = tempArray.concat(three);
+    random = Math.floor(Math.random() * possible.length - 1) + 1;
+    tempScore = possible[random].score;
+    controlInfo(possible[random], point, day);
+
+    if(!one.length)
+    {
+        if(tempScore === 2)
+        {
+            for(let i = 0; i < two.length; i++)
+            {
+                if(two[i].id === possible[random].id)
+                {
+                    one = two[i];
+                    two.splice(i, 1);
+                    return one;
+                }
+            }
+        }
+        else // tempScore === 3
+        {
+            for(let i = 0; i < three.length; i++)
+            {
+                if(three[i].id === possible[random].id)
+                {
+                    one = three[i];
+                    three.splice(i, 1);
+                    return one;
+                }
+            }
+        }
+    }
+    else if(!two.length)
+    {
+        if(tempScore === 1)
+        {
+            for(let i = 0; i < one.length; i++)
+            {
+                if(one[i].id === possible[random].id)
+                {
+                    two = one[i];
+                    one.splice(i, 1);
+                    return two;
+                }
+            }
+        }
+        else // tempScore === 3
+        {
+            for(let i = 0; i < three.length; i++)
+            {
+                if(three[i].id === possible[random].id)
+                {
+                    two = three[i]
+                    three.splice(i, 1);
+                    return two;
+                }
+            }
+        }
+    }
+    else
+    {
+        if(tempScore === 1)
+        {
+            for(let i = 0; i < one.length; i++)
+            {
+                if(one[i].id === possible[random].id)
+                {
+                    three = one[i];
+                    one.splice(i, 1);
+                    return three;
+                }
+            }
+        }
+        else // tempScore === 2
+        {
+            for(let i = 0; i < two.length; i++)
+            {
+                if(two[i].id === possible[random].id)
+                {
+                    three = two[i];
+                    two.splice(i, 1);
+                    return three;
+                }
+            }
+        }
+    }
+}
+
 function pick()
 {
-    let shiftCount = 0;
     let zeroPointMembers = [];
     let onePointMembers = [];
     let twoPointMembers = [];
@@ -111,11 +215,9 @@ function pick()
         for(let j = 0; j < aDayShiftsTotal; j++)
         {
             let point = shift[i][j].score;
-            let day = shift[i][j].day;
+            let day = i;
             let randomPerson = 0;
-            let possiblePeople = [];
-            let tempArray = [];
-            let tempScore = 0;
+            let selectedPerson; // change name
 
             switch(point)
             {
@@ -123,81 +225,70 @@ function pick()
                     if(zeroPointMembers.length)
                     {
                         randomPerson = Math.floor(Math.random() * zeroPointMembers.length - 1) + 1;
-                        zeroPointMembers[randomPerson].score = point;
-                        zeroPointMembers[randomPerson].day = day;
-                        zeroPointMembers[randomPerson].count++;
+                        controlInfo(zeroPointMembers[randomPerson], point, day);
+                        todayWorker[j] = zeroPointMembers[randomPerson].name;
                         onePointMembers.push(zeroPointMembers[randomPerson]);
                         zeroPointMembers.splice(randomPerson, 1);
-                        todayWorker[j] = zeroPointMembers[randomPerson];
                     }
-                    else if(!twoPointMembers.length && !threePointMembers.length)
+                    else if(!twoPointMembers.length && !threePointMembers.length) // only remain onePointMembers
                     {
                         randomPerson = Math.floor(Math.random() * onePointMembers.length - 1) + 1;
                         onePointMembers[randomPerson].score = point; // 이런 경우에는 카운트 가장 적은 사람이
                         onePointMembers[randomPerson].day = day;
                         onePointMembers[randomPerson].count++;
-                        todayWorker[j] = onePointMembers[randomPerson];
+                        todayWorker[j] = onePointMembers[randomPerson].name;
                     }
                     else
                     {
-                        possiblePeople = twoPointMembers.concat(threePointMembers);
-                        randomPerson = Math.floor(Math.random() * possiblePeople.length - 1) + 1;
-                        possiblePeople[randomPerson].score = point;
-                        possiblePeople[randomPerson].day = day;
-                        possiblePeople[randomPerson].count++;
-                        onePointMembers.push(possiblePeople[randomPerson]);
-                        zeroPointMembers.splice(randomPerson, 1);
-                        todayWorker[j] = possiblePeople[randomPerson];
+                        selectedPerson = pickAndClassify([], twoPointMembers, threePointMembers, point, day);
+                        onePointMembers.push(selectedPerson);
+                        todayWorker[j] = selectedPerson.name;
                     }
                     break;
                 case 2:
                     if(zeroPointMembers.length)
                     {
                         randomPerson = Math.floor(Math.random() * zeroPointMembers.length - 1) + 1;
-                        zeroPointMembers[randomPerson].score = point;
-                        zeroPointMembers[randomPerson].day = day;
-                        zeroPointMembers[randomPerson].count++;
-                        todayWorker[j] = zeroPointMembers[randomPerson];
+                        controlInfo(zeroPointMembers[randomPerson], point, day);
+                        todayWorker[j] = zeroPointMembers[randomPerson].name;
+                        twoPointMembers.push(zeroPointMembers[randomPerson]);
+                        zeroPointMembers.splice(randomPerson, 1);
                     }
                     else
                     {
-                        tempArray = onePointMembers.concat(twoPointMembers);
-                        possiblePeople = tempArray.concat(threePointMembers);
-                        randomPerson = Math.floor(Math.random() * possiblePeople.length - 1) + 1;
-                        possiblePeople[randomPerson].score = point;
-                        possiblePeople[randomPerson].day = day;
-                        possiblePeople[randomPerson].count++;
-                        todayWorker[j] = possiblePeople[randomPerson];
+                        selectedPerson = pickAndClassify(onePointMembers, [], threePointMembers, point, day);
+                        twoPointMembers.push(selectedPerson);
+                        todayWorker[j] = selectedPerson.name;
                     }
                     break;
                 case 3:
                     if(zeroPointMembers.length)
                     {
-                        randomPerson = Math.floor(Math.random() * members.length - 1) + 1;
+                        randomPerson = Math.floor(Math.random() * zeroPointMembers.length - 1) + 1;
+                        controlInfo(zeroPointMembers[randomPerson], point, day);
+                        todayWorker[j] = zeroPointMembers[randomPerson].name;
+                        threePointMembers.push(zeroPointMembers[randomPerson]);
+                        zeroPointMembers.splice(randomPerson, 1);
                     }
-                    else if(!onePointMembers.length && !twoPointMembers.length)
+                    else if(!onePointMembers.length && !twoPointMembers.length) // only remain threePointMembers
                     {
                         randomPerson = Math.floor(Math.random() * members.length - 1) + 1;
                         threePointMembers[randomPerson].score = point; // 이런 경우에는 카운트 가장 적은 사람이
                         threePointMembers[randomPerson].day = day;
                         threePointMembers[randomPerson].count++;
-                        todayWorker[j] = threePointMembers[randomPerson];
+                        todayWorker[j] = threePointMembers[randomPerson].name;
                     }
                     else
                     {
-                        possiblePeople = onePointMembers.concat(twoPointMembers);
-                        randomPerson = Math.floor(Math.random() * possiblePeople.length - 1) + 1;
-                        possiblePeople[randomPerson].score = point;
-                        possiblePeople[randomPerson].day = day;
-                        possiblePeople[randomPerson].count++;
-                        todayWorker[j] = possiblePeople[randomPerson];
+                        selectedPerson = pickAndClassify(onePointMembers, twoPointMembers, [], point, day);
+                        threePointMembers.push(selectedPerson);
+                        todayWorker[j] = selectedPerson.name;
                     }
                     break;
                 default:
                     alert("Unknown type");
                     break;
             }
-            shiftCount++;
         }
         console.log(`${yoill[i]} : ${todayWorker}`);
     }
