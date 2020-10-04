@@ -97,13 +97,48 @@ function controlInfo(selected, point, day)
     selected.day = day;
     selected.count++;
 }
-
+/*
+function checkMembersDay(from, day)
+{
+    let count = 0;
+    for(let i = 0; i < from.length; i++)
+    {
+        if(day - from[i].day > 1)
+        {
+            count++;
+        }
+        else
+        {
+            break;
+        }
+    }
+    return count;
+}
+*/
 function pickAndClassify(from, to, point, day)
 {
     let randomPerson = 0;
-    randomPerson = Math.floor(Math.random() * from.length - 1) + 1; // 하루걸러
-    controlInfo(from[randomPerson], point, day);
+    let pass = false;
+    let len = from.length;
+
+    while(!pass)
+    {
+        randomPerson = Math.floor(Math.random() * len - 1) + 1;
+        let dayDistance = day - from[randomPerson].day
+        if(dayDistance < 2 && day >= 2)
+        {
+            // len = checkMembersDay(from, day);
+            pass = false;
+        }
+        else
+        {
+            // if(from[randomPerson].count >= 3) // Max count/////////////////////////
+            pass = true;
+        }
+    }
+
     let todaySlave = from[randomPerson].name;
+    controlInfo(from[randomPerson], point, day);
 
     to.push(from[randomPerson]);
     from.splice(randomPerson, 1);
@@ -181,22 +216,49 @@ function pick()
                     }
                     else
                     {
-                        // randomNum = Math.floor(Math.random() * 3 + 1); 비어있으면 에러남
-                        randomNum = 3;
-                        if(!onePointMembers.length)
+                        randomNum = Math.floor(Math.random() * 3 + 1);
+                        if(!onePointMembers.length || !twoPointMembers.length || !threePointMembers.length)
                         {
-                            todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
-                        }
-                        else if(!twoPointMembers.length)
-                        {
-                            todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
-                        }
-                        else if(!threePointMembers)
-                        {
-
+                            if(!onePointMembers.length) // remain two, three
+                            {
+                                randomNum = Math.floor(Math.random() * 100 + 1); // random 1 ~ 100
+                                if(randomNum % 2 === 0)
+                                {
+                                    todayWorker[j] = pickAndClassify(twoPointMembers, twoPointMembers, point, day);
+                                }
+                                else
+                                {
+                                    todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
+                                }
+                            }
+                            else if(!twoPointMembers.length) // remain one, three
+                            {
+                                randomNum = Math.floor(Math.random() * 100 + 1); // random 1 ~ 100
+                                if(randomNum % 2 === 0)
+                                {
+                                    todayWorker[j] = pickAndClassify(onePointMembers, twoPointMembers, point, day);
+                                }
+                                else
+                                {
+                                    todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
+                                }
+                            }
+                            else // remain one, two
+                            {
+                                randomNum = Math.floor(Math.random() * 100 + 1); // random 1 ~ 100
+                                if(randomNum % 2 === 0)
+                                {
+                                    todayWorker[j] = pickAndClassify(onePointMembers, twoPointMembers, point, day);
+                                }
+                                else
+                                {
+                                    todayWorker[j] = pickAndClassify(twoPointMembers, twoPointMembers, point, day);
+                                }
+                            }
                         }
                         else
                         {
+                            randomNum = Math.floor(Math.random() * 3 + 1); // random 1 ~ 100
                             if(randomNum === 1)
                             {
                                 todayWorker[j] = pickAndClassify(onePointMembers, twoPointMembers, point, day);
