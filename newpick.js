@@ -97,7 +97,7 @@ function controlInfo(selected, point, day)
     selected.day = day;
     selected.count++;
 }
-/*
+
 function checkMembersDay(from, day)
 {
     let count = 0;
@@ -114,34 +114,52 @@ function checkMembersDay(from, day)
     }
     return count;
 }
-*/
+
+function checkPossiblePeople(from, day, max)
+{
+    let possible = [];
+    for(let i = 0; i < from.length; i++)
+    {
+        if(from[i].count >= max)
+        {
+            continue;
+        }
+        else if(day - from[i].day >= 2) // Day distance
+        {
+            possible.push(from[i]);
+        }
+    }
+    return possible;
+}
+
 function pickAndClassify(from, to, point, day)
 {
     let randomPerson = 0;
-    let pass = false;
-    let len = from.length;
+    let possiblePeople = [];
+    let maxCount = Math.ceil(weekShiftsTotal / members.length);
 
-    while(!pass)
+    if(day > 1)
     {
-        randomPerson = Math.floor(Math.random() * len - 1) + 1;
-        let dayDistance = day - from[randomPerson].day
-        if(dayDistance < 2 && day >= 2)
-        {
-            // len = checkMembersDay(from, day);
-            pass = false;
-        }
-        else
-        {
-            // if(from[randomPerson].count >= 3) // Max count/////////////////////////
-            pass = true;
-        }
+        possiblePeople = checkPossiblePeople(from, day, maxCount);
+    }
+    else
+    {
+        possiblePeople = from;
     }
 
-    let todaySlave = from[randomPerson].name;
-    controlInfo(from[randomPerson], point, day);
+    randomPerson = Math.floor(Math.random() * possiblePeople.length - 1) + 1;
+    let todaySlave = possiblePeople[randomPerson].name;
+    controlInfo(possiblePeople[randomPerson], point, day);
+    to.push(possiblePeople[randomPerson]);
 
-    to.push(from[randomPerson]);
-    from.splice(randomPerson, 1);
+    for(let i = 0; i < from.length; i++)
+    {
+        if(possiblePeople[randomPerson].id === from[i].id)
+        {
+            from.splice(i, 1);
+            break;
+        }
+    }
 
     return todaySlave;
 }
@@ -169,7 +187,17 @@ function pick()
             let point = shift[i][j].score;
             let day = i;
             let randomNum = 0;
+            let repOneDayDistance;
+            let reptwoDayDistance;
+            let repthreeDayDistance;
 
+            if(!zeroPointMembers.length)
+            {
+                repOneDayDistance = day - onePointMembers[0].day;
+                reptwoDayDistance = day - twoPointMembers[0].day;
+                repthreeDayDistance = day - threePointMembers[0].day;
+            }
+            
             switch(point)
             {
                 case 1:
@@ -187,7 +215,7 @@ function pick()
                         {
                             todayWorker[j] = pickAndClassify(twoPointMembers, onePointMembers, point, day);
                         }
-                        else // only remain onePointMembers
+                        else // only remain onePointMembers // from과 to가 같음
                         {
                             randomNum = Math.floor(Math.random() * onePointMembers.length - 1) + 1;
                             onePointMembers[randomNum].score = point; // 이런 경우에는 카운트 가장 적은 사람이
@@ -196,9 +224,20 @@ function pick()
                             todayWorker[j] = onePointMembers[randomNum].name;
                         }
                     }
+                    else if(reptwoDayDistance < 2 || repthreeDayDistance < 2)
+                    {
+                        if(reptwoDayDistance < 2)
+                        {
+                            todayWorker[j] = pickAndClassify(threePointMembers, onePointMembers, point, day);
+                        }
+                        else // 둘다 없는 경우가 있을까? 이거는 테스트 하면서 확인 해봐야함.
+                        {
+                            todayWorker[j] = pickAndClassify(twoPointMembers, onePointMembers, point, day);
+                        }
+                    }
                     else
                     {
-                        randomNum = Math.floor(Math.random() * 100 + 1); // random 1 ~ 100
+                        randomNum = Math.floor(Math.random() * 100 + 1);
                         if(randomNum % 2 === 0)
                         {
                             todayWorker[j] = pickAndClassify(twoPointMembers, onePointMembers, point, day);
@@ -214,15 +253,22 @@ function pick()
                     {
                         todayWorker[j] = pickAndClassify(zeroPointMembers, twoPointMembers, point, day);
                     }
-                    else
+                    else if(!onePointMembers.length || !twoPointMembers.length || !threePointMembers.length)
                     {
-                        randomNum = Math.floor(Math.random() * 3 + 1);
-                        if(!onePointMembers.length || !twoPointMembers.length || !threePointMembers.length)
+                        if(!onePointMembers.length)
                         {
-                            if(!onePointMembers.length) // remain two, three
+                            if(!twoPointMembers.length) // only remain three
                             {
-                                randomNum = Math.floor(Math.random() * 100 + 1); // random 1 ~ 100
-                                if(randomNum % 2 === 0)
+                                todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
+                            }
+                            else if(!threePointMembers.length) // only remain two, from과 to가 같음
+                            {
+                                todayWorker[j] = pickAndClassify(twoPointMembers, twoPointMembers, point, day);
+                            }
+                            else // remain two, three
+                            {
+                                randomNum = Math.floor(Math.random() * 100 + 1);
+                                if(randomNum % 2 === 0) // from과 to가 같음
                                 {
                                     todayWorker[j] = pickAndClassify(twoPointMembers, twoPointMembers, point, day);
                                 }
@@ -231,51 +277,115 @@ function pick()
                                     todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
                                 }
                             }
-                            else if(!twoPointMembers.length) // remain one, three
+                        }
+                        else if(!twoPointMembers.length)
+                        {
+                            if(!threePointMembers.length) // only remain one
                             {
-                                randomNum = Math.floor(Math.random() * 100 + 1); // random 1 ~ 100
-                                if(randomNum % 2 === 0)
+                                todayWorker[j] = pickAndClassify(onePointMembers, twoPointMembers, point, day);
+                            }
+                            else // remain one, three
+                            {
+                                randomNum = Math.floor(Math.random() * 100 + 1);
+                                if(randomNum % 2 === 0) 
                                 {
                                     todayWorker[j] = pickAndClassify(onePointMembers, twoPointMembers, point, day);
                                 }
                                 else
                                 {
                                     todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
-                                }
-                            }
-                            else // remain one, two
-                            {
-                                randomNum = Math.floor(Math.random() * 100 + 1); // random 1 ~ 100
-                                if(randomNum % 2 === 0)
-                                {
-                                    todayWorker[j] = pickAndClassify(onePointMembers, twoPointMembers, point, day);
-                                }
-                                else
-                                {
-                                    todayWorker[j] = pickAndClassify(twoPointMembers, twoPointMembers, point, day);
                                 }
                             }
                         }
                         else
                         {
-                            randomNum = Math.floor(Math.random() * 3 + 1); // random 1 ~ 100
-                            if(randomNum === 1)
+                            randomNum = Math.floor(Math.random() * 100 + 1);
+                            if(randomNum % 2 === 0) 
                             {
                                 todayWorker[j] = pickAndClassify(onePointMembers, twoPointMembers, point, day);
                             }
-                            else if(randomNum === 2)
+                            else // from과 to가 같음
                             {
                                 todayWorker[j] = pickAndClassify(twoPointMembers, twoPointMembers, point, day);
                             }
-                            else
+                        }
+                    }
+                    else if(repOneDayDistance < 2 || reptwoDayDistance < 2 || repthreeDayDistance < 2)
+                    {
+                        if(repOneDayDistance < 2)
+                        {
+                            if(reptwoDayDistance < 2) // only remain three
                             {
                                 todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
                             }
+                            else if(repthreeDayDistance < 2) // only remain two // from과 to가 같음
+                            {
+                                todayWorker[j] = pickAndClassify(twoPointMembers, twoPointMembers, point, day);
+                            }
+                            else // remain two, three
+                            {
+                                randomNum = Math.floor(Math.random() * 100 + 1);
+                                if(randomNum % 2 === 0) // from과 to가 같음
+                                {
+                                    todayWorker[j] = pickAndClassify(twoPointMembers, twoPointMembers, point, day);
+                                }
+                                else
+                                {
+                                    todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
+                                }
+                            }
+                        }
+                        else if(reptwoDayDistance < 2)
+                        {
+                            if(repthreeDayDistance < 2) // only remain one
+                            {
+                                todayWorker[j] = pickAndClassify(onePointMembers, twoPointMembers, point, day);
+                            }
+                            else //remain one, three
+                            {
+                                randomNum = Math.floor(Math.random() * 100 + 1);
+                                if(randomNum % 2 === 0) 
+                                {
+                                    todayWorker[j] = pickAndClassify(onePointMembers, twoPointMembers, point, day);
+                                }
+                                else
+                                {
+                                    todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
+                                }
+                            }
+                        }
+                        else // remain one, two
+                        {
+                            randomNum = Math.floor(Math.random() * 100 + 1);
+                            if(randomNum % 2 === 0)
+                            {
+                                todayWorker[j] = pickAndClassify(onePointMembers, twoPointMembers, point, day);
+                            }
+                            else // from과 to가 같음
+                            {
+                                todayWorker[j] = pickAndClassify(twoPointMembers, twoPointMembers, point, day);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        randomNum = Math.floor(Math.random() * 3 + 1);
+                        if(randomNum === 1)
+                        {
+                            todayWorker[j] = pickAndClassify(onePointMembers, twoPointMembers, point, day);
+                        }
+                        else if(randomNum === 2)
+                        {
+                            todayWorker[j] = pickAndClassify(twoPointMembers, twoPointMembers, point, day);
+                        }
+                        else
+                        {
+                            todayWorker[j] = pickAndClassify(threePointMembers, twoPointMembers, point, day);
                         }
                     }
                     break;
                 case 3:
-                    if(zeroPointMembers.length)
+                    if(zeroPointMembers.length) // 근무를 한번도 안한 사람이 있을때
                     {
                         todayWorker[j] = pickAndClassify(zeroPointMembers, threePointMembers, point, day);
                     }
@@ -289,7 +399,7 @@ function pick()
                         {
                             todayWorker[j] = pickAndClassify(onePointMembers, threePointMembers, point, day);
                         }
-                        else // only remain threePointMembers
+                        else // only remain threePointMembers // from과 to가 같음
                         {
                             randomNum = Math.floor(Math.random() * threePointMembers.length - 1) + 1;
                             threePointMembers[randomNum].score = point; // 이런 경우에는 카운트 가장 적은 사람이
@@ -298,9 +408,20 @@ function pick()
                             todayWorker[j] = threePointMembers[randomNum].name;
                         }
                     }
+                    else if(repOneDayDistance < 2 || reptwoDayDistance < 2)
+                    {
+                        if(repOneDayDistance < 2)
+                        {
+                            todayWorker[j] = pickAndClassify(twoPointMembers, threePointMembers, point, day);
+                        }
+                        else // 둘다 없는 경우가 있을까? 이거는 테스트 하면서 확인 해봐야함.
+                        {
+                            todayWorker[j] = pickAndClassify(onePointMembers, threePointMembers, point, day);
+                        }
+                    }
                     else
                     {
-                        randomNum = Math.floor(Math.random() * 100 + 1); // random 1 ~ 100
+                        randomNum = Math.floor(Math.random() * 100 + 1);
                         if(randomNum % 2 === 0)
                         {
                             todayWorker[j] = pickAndClassify(onePointMembers, threePointMembers, point, day);
