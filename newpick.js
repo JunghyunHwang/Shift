@@ -12,18 +12,15 @@ let week = 7;
 let shift = [];
 let members = [];
 let weekShiftsTotal = 0;
-let totalScore = 0;
+// let totalScore = 0;
 let person = ["길윤재", "황중현", "이근혁", "서동휘", "나종원", "박시현", "이관진", "임석범", "황인성", "류희성", "복병수", "김민수", "김종훈", "김정현", "백지용", "홍우진", "김민수2", "김수환", "김승진", "손건우", "강우석", "송강산", "김석희", "김선규", "박태규", "공민식", "오도경", "홍성원", "최현준", "권오복", "최재성", "김창민", "이영한" , "박준서", "김수원", "김건호", "강건호", "김정원"];
 let zeroPointMembers = [];
-let onePointMembers = [];
-let twoPointMembers = [];
-let threePointMembers = [];
 
-function work(name, score, cnt, day)
+function work(id, name, score, day)
 {
-    this.name = name
+    this.id = id;
+    this.name = name;
     this.score = score;
-    this.count = cnt;
     this.day = day;
 }
 
@@ -40,6 +37,7 @@ for(let i = 0; i < week; i++)
 {
     let numberNightShift = 4; // 불침번 근무 개수
     let numberCctvShift = 10; // cctv 근무 개수
+    let shiftId = 0;
     let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"]; // Sever data
     let weekdayShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 2, 3, 2]; // Sever data
     let friShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 1, 3, 2]; // Sever data
@@ -54,42 +52,41 @@ for(let i = 0; i < week; i++)
     {
         for(let j = 0; j < aDayShiftsTotal; j++)
         {
-            shift[i][j] = new work(shiftName[j], weekdayShiftScore[j], 1, i);
-            totalScore += weekdayShiftScore[j];
+            shift[i][j] = new work(shiftId, shiftName[j], weekdayShiftScore[j], i);
+            shiftId++;
         }
     }
     else if(i === weekday - 1) // Friday
     {
         for(let j = 0; j < aDayShiftsTotal; j++)
         {
-            shift[i][j] = new work(shiftName[j], friShiftScore[j], 1, i);
-            totalScore += friShiftScore[j];
+            shift[i][j] = new work(shiftId, shiftName[j], friShiftScore[j], i);
+            shiftId++;
         }
     }
     else if(i === weekday) // Satday
     {
         for(let j = 0; j < aDayShiftsTotal; j++)
         {
-            shift[i][j] = new work(shiftName[j], satShiftScore[j], 1, i);
-            totalScore += satShiftScore[j];
+            shift[i][j] = new work(shiftId, shiftName[j], satShiftScore[j], i);
+            shiftId++;
         }
     }
     else // Sunday
     {
         for(let j = 0; j < aDayShiftsTotal; j++)
         {
-            shift[i][j] = new work(shiftName[j], sunShiftScore[j], 1, i);
-            totalScore += sunShiftScore[j];
+            shift[i][j] = new work(shiftId, shiftName[j], sunShiftScore[j], i);
+            shiftId++;
         }
     }
 }
 
-function loadMembers(zero) // 나중에 엑셀
+function loadMembers() // 나중에 엑셀
 {
     for(let i = 0; i < person.length; i++)
     {
         members[i] = new info(i, person[i], 0, 0, 0);
-        zero[i] = members[i];
     }
 }
 
@@ -102,31 +99,71 @@ function controlInfo(selected, point, day)
     selected.count++;
 }
 
-function checkPossiblePeople(one, two, three, point)
+function checkPossiblePeople(day)
 {
     let possible = [];
-    switch(point)
+    let len = members.length;
+    let maxCount = Math.ceil(weekShiftsTotal / len);
+
+    for(let i = 0; i < len; i++)
     {
-        case 1:
-            one.
+        if(members[i].count >= maxCount)
+        {
+            continue;
+        }
+        else if(day - members[i].day < 2 && day >= 2) // 근무 후 적어도 하루는 쉰다는 규칙이 있을때만 적용, 후에 2을 변수로 변경
+        {
+            continue;
+        }
+        else
+        {
+            possible.push(members[i]);
+        }
     }
+    
     return possible;
 }
 
-function pickAndControlInfo(possible, point, day)
+function pickAndControlInfo(selected, point, day)
 {
     let randomPerson = 0;
+    let pass = false;
+    unsuitable = [];
 
-    randomPerson = Math.floor(Math.random() * possible.length - 1) + 1;
-    controlInfo(possible[randomPerson], point, day);
-    let todaySlave = possible[randomPerson].name;
+    while(!pass)
+    {
+        randomPerson = Math.floor(Math.random() * selected.length - 1) + 1;
+
+        for(let i = 0; i < unsuitable.length; i++)
+        {
+            if(randomPerson === unsuitable[i])
+            {
+                pass = false;
+                break;
+            }
+        }
+
+        if(selected[randomPerson].score === point)
+        {
+            unsuitable.push(randomPerson);
+            pass = false;
+        }
+        else
+        {
+            pass = true;
+        }
+    }
+    
+    controlInfo(selected[randomPerson], point, day);
+    let todaySlave = selected[randomPerson].name;
+    selected.splice(randomPerson, 1);
 
     return todaySlave;
 }
 
 function pick()
 {
-    loadMembers(zeroPointMembers); // 나중에 휴가자들
+    loadMembers(); // 나중에 휴가자들
 
     for(let i = 0; i < week; i++)
     {
@@ -136,49 +173,19 @@ function pick()
         let yoill = ["Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"];
         let aDayShiftsTotal = numberNightShift + numberCctvShift;
         aDayShiftsTotal = (i < weekday) ? aDayShiftsTotal : aDayShiftsTotal + 2;
+        let possiblePeople = [];
+        let day = i;
+        possiblePeople = checkPossiblePeople(day);
         
         for(let j = 0; j < aDayShiftsTotal; j++)
         {
-            let point = shift[i][j].score;
-            let day = i;
-            let possiblePeople = [];
-
             if(zeroPointMembers.length)
             {
-                switch(point)
-                {
-                    case 1:
-                        todayWorker[j] = pickAndControlInfo(zeroPointMembers, onePointMembers, point, day);
-                        break;
-                    case 2:
-                        todayWorker[j] = pickAndControlInfo(zeroPointMembers, twoPointMembers, point, day);
-                        break;
-                    case 3:
-                        todayWorker[j] = pickAndControlInfo(zeroPointMembers, threePointMembers, point, day);
-                        break;
-                    default:
-                        alert("Unknown type");
-                        break;
-                }
+                todayWorker[j] = pickAndControlInfo(zeroPointMembers, shift[i][j].score, day);
             }
             else
             {
-                switch(point)
-                {
-                    case 1:
-                        possiblePeople = checkPossiblePeople(onePointMembers, twoPointMembers, threePointMembers);
-                        todayWorker[j] = pickAndControlInfo(possiblePeople, onePointMembers, point, day);
-                        break;
-                    case 2:
-                        todayWorker[j] = pickAndControlInfo(possiblePeople, twoPointMembers, point, day);
-                        break;
-                    case 3:
-                        todayWorker[j] = pickAndControlInfo(possiblePeople, threePointMembers, point, day);
-                        break;
-                    default:
-                        alert("Unknown type");
-                        break;
-                }
+                todayWorker[j] = pickAndControlInfo(possiblePeople, shift[i][j].score, day);
             }
         }
         console.log(`${yoill[i]} : ${todayWorker}`);
