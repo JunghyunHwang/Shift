@@ -13,7 +13,8 @@ let shift = [];
 let members = [];
 let weekShiftsTotal = 0;
 // let totalScore = 0;
-let person = ["길윤재", "황중현", "이근혁", "서동휘", "나종원", "박시현", "이관진", "임석범", "황인성", "류희성", "복병수", "김민수", "김종훈", "김정현", "백지용", "홍우진", "김민수2", "김수환", "김승진", "손건우", "강우석", "송강산", "김석희", "김선규", "박태규", "공민식", "오도경", "홍성원", "최현준", "권오복", "최재성", "김창민", "이영한" , "박준서", "김수원", "김건호", "강건호", "김정원"];
+let person = ["길윤재", "황중현", "이근혁", "서동휘", "나종원", "박시현", "이관진", "임석범", "황인성", "류희성", "복병수", "김민수", "김종훈", "김정현", "백지용", "홍우진", "김민수2", "김수환", "김승진", "손건우", "강우석", "송강산", "김석희", "김선규", "박태규", "공민식", "오도경", "홍성원", "최현준", "권오복", "최재성", "김창민", "이영한" , "박준서", "김수원", "김건호", "강건호", "이정원"];
+let shiftId = 0;
 
 function work(id, number, name, score, day, who)
 {
@@ -25,21 +26,22 @@ function work(id, number, name, score, day, who)
     this.who = who;
 }
 
-function info(id, name, score, cnt, day)
+function info(id, name, score, cnt, day, sum)
 {
     this.id = id;
     this.name = name
     this.score = score;
     this.count = cnt;
     this.worked = [];
+    this.workId = [];
     this.day = day;
+    this.sum = sum;
 }
 
 for(let i = 0; i < week; i++)
 {
     let numberNightShift = 4; // 불침번 근무 개수
     let numberCctvShift = 10; // cctv 근무 개수
-    let shiftId = 0;
     let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"]; // Sever data
     let weekdayShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 2, 3, 2]; // Sever data
     let friShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 1, 3, 2]; // Sever data
@@ -89,10 +91,43 @@ for(let i = 0; i < week; i++)
 
 function loadMembers(zeroPoint) // 나중에 엑셀
 {
-    for(let i = 0; i < person.length; i++)
+    let tempPerson = person;
+    if(!members.length)
     {
-        members[i] = new info(i, person[i], 0, 0, 0);
-        zeroPoint[i] = members[i];
+        for(let i = 0; i < tempPerson.length; i++)
+        {
+            members[i] = new info(i, tempPerson[i], 0, 0, 0, 0);
+            zeroPoint[i] = members[i];    
+        }
+    }
+    else if(members.length < tempPerson.length) // 추가 되었을때 (휴가복귀)
+    {
+        for(let i = 0; i < tempPerson.length; i++)
+        {
+            for(let j = 0; j < members.length; j++)
+            {
+                if(tempPerson[i] === members[i].name)
+                {
+                    tempPerson.splice(i, 1);
+                    break;
+                }
+            }
+        }
+
+        for(let i = 0; i < tempPerson.length; i++)
+        {
+            tempPerson[i] = new info(members.length, tempPerson[i], 0, 0, 0, 0);
+            members.push(tempPerson[i]);
+            zeroPoint.push(tempPerson[i]);
+        }
+    }
+    else if(members.length > person.length) // 휴가 나감
+    {
+
+    }
+    else
+    {
+        return;
     }
 }
 
@@ -101,11 +136,13 @@ function loadMembers(zeroPoint) // 나중에 엑셀
 function controlInfo(selected, shift)
 {
     let workedCnt = selected.worked.length;
+    let workIdCnt = selected.workId.length;
 
-    selected.score = shift.point;
+    selected.score = shift.score;
     selected.day = shift.day;
     selected.count++;
     selected.worked[workedCnt] = shift.name;
+    selected.workId[workIdCnt] = shift.id;
 }
 
 function checkPossiblePeople(day)
@@ -137,7 +174,7 @@ function checkPossiblePeople(day)
     return possible;
 }
 
-function checkLessWorkers(selected) // 이름 괜찮은지?
+function checkLessWorkers(selected)
 {
     let leastCnt = 3;
     let less = [];
@@ -169,6 +206,7 @@ function pickAndControlInfo(selected, shift)
     let pass = false;
     let samePoint = [];
     let repeatCnt = 0;
+    let oneCntMember = [];
 
     if(shift.score === 2)
     {
@@ -176,6 +214,21 @@ function pickAndControlInfo(selected, shift)
     }
     else
     {
+        if(shift.day === 6) // 주에 한번 하는 넘들 잡는 코드, 이거 6일 차에 한번만 하게 수정
+        {
+            for(let i = 0; i < members.length; i++)
+            {
+                if(members[i].count === 1)
+                {
+                    oneCntMember.push(members[i]);
+                }
+            }
+            if(oneCntMember.length)
+            {
+                selected = null;
+                selected = oneCntMember;
+            }
+        }
         while(!pass)
         {
             randomPerson = Math.floor(Math.random() * selected.length - 1) + 1;
@@ -205,6 +258,7 @@ function pickAndControlInfo(selected, shift)
     }
 
     let todaySlave = selected[randomPerson].name;
+    selected[randomPerson].sum += shift.score;
     controlInfo(selected[randomPerson], shift);
     selected.splice(randomPerson, 1);
 
@@ -262,32 +316,61 @@ function pick() // Change name
 }
 pick();
 
-function checkInfo()
+function checkFair()
 {
-    let one = 0;
-    let two = 0;
-    let three = 0;
-    let cnt = 0;
+    let variance = [];
+    let deviation = 0;
+    let squared = 0;
+    let totalScore = 0;
+    let avg = 0;
+    let hardWorkers = [];
+    let easyWokers = [];
+
     for(let i = 0; i < members.length; i++)
     {
-        cnt = members[i].count;
-        switch(cnt)
+        totalScore += members[i].sum;
+
+        if(members[i].sum > 7)
         {
-            case 1:
-                one++;
-                break;
-            case 2:
-                two++;
-                break;
-            case 3:
-                three++;
-                break;
-            default:
-                alert("Unknown type");
+            hardWorkers.push(members[i]);
+        }
+        else if(members[i].sum < 4)
+        {
+            easyWokers.push(members[i]);
         }
     }
-    console.log(`한번한 사람 : ${one} 명`)
-    console.log(`두번한 사람 : ${two} 명`)
-    console.log(`세번한 사람 : ${three} 명`)
+
+    avg = totalScore / members.length;
+    avg = avg.toFixed(1);
+    avg *= 1;
+    
+    for(let i = 0; i < members.length; i++)
+    {
+        squared = (members[i].sum - avg)
+        squared *= squared;
+        deviation += squared;
+    }
+
+    variance = deviation / members.length;
+    console.log("-------------------------------------------");
+    console.log(`분산 값 : ${variance}`);
+    console.log("-------------------------------------------");
+    console.log(`Hard worker 총 인원 : ${hardWorkers.length}`);
+
+    for(let i = 0; i < hardWorkers.length; i++)
+    {
+        console.log(`name: ${hardWorkers[i].name}, count ${hardWorkers[i].count}, sum : ${hardWorkers[i].sum}`);
+    }
+
+    console.log("-------------------------------------------");
+    console.log(`easy worker 총 인원 : ${easyWokers.length}`);
+
+    for(let i = 0; i < easyWokers.length; i++)
+    {
+        console.log(`name: ${easyWokers[i].name}, count: ${easyWokers[i].count}, sum : ${easyWokers[i].sum}`);
+    }
+
+    console.log("-------------------------------------------");
 }
-checkInfo();
+checkFair();
+// console.log(members);
