@@ -1,0 +1,39 @@
+body
+{
+    padding: 20px;
+}
+
+div
+{
+    text-align: center;
+}
+
+div.top
+{
+    margin: 30px;
+}
+
+div.top h1
+{
+    font-weight: lighter;
+}
+
+div.main
+{
+    margin: 30px;
+}
+
+div.bottom
+{
+    margin: 30px;
+    font-size: 12px;
+}
+
+button#setShift
+{
+    background-color: #cccccc;
+    border-style: none;
+    padding: 15px;
+    font-size: 15px;
+    border-radius: 8px;
+}
