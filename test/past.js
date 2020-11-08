@@ -196,9 +196,4 @@
         }
         // console.log(`${yoill[i]} : ${todayShift}`);
     }
-
-    for(let i = 0; i < week; i++)
-    {
-        
-    }
 }

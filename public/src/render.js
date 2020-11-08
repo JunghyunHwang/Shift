@@ -1,13 +1,7 @@
 {
-    let btnSetShift = document.getElementById('setShift');
-    
-    function renderingTable(root)
-    {
-        const table = root.querySelector('.table-shift__table');
-        console.log(table);
-    }
+    'use strict';
 
-    function createRoot()
+    function renderingTable(data)
     {
         const root = document.querySelector('.table-shift');
 
@@ -17,16 +11,7 @@
         
         table.innerHTML = `
             <thead>
-                <tr>
-                    <th>시간 / 요일</th>
-                    <th colspan="2">월요일</th>
-                    <th colspan="2">화요일</th>
-                    <th colspan="2">수요일</th>
-                    <th colspan="2">목요일</th>
-                    <th colspan="2">금요일</th>
-                    <th colspan="2">토요일</th>
-                    <th colspan="2">일요일</th>
-                </tr>
+                <tr></tr>
             </thead>
             <tbody>
                 <tr>
@@ -36,13 +21,26 @@
         `;
     
         root.append(table);
-        renderingTable(root);
+        console.log(root);
+
+        table.querySelector('thead tr').textContent = "";
+        table.querySelector('tbody').textContent = "";
+
+        console.log(data);
+
+        for(const header of data.headers)
+        {
+            table.querySelector('thead tr').insertAdjacentHTML('beforeend', `<th>${header}</th>`);
+        }
+
+        for(const row of data.rows)
+        {
+            console.log(row);
+            table.querySelector('tbody').insertAdjacentHTML('beforeend', `
+                <tr>
+                    ${ row.map(col => `<td>${ col }</td>`).join("") }
+                </tr>
+            `)
+        }
     }
-
-    createRoot();
-
-    btnSetShift.addEventListener("click", () =>
-    {
-        pick();
-    });
 }

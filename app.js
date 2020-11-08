@@ -5,6 +5,8 @@ const app = express();
 
 dotenv.config({path: './.env'});
 
+// Database connect
+/*
 const db = mysql.createConnection(
     {
         host: process.env.DATABASE_HOST,
@@ -14,23 +16,20 @@ const db = mysql.createConnection(
     }
 );
 
-db.connect((error)=>
+db.connect((error) =>
 {
     if(error)
     {
         console.log(error);
     }
 });
+*/
 
 app.use(express.static('public'));
 
 app.get('/data', (req, res) =>
 {
-    res.json(
-        {
-
-        }
-    )
+    res.json();
 });
 
 app.listen(3001, () =>

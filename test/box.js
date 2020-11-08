@@ -150,3 +150,81 @@ function classifyByMoreOrLess(oneNum, twoNum, threeNum, fourNum, fiveNum)
         rows: shift
     }
 */
+
+let dia = 
+{
+    squadName: "Super hero squad",
+    homeTown: "Metro City",
+    formed: 2016,
+    secretBase: "Super tower",
+    active: true,
+    members: 
+    [
+      {
+        name: "Molecule Man",
+        age: 29,
+        secretIdentity: "Dan Jukes",
+        powers: ["Radiation resistance", "Turning tiny", "Radiation blast"]
+      },
+      {
+        name: "Madame Uppercut",
+        age: 39,
+        secretIdentity: "Jane Wilson",
+        powers: ["Million tonne punch", "Damage resistance", "Superhuman reflexes"]
+      },
+      {
+        name: "Eternal Flame",
+        age: 1000000,
+        secretIdentity: "Unknown",
+        powers: ["Immortality", "Heat Immunity", "Inferno", "Teleportation", "Interdimensional travel"]
+      }
+    ]
+}
+
+let shift = 
+{
+    headers: ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"],
+    dayOfWeek:
+    [
+        {
+            "cctv04" : "fuck",
+            "cctv06" : "you",
+            "nightshift" : "kil"
+        },
+        {
+            "cctv04" : "김지완",
+            "cctv06" : "길윤재",
+            "nightshift" : "황중현"
+        },
+        {
+            "cctv04" : "김정현",
+            "cctv06" : "임석범",
+            "nightshift" : "황인성"
+        },
+    ]
+}
+
+
+let test = 
+{
+    headers: ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"],
+    
+    mon:
+    {
+        "cctv04" : "fuck",
+        "cctv06" : "you",
+        "nightshift" : "kil"
+    },
+    tue:
+    {
+        "cctv04" : "김지완",
+        "cctv06" : "길윤재",
+        "nightshift" : "황중현"
+    },
+    wed:
+    {
+        "cctv04" : "김정현",
+        "cctv06" : "임석범",
+        "nightshift" : "황인성"
+    }
+}

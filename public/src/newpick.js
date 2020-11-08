@@ -1,23 +1,21 @@
+/* 근무 짜는 프로그램*/
 {
-    /*
-        근무 짜는 프로그램
-    */
+    'use strict';
 
-    /* 
-        1. case 2 일때 해결하고 나머지 검토 후 사이트 가서 확인
-        2. 최소 하루 걸러 근무 들어가게
-    */
     let weekday = 5;
     let week = 7;
     let shift = [];
     let members = [];
     let weekShiftsTotal = 0;
+    // re
     let person = ["길윤재", "황중현", "이근혁", "서동휘", "나종원", "박시현", "이관진", "임석범", "황인성", "류희성", "복병수", "김민수", "김종훈", "김정현", "백지용", "홍우진", "김민수2", "김수환", "김승진", "손건우", "강우석", "송강산", "김석희", "김선규", "박태규", "공민식", "오도경", "홍성원", "최현준", "권오복", "최재성", "김창민", "이영한" , "박준서", "김수원", "김건호", "강건호", "이정원"];
     let shiftId = 0;
+    // re
     let numberNightShift = 4; // 불침번 근무 개수
     let numberCctvShift = 10; // cctv 근무 개수
+    let btnSetShift = document.getElementById('setShift');
 
-    function work(id, number, name, score, day, who)
+    function work(id, number, name, score, day, who) // number 필요한가?(검색했을때 쓰이는 곳 없음)
     {
         this.id = id;
         this.number = number;
@@ -41,6 +39,7 @@
 
     for(let i = 0; i < week; i++)
     {
+        // re
         let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"]; // Sever data
         let weekdayShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 2, 3, 2]; // Sever data
         let friShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 1, 3, 2]; // Sever data
@@ -160,17 +159,17 @@
 
     ////////////////////////////////////////////////////////////////////////////////////////////////*** 근무 및 인원 초기화 끝
 
-    function controlInfo(selected, shift)
+    function controlInfo(selectedPeople, shift)
     {
-        let workedCnt = selected.worked.length;
-        let workIdCnt = selected.workId.length;
+        let workedCnt = selectedPeople.worked.length;
+        let workIdCnt = selectedPeople.workId.length;
 
-        selected.score = shift.score;
-        selected.sum += shift.score;
-        selected.day = shift.day;
-        selected.count++;
-        selected.worked[workedCnt] = shift.name;
-        selected.workId[workIdCnt] = shift.id;
+        selectedPeople.score = shift.score;
+        selectedPeople.sum += shift.score;
+        selectedPeople.day = shift.day;
+        selectedPeople.count++;
+        selectedPeople.worked[workedCnt] = shift.name;
+        selectedPeople.workId[workIdCnt] = shift.id;
     }
 
     function checkPossiblePeople(day)
@@ -203,16 +202,15 @@
         return possible;
     }
 
-    function checkLessWorkers(selected)
+    function checkLessWorkers(selectedPeople)
     {
-        console.log("이 말도 안되는 상황이 나오네...");
         let leastCnt = 3;
         let less = [];
-        for(let i = 0; i < selected.length; i++) // 가장 적게 한 횟수 구함
+        for(let i = 0; i < selectedPeople.length; i++) // 가장 적게 한 횟수 구함
         {
-            if(selected[i].count < leastCnt)
+            if(selectedPeople[i].count < leastCnt)
             {
-                leastCnt = selected[i].count;
+                leastCnt = selectedPeople[i].count;
                 if(leastCnt === 1) // 0은 여기 올 수 없음 그러니 가장 작은 1이 나오면 더 볼 것도 없음
                 {
                     break;
@@ -220,31 +218,32 @@
             }
         }
 
-        for(let i = 0; i < selected.length; i++) // 가장 적게 한 인원들 구함
+        for(let i = 0; i < selectedPeople.length; i++) // 가장 적게 한 인원들 구함
         {
-            if(leastCnt === selected[i].count)
+            if(leastCnt === selectedPeople[i].count)
             {
-                less.push(selected[i]);
+                less.push(selectedPeople[i]);
             }
         }
         return less;
     }
 
-    function pickAndControlInfo(selected, shift)
+    function pickAndControlInfo(selectedPeople, shift)
     {
         let randomPerson = 0;
         let pass = false;
         let repeatCnt = 0;
-        let oneCntMember = [];
+        let pickedPerson = [];
 
-        if(shift.score === 2)
+        if(shift.score === 2) // 2점 근무는 이전에 무슨 근무를 했던지 상관없이 들어감
         {
-            randomPerson = Math.floor(Math.random() * selected.length - 1) + 1;
+            randomPerson = Math.floor(Math.random() * selectedPeople.length - 1) + 1;
         }
         else
         {
-            if(shift.day === 6) // 주에 한번 하는 넘들 잡는 코드, 이거 6일 차에 한번만 하게 수정!!!!
+            if(shift.day === 6) // 주에 한번 하는 넘들 잡는 코드, 이거 6일 차에 한번만 하게 수정!!!! /// 멤버들을 담을 다른 변수를 만들고 count가 2번이면 지우는 코드 만들자
             {
+                let oneCntMember = []; // 마지막 날인 일요일 까지 한번 사람이 있다면 그사람 먼저
                 for(let i = 0; i < members.length; i++)
                 {
                     if(members[i].count === 1)
@@ -254,25 +253,27 @@
                 }
                 if(oneCntMember.length)
                 {
-                    selected = null;
-                    selected = oneCntMember;
+                    debugger;
+                    selectedPeople = null;
+                    selectedPeople = oneCntMember;
                 }
             }
 
             while(!pass)
             {
-                randomPerson = Math.floor(Math.random() * selected.length - 1) + 1;
+                randomPerson = Math.floor(Math.random() * selectedPeople.length - 1) + 1;
         
-                if(selected[randomPerson].score === shift.score)
+                // Idea : 번호를 몇개 뽑아놔 그러는 이유는 중복되는 번호를 안 뽑기 위해
+                if(selectedPeople[randomPerson].score === shift.score)
                 {
-                    repeatCnt++;
                     pass = false;
-                    if(repeatCnt === selected.length) // 모든 사람의 점수가 같은 경우 가장 적게 일한 사람들 중에서 픽함 // 위험 // 위에 oneCntMember랑 충돌 하는지?
+                    repeatCnt++; // 중복되는 숫자가 나오면 카운트 하지 말아야함
+                    if(repeatCnt === selectedPeople.length) // 모든 사람의 점수가 같은 경우 가장 적게 일한 사람들 중에서 픽함 // 위험 // 위에 oneCntMember랑 충돌 하는지?
                     {
                         let temp = [];
-                        temp = checkLessWorkers(selected);
-                        selected = temp;
-                        randomPerson = Math.floor(Math.random() * selected.length - 1) + 1;
+                        temp = checkLessWorkers(selectedPeople);
+                        selectedPeople = temp;
+                        randomPerson = Math.floor(Math.random() * selectedPeople.length - 1) + 1;
                         pass = true;
                     }
                 }
@@ -283,9 +284,9 @@
             }
         }
 
-        let todaySlave = selected[randomPerson].name;
-        controlInfo(selected[randomPerson], shift);
-        selected.splice(randomPerson, 1);
+        let todaySlave = selectedPeople[randomPerson].name;
+        controlInfo(selectedPeople[randomPerson], shift);
+        selectedPeople.splice(randomPerson, 1);
 
         return todaySlave;
     }
@@ -349,6 +350,34 @@
         console.log("-------------------------------------------");
     }
 
+    function createData(shift)
+    {
+        // re
+        let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"]; // Sever data
+
+        let  data =
+        {
+            headers: ["요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"],
+            rows: Array.from(Array(shiftName.length), () => Array(week).fill(null))
+        }
+
+        for(let i = 0; i < week; i++)
+        {
+            for(let j = 0; j < shift[i].length; j++)
+            {
+                data.rows[j][i] = shift[i][j].who;
+            }
+        }
+
+        // data.rows[n][0]은 근무이름
+        for(let i = 0; i < data.rows.length; i++)
+        {
+            data.rows[i].unshift(shiftName[i]);
+        }
+
+        return data;
+    }
+
     function pick() // Change name (ex: shifting?)
     {
         let zeroPointMembers = [];
@@ -359,7 +388,7 @@
         {
             let numberNightShift = 4; // Sever data
             let numberCctvShift = 10; // Sever data
-            let todayWorker = [];
+            let todayWorker = []; // re
             let yoill = ["Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"];
             let aDayShiftsTotal = numberNightShift + numberCctvShift;
             aDayShiftsTotal = (i < weekday) ? aDayShiftsTotal : aDayShiftsTotal + 2; // 이것도 수정 해야함
@@ -376,7 +405,7 @@
                         for(let k = j; k < aDayShiftsTotal; k++)
                         {
                             todayWorker[k] = pickAndControlInfo(possiblePeople, shift[i][k]);
-                            shift[i][k].who = todayWorker[j];
+                            shift[i][k].who = todayWorker[k];
                         }
                         break;
                     }
@@ -398,7 +427,58 @@
             }
             console.log(`${yoill[i]} : ${todayWorker}`);
         }
+
         checkFair();
-        console.log(shift);
+        
+        // Create data
+        let json = JSON.stringify(shift);
+        const data = createData(shift);
+        console.log(data);
+
+        renderingTable(data);
     }
+
+    function renderingTable(data)
+    {
+        const root = document.querySelector('.table-shift');
+
+        const table = document.createElement('table');
+    
+        table.classList.add('table-shift__table');
+        
+        table.innerHTML = `
+            <thead>
+                <tr></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td></td>
+                </tr>
+            </tbody>
+        `;
+    
+        root.append(table);
+
+        table.querySelector('thead tr').textContent = "";
+        table.querySelector('tbody').textContent = "";
+
+        for(const header of data.headers)
+        {
+            table.querySelector('thead tr').insertAdjacentHTML('beforeend', `<th>${header}</th>`);
+        }
+
+        for(const row of data.rows)
+        {
+            table.querySelector('tbody').insertAdjacentHTML('beforeend', `
+                <tr>
+                    ${ row.map(col => `<td>${ col }</td>`).join("") }
+                </tr>
+            `)
+        }
+    }
+
+    btnSetShift.addEventListener("click", () =>
+    {
+        pick();
+    });
 }
