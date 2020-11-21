@@ -241,7 +241,7 @@
         }
         else
         {
-            if(shift.day === 6) // 주에 한번 하는 넘들 잡는 코드, 이거 6일 차에 한번만 하게 수정!!!! /// 멤버들을 담을 다른 변수를 만들고 count가 2번이면 지우는 코드 만들자
+            if(shift.day === 6) // 이거를 checkPossible로 옮겨야 함
             {
                 let oneCntMember = []; // 마지막 날인 일요일 까지 한번 사람이 있다면 그사람 먼저
                 for(let i = 0; i < members.length; i++)
@@ -251,10 +251,11 @@
                         oneCntMember.push(members[i]);
                     }
                 }
+
                 if(oneCntMember.length)
                 {
-                    debugger;
-                    selectedPeople = null;
+                    // debugger;
+                    selectedPeople = null; // Bug 1 : 기존에 possiblePeople에서는 못 지움
                     selectedPeople = oneCntMember;
                 }
             }
@@ -263,18 +264,49 @@
             {
                 randomPerson = Math.floor(Math.random() * selectedPeople.length - 1) + 1;
         
-                // Idea : 번호를 몇개 뽑아놔 그러는 이유는 중복되는 번호를 안 뽑기 위해
                 if(selectedPeople[randomPerson].score === shift.score)
                 {
+                    if(pickedPerson.length)
+                    {
+                        let isSameNumber = false;
+
+                        for(let i = 0; i < pickedPerson.length; i++)
+                        {
+                            if(pickedPerson[i] === randomPerson)
+                            {
+                                isSameNumber = true;
+                                break;
+                            }
+                        }
+
+                        if(!isSameNumber)
+                        {
+                            pickedPerson.push(randomPerson);
+                            repeatCnt++;
+                        }
+                    }
+                    else
+                    {
+                        pickedPerson.push(randomPerson);
+                        repeatCnt++; // 중복되는 숫자가 나오면 카운트 하지 말아야함
+                    }
                     pass = false;
-                    repeatCnt++; // 중복되는 숫자가 나오면 카운트 하지 말아야함
+
                     if(repeatCnt === selectedPeople.length) // 모든 사람의 점수가 같은 경우 가장 적게 일한 사람들 중에서 픽함 // 위험 // 위에 oneCntMember랑 충돌 하는지?
                     {
-                        let temp = [];
-                        temp = checkLessWorkers(selectedPeople);
-                        selectedPeople = temp;
-                        randomPerson = Math.floor(Math.random() * selectedPeople.length - 1) + 1;
-                        pass = true;
+                        // debugger;
+                        if(pickedPerson.length === 1)
+                        {
+                            pass = true;
+                        }
+                        else
+                        {
+                            let temp = [];
+                            temp = checkLessWorkers(selectedPeople);
+                            selectedPeople = temp;
+                            randomPerson = Math.floor(Math.random() * selectedPeople.length - 1) + 1;
+                            pass = true;
+                        }
                     }
                 }
                 else
@@ -286,7 +318,7 @@
 
         let todaySlave = selectedPeople[randomPerson].name;
         controlInfo(selectedPeople[randomPerson], shift);
-        selectedPeople.splice(randomPerson, 1);
+        selectedPeople.splice(randomPerson, 1); // Bug 1
 
         return todaySlave;
     }

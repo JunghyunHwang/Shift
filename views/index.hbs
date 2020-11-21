@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/style.css">
+        <title>Shift</title>
+    </head>
+    <body>
+        <div class="top">
+            <h1><a href="/">SHIFT</a></h1>
+            <nav>
+                <ul>
+                    <li><a href="/login">로그인</a></li>
+                    <li><a href="/signup">회원가입</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="main">
+            {{#if button}}
+                <button type="button" id="setShift">근무 설정</button>
+            {{/if}}
+            <div class="table-shift"></div>
+        </div>
+        <div class="bottom">
+            Ja_Hwang. all rights reserved
+        </div>
+        <!-- <script src="./src/test.js"></script> -->
+        <script src="/main.js"></script>
+    </body>
+</html>

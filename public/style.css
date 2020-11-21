@@ -13,9 +13,27 @@ div.top
     margin: 30px;
 }
 
+div.top a
+{
+    text-decoration: none;
+    color: black;
+}
+
 div.top h1
 {
     font-weight: lighter;
+}
+
+div.top nav ul
+{
+
+}
+
+div.top nav li
+{
+    list-style: none;
+    display: inline-block;
+    font-size: 15px;
 }
 
 div.main
@@ -54,4 +72,17 @@ table, th, td
     margin-left: auto;
     margin-right: auto;
     border-collapse: collapse;
+}
+
+thead, th
+{
+    padding: 10px;
+    font-size: 20px;
+}
+
+tbody, td
+{
+    width: 100px;
+    padding: 10px;
+    text-align: center;
 }

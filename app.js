@@ -1,12 +1,15 @@
 const express = require('express');
 const mysql = require('mysql');
 const dotenv = require('dotenv');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+
 const app = express();
+
 
 dotenv.config({path: './.env'});
 
 // Database connect
-/*
 const db = mysql.createConnection(
     {
         host: process.env.DATABASE_HOST,
@@ -23,14 +26,19 @@ db.connect((error) =>
         console.log(error);
     }
 });
-*/
 
-app.use(express.static('public'));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(cookieParser());
 
-app.get('/data', (req, res) =>
-{
-    res.json();
-});
+const publicDirectory = path.join(__dirname, './public');
+app.use(express.static(publicDirectory));
+
+app.set('view engine', 'hbs');
+
+// Define Routes
+app.use('/', require('./routes/pages'));
+app.use('/auth', require('./routes/auth'));
 
 app.listen(3001, () =>
 {
