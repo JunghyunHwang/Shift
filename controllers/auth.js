@@ -25,7 +25,6 @@ exports.login = async (req, res) =>
             });
         }
 
-        // Add limit
         db.query('SELECT * FROM user WHERE user_id = ?', [user_id], async (error, results) =>
         {
             if(!results || !(await bcrypt.compare(user_password, results[0].user_password)))
@@ -35,6 +34,8 @@ exports.login = async (req, res) =>
             else
             {
                 const id = results[0].user_id;
+                const com_id = results[0].id;
+
                 const token = jwt.sign({ id: id }, process.env.JWT_SECRET,
                 {
                     expiresIn: process.env.JWT_EXPIRES_IN
@@ -47,9 +48,14 @@ exports.login = async (req, res) =>
                     ),
                     httpOnly: true
                 }
+                const sql = "SELECT day_of shift_name FROM shift WHERE com_id=?" 
+                db.query(sql, [com_id], (err, rows) =>
+                {
 
+                });
+                
                 res.cookie('jwt', token, cookieOptions);
-                res.status(200).render('index');
+                res.status(200).redirect(`/user/${id}`);
             }
         });
     } 
@@ -103,3 +109,31 @@ exports.signup = (req, res) =>
         });
     });
 }
+
+module.exports.logout_get = (req, res) =>
+{
+    res.cookie('jwt', '', { maxAge: 1 });
+    res.redirect('/');
+}
+/*
+module.exports.getData = (req, res) =>
+{
+    const userId = req.headers.cookie;
+    const data = [];
+    console.log("Hi");
+
+    db.query('SELECT * FROM shift WHERE com_id=4', (error, result) =>
+    {
+        if(error)
+        {
+            console.log(error);
+        }
+        else
+        {
+            data = result[0];
+        }
+    });
+    res.json(data);
+}
+*/
+// module.exports = data;

@@ -3,9 +3,9 @@ const mysql = require('mysql');
 const dotenv = require('dotenv');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const test = require('./public/test');
 
 const app = express();
-
 
 dotenv.config({path: './.env'});
 
@@ -40,7 +40,41 @@ app.set('view engine', 'hbs');
 app.use('/', require('./routes/pages'));
 app.use('/auth', require('./routes/auth'));
 
+app.get('/api')
+
+app.get('/user/:userName', (req, res) =>
+{
+    const userName = req.params.userName;
+    console.log(userName);
+
+    db.query('SELECT id FROM user WHERE user_id=?', [userName], (err, result) =>
+    {
+        if(err)
+        {
+            console.log(err);
+        }
+        else
+        {
+            const com_id = result[0].id;
+            const sql = 'SELECT day_of, shift_name FROM shift WHERE com_id=?';
+            db.query(sql, [com_id], (err, row) =>
+            {
+                if(err)
+                {
+                    console.log(err);
+                }
+                else
+                {
+                    const dataTest = test.getData(row);
+                    console.log(dataTest);
+                }
+            })
+        }
+    });
+    res.render('personal');
+});
+
 app.listen(3001, () =>
 {
-    console.log("Server started on Port 3001");
+    console.log("Server is running like Ninja");
 });

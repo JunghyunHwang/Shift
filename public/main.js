@@ -1,7 +1,21 @@
 /* 근무 짜는 프로그램*/
 {
     'use strict';
-
+    
+    let btnTest = document.getElementById('test');
+    btnTest.addEventListener('click', () =>
+    {
+        fetch('http://localhost:3001/user/api')
+        .then(res => {
+            return res.json();
+        })
+        .then(data => {
+            console.log(data);
+        })
+        .catch(err =>{
+            console.log("Fetch error");
+        });
+    });
     let weekday = 5;
     let week = 7;
     let shift = [];
@@ -463,9 +477,7 @@
         checkFair();
         
         // Create data
-        let json = JSON.stringify(shift);
         const data = createData(shift);
-        console.log(data);
 
         renderingTable(data);
     }

@@ -7,7 +7,8 @@ router.get('/', (req, res) =>
     {
         return res.render('index', 
         {
-            button: true
+            button: true,
+            isLogin: true
         });
     }
     else
