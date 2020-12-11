@@ -1,27 +1,13 @@
 /* 근무 짜는 프로그램*/
+'use strict';
+
 {
-    'use strict';
-    
-    let btnTest = document.getElementById('test');
-    btnTest.addEventListener('click', () =>
-    {
-        fetch('http://localhost:3001/user/api')
-        .then(res => {
-            return res.json();
-        })
-        .then(data => {
-            console.log(data);
-        })
-        .catch(err =>{
-            console.log("Fetch error");
-        });
-    });
     let weekday = 5;
     let week = 7;
     let shift = [];
     let members = [];
     let weekShiftsTotal = 0;
-    // re
+    // sheet
     let person = ["길윤재", "황중현", "이근혁", "서동휘", "나종원", "박시현", "이관진", "임석범", "황인성", "류희성", "복병수", "김민수", "김종훈", "김정현", "백지용", "홍우진", "김민수2", "김수환", "김승진", "손건우", "강우석", "송강산", "김석희", "김선규", "박태규", "공민식", "오도경", "홍성원", "최현준", "권오복", "최재성", "김창민", "이영한" , "박준서", "김수원", "김건호", "강건호", "이정원"];
     let shiftId = 0;
     // re
@@ -29,7 +15,7 @@
     let numberCctvShift = 10; // cctv 근무 개수
     let btnSetShift = document.getElementById('setShift');
 
-    function work(id, number, name, score, day, who) // number 필요한가?(검색했을때 쓰이는 곳 없음)
+    function work(id, number, name, score, day, who) //re number 필요한가?(검색했을때 쓰이는 곳 없음)
     {
         this.id = id;
         this.number = number;
@@ -54,11 +40,11 @@
     for(let i = 0; i < week; i++)
     {
         // re
-        let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"]; // Sever data
-        let weekdayShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 2, 3, 2]; // Sever data
-        let friShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 1, 3, 2]; // Sever data
-        let satShiftScore = [2, 2, 2, 2, 2, 3, 3, 3, 3, 1, 1, 1, 2, 2, 3, 3]; // Sever data
-        let sunShiftScore = [2, 2, 2, 3, 3, 3, 2, 3, 2, 2, 2, 2, 3, 2, 3, 3]; // Sever data
+        let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"]; // Server data
+        let weekdayShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 2, 3, 2]; // Server data
+        let friShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 1, 3, 2]; // Server data
+        let satShiftScore = [2, 2, 2, 2, 2, 3, 3, 3, 3, 1, 1, 1, 2, 2, 3, 3]; // Server data
+        let sunShiftScore = [2, 2, 2, 3, 3, 3, 2, 3, 2, 2, 2, 2, 3, 2, 3, 3]; // Server data
         let aDayShiftsTotal = numberNightShift + numberCctvShift
         aDayShiftsTotal = (i < weekday) ? aDayShiftsTotal : aDayShiftsTotal + 2; // 주말 위병소 근무 때문에
         shift[i] = new Array(aDayShiftsTotal);
@@ -399,7 +385,7 @@
     function createData(shift)
     {
         // re
-        let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"]; // Sever data
+        let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"]; // Server data
 
         let  data =
         {
@@ -424,7 +410,7 @@
         return data;
     }
 
-    function pick() // Change name (ex: shifting?)
+    function main() // Change name (ex: shifting?)
     {
         let zeroPointMembers = [];
         loadMembers(zeroPointMembers); // 나중에 휴가자들
@@ -432,8 +418,8 @@
         // pick 함수 호출했을때 table 만들기 좋게
         for(let i = 0; i < week; i++)
         {
-            let numberNightShift = 4; // Sever data
-            let numberCctvShift = 10; // Sever data
+            let numberNightShift = 4; // Server data
+            let numberCctvShift = 10; // Server data
             let todayWorker = []; // re
             let yoill = ["Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"];
             let aDayShiftsTotal = numberNightShift + numberCctvShift;
@@ -476,8 +462,10 @@
 
         checkFair();
         
+        console.log(shift);
         // Create data
         const data = createData(shift);
+        console.log(data);
 
         renderingTable(data);
     }
@@ -523,6 +511,6 @@
 
     btnSetShift.addEventListener("click", () =>
     {
-        pick();
+        main();
     });
 }

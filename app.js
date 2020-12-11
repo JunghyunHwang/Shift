@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const test = require('./public/test');
+const { Script } = require('vm');
 
 const app = express();
 
@@ -40,14 +41,10 @@ app.set('view engine', 'hbs');
 app.use('/', require('./routes/pages'));
 app.use('/auth', require('./routes/auth'));
 
-app.get('/api')
-
-app.get('/user/:userName', (req, res) =>
+app.use('/api/:userId', (req, res) =>
 {
-    const userName = req.params.userName;
-    console.log(userName);
-
-    db.query('SELECT id FROM user WHERE user_id=?', [userName], (err, result) =>
+    const userId = req.params.userId;
+    db.query('SELECT id FROM user WHERE user_id=?', [userId], (err, result) =>
     {
         if(err)
         {
@@ -56,25 +53,53 @@ app.get('/user/:userName', (req, res) =>
         else
         {
             const com_id = result[0].id;
-            const sql = 'SELECT day_of, shift_name FROM shift WHERE com_id=?';
-            db.query(sql, [com_id], (err, row) =>
+            const shift_sql = 'SELECT data FROM shift_tb WHERE com_id=?';
+            const shiftOptions_sql = 'SELECT data FROM shiftoptions WHERE com_id=?';
+            db.query(shift_sql, [com_id], (err, shiftScore_row) =>
             {
                 if(err)
                 {
                     console.log(err);
-                }
+                }/*
+                else if(!shiftScore_row) // 아이디만 있고 근무 설정 하지 않음
+                {
+
+                }*/
                 else
                 {
-                    const dataTest = test.getData(row);
-                    console.log(dataTest);
+                    db.query(shiftOptions_sql, [com_id], (err2, shiftOptions_row) =>
+                    {
+                        if(err2)
+                        {
+                            console.log(err2);
+                        }
+                        else
+                        {
+                            const shiftScoreData = JSON.parse(shiftScore_row[0].data);
+                            const shiftOptionsData = JSON.parse(shiftOptions_row[0].data);
+                            const tableData = test.getData(shiftScoreData, shiftOptionsData);
+                            res.json({
+                                headers: tableData.headers,
+                                rows: tableData.rows
+                            });
+                        }
+                    });
                 }
-            })
+            });
         }
     });
-    res.render('personal');
 });
 
-app.listen(3001, () =>
+app.get('/user/:userId', (req, res) =>
+{
+    const userId = req.params.userId; // 이걸로 app.get('/api') middleware 만들어서 해봐!!!!!!!!!!!!
+    res.render('personal',
+    {
+        script: userId
+    });
+});
+
+app.listen(3000, () =>
 {
     console.log("Server is running like Ninja");
 });

@@ -228,3 +228,167 @@ let test =
         "nightshift" : "황인성"
     }
 }
+
+/*
+                    for(i of row) // re i 이름 바꾸자
+                    {
+                        switch(i.day_of)
+                        {
+                            case "mon":
+                                data.weekdayShiftScore.push(i.score);
+                                break;
+                            case "fri":
+                                data.friShiftScore.push(i.score);
+                                break;
+                            case "sat":
+                                data.satShiftScore.push(i.score);
+                                break;
+                            case "sun":
+                                data.sunShiftScore.push(i.score);
+                                break;
+                            default:
+                                console.log("This is unknown type in day_of");
+                                break;
+                        }
+                    }
+                     
+                    for(let i = 0; i < row.length; i++)
+                    {
+                        switch(row[i].day_of)
+                        {
+                            case "mon":
+                                data.weekdayShiftScore.push(row[i].score);
+                                break;
+                            case "fri":
+                                data.friShiftScore.push(row[i].score);
+                                break;
+                            case "sat":
+                                data.satShiftScore.push(row[i].score);
+                                break;
+                            case "sun":
+                                data.sunShiftScore.push(row[i].score);
+                                break;
+                            default:
+                                console.log("This is unknown type in day_of");
+                                break;
+                        }
+                    }
+                    
+
+                    let numberWeekdayShift = 0;
+                    let numberWeekendShift = 0;
+                    let numberFriShift = 0;
+                    let numberSunShift = 0;
+                    let isWeekdaySameNumber = true;
+                    let isWeekendSameNumber = true;
+
+                    if(data.weekdayShiftScore.length === data.friShiftScore.length)
+                    {
+                        numberWeekdayShift = data.weekdayShiftScore.length;
+                    }
+                    else
+                    {
+                        numberWeekdayShift = data.weekdayShiftScore.length;
+                        numberFriShift = data.friShiftScore.length;
+                        isWeekdaySameNumber = false;
+                    }
+
+                    if(data.satShiftScore.length === data.sunShiftScore.length)
+                    {
+                        numberWeekendShift = data.satShiftScore.length;
+                    }
+                    else
+                    {
+                        numberWeekdayShift = data.weekdayShiftScore.length;
+                        numberSunShift = data.SunShiftScore.length;
+                        isWeekendSameNumber = false;
+                    }
+
+                    for(propertyName in data)
+                    {
+                        // console.log(`${propertyName} : ${data[propertyName]}`);
+                    }
+                    // console.log(data.weekdayShiftScore[0]);*/
+
+                    `
+        <script>
+        function renderingTable(data)
+        {
+            const root = document.querySelector('.table-shift');
+    
+            const table = document.createElement('table');
+        
+            table.classList.add('table-shift__table');
+            
+            table.innerHTML = \`
+                <thead>
+                    <tr></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                    </tr>
+                </tbody>
+            \`;
+        
+            root.append(table);
+    
+            table.querySelector('thead tr').textContent = "";
+            table.querySelector('tbody').textContent = "";
+    
+            for(const header of data)
+            {
+                table.querySelector('thead tr').insertAdjacentHTML('beforeend', \`<th>header</th>\`);
+            }
+    
+            for(const row of data.rows)
+            {
+                table.querySelector('tbody').insertAdjacentHTML('beforeend', \`
+                    <tr>
+                        row.map(col => '<td> col </td>').join("")
+                    </tr>
+                \`)
+            }
+        }
+        console.log(${tableData});
+        renderingTable(${tableData});
+        </script>`
+
+        /*function renderingTable(data)
+            {
+                const root = document.querySelector('.table-shift');
+        
+                const table = document.createElement('table');
+            
+                table.classList.add('table-shift__table');
+                
+                table.innerHTML = `
+                    <thead>
+                        <tr></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                `;
+            
+                root.append(table);
+        
+                table.querySelector('thead tr').textContent = "";
+                table.querySelector('tbody').textContent = "";
+        
+                for(const header of data)
+                {
+                    table.querySelector('thead tr').insertAdjacentHTML('beforeend', `<th>${header}</th>`);
+                }
+        
+                for(const row of data.rows)
+                {
+                    table.querySelector('tbody').insertAdjacentHTML('beforeend', `
+                        <tr>
+                            ${row.map(col => '<td> col </td>').join("")}
+                        </tr>
+                    `)
+                }
+            }*/

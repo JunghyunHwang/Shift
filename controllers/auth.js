@@ -34,7 +34,6 @@ exports.login = async (req, res) =>
             else
             {
                 const id = results[0].user_id;
-                const com_id = results[0].id;
 
                 const token = jwt.sign({ id: id }, process.env.JWT_SECRET,
                 {
@@ -48,11 +47,6 @@ exports.login = async (req, res) =>
                     ),
                     httpOnly: true
                 }
-                const sql = "SELECT day_of shift_name FROM shift WHERE com_id=?" 
-                db.query(sql, [com_id], (err, rows) =>
-                {
-
-                });
                 
                 res.cookie('jwt', token, cookieOptions);
                 res.status(200).redirect(`/user/${id}`);
@@ -101,10 +95,7 @@ exports.signup = (req, res) =>
             }
             else
             {
-                return res.render('signup', 
-                {
-                    message: "User signuped"
-                });
+                return res.render('login');
             }
         });
     });
@@ -115,25 +106,3 @@ module.exports.logout_get = (req, res) =>
     res.cookie('jwt', '', { maxAge: 1 });
     res.redirect('/');
 }
-/*
-module.exports.getData = (req, res) =>
-{
-    const userId = req.headers.cookie;
-    const data = [];
-    console.log("Hi");
-
-    db.query('SELECT * FROM shift WHERE com_id=4', (error, result) =>
-    {
-        if(error)
-        {
-            console.log(error);
-        }
-        else
-        {
-            data = result[0];
-        }
-    });
-    res.json(data);
-}
-*/
-// module.exports = data;
