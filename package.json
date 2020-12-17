@@ -29,6 +29,7 @@
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
     "nodemon": "^2.0.6",
-    "sanitize-html": "^2.1.0"
+    "sanitize-html": "^2.1.0",
+    "xlsx": "^0.16.9"
   }
 }

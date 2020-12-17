@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const dataController = require('../controllers/getdata');
 
 router.get('/', (req, res) =>
 {
@@ -15,6 +16,17 @@ router.get('/', (req, res) =>
     {
         res.render('index');
     }
+});
+
+router.post('/api/:userId', dataController.getTableData);
+
+router.get('/user/:userId', (req, res) =>
+{
+    const userId = req.params.userId;
+    res.render('personal',
+    {
+        script: userId
+    });
 });
 
 router.get('/login', (req, res) =>

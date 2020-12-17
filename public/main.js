@@ -1,19 +1,22 @@
-/* 근무 짜는 프로그램*/
-'use strict';
+'use strict'
 
+exports.getData = (shiftScoreData, shiftOptionsData, membersData) =>
 {
-    let weekday = 5;
-    let week = 7;
+    const weekday = 5;
+    const week = 7;
     let shift = [];
     let members = [];
-    let weekShiftsTotal = 0;
+    let weekShiftsTotal = 0; //re
+    let shiftId = 0; // re
+    let numberNightShift = 4;
+    let numberCctvShift = 10;
     // sheet
-    let person = ["길윤재", "황중현", "이근혁", "서동휘", "나종원", "박시현", "이관진", "임석범", "황인성", "류희성", "복병수", "김민수", "김종훈", "김정현", "백지용", "홍우진", "김민수2", "김수환", "김승진", "손건우", "강우석", "송강산", "김석희", "김선규", "박태규", "공민식", "오도경", "홍성원", "최현준", "권오복", "최재성", "김창민", "이영한" , "박준서", "김수원", "김건호", "강건호", "이정원"];
-    let shiftId = 0;
+    let person = membersData;
+
     // re
-    let numberNightShift = 4; // 불침번 근무 개수
-    let numberCctvShift = 10; // cctv 근무 개수
-    let btnSetShift = document.getElementById('setShift');
+    let shiftName = ["cctv 04:00 ~ 06:00", "cctv 06:00 ~ 08:00", "cctv 08:00 ~ 10:00", "cctv 10:00 ~ 12:00", "cctv 12:00 ~ 14:00", "cctv 14:00 ~ 16:00", "cctv 16:00 ~ 18:00",
+    "cctv 18:00 ~ 20:00", "cctv 20:00 ~ 22:00", "cctv 22:00 ~ 00:00", "불침번 22:00 ~ 00:00", "불침번 00:00 ~ 02:00", "불침번 02:00 ~ 04:00", "불침번 04:00 ~ 06:00",
+    "위병소1", "위병소2"]; // Server data
 
     function work(id, number, name, score, day, who) //re number 필요한가?(검색했을때 쓰이는 곳 없음)
     {
@@ -39,13 +42,11 @@
 
     for(let i = 0; i < week; i++)
     {
-        // re
-        let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"]; // Server data
-        let weekdayShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 2, 3, 2]; // Server data
-        let friShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 1, 3, 2]; // Server data
-        let satShiftScore = [2, 2, 2, 2, 2, 3, 3, 3, 3, 1, 1, 1, 2, 2, 3, 3]; // Server data
-        let sunShiftScore = [2, 2, 2, 3, 3, 3, 2, 3, 2, 2, 2, 2, 3, 2, 3, 3]; // Server data
-        let aDayShiftsTotal = numberNightShift + numberCctvShift
+        let weekdayShiftScore = shiftScoreData.weekdayShiftScore;
+        let friShiftScore = shiftScoreData.friShiftScore;
+        let satShiftScore = shiftScoreData.satShiftScore;
+        let sunShiftScore = shiftScoreData.sunShiftScore;
+        let aDayShiftsTotal = numberNightShift + numberCctvShift // re
         aDayShiftsTotal = (i < weekday) ? aDayShiftsTotal : aDayShiftsTotal + 2; // 주말 위병소 근무 때문에
         shift[i] = new Array(aDayShiftsTotal);
 
@@ -172,7 +173,7 @@
         selectedPeople.workId[workIdCnt] = shift.id;
     }
 
-    function checkPossiblePeople(day)
+    function checkPossibleMembers(day)
     {
         let possible = [];
         let len = members.length;
@@ -228,7 +229,7 @@
         return less;
     }
 
-    function pickAndControlInfo(selectedPeople, shift)
+    function pickAndControlInfo(selectedPeople, shift) // divide
     {
         let randomPerson = 0;
         let pass = false;
@@ -384,16 +385,13 @@
 
     function createData(shift)
     {
-        // re
-        let shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"]; // Server data
-
         let  data =
         {
             headers: ["요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"],
             rows: Array.from(Array(shiftName.length), () => Array(week).fill(null))
         }
 
-        for(let i = 0; i < week; i++)
+        for(let i = 0; i < week; i++) // re 꼭 이렇게 어렵게?
         {
             for(let j = 0; j < shift[i].length; j++)
             {
@@ -410,6 +408,7 @@
         return data;
     }
 
+    let data ={};
     function main() // Change name (ex: shifting?)
     {
         let zeroPointMembers = [];
@@ -423,7 +422,7 @@
             let todayWorker = []; // re
             let yoill = ["Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"];
             let aDayShiftsTotal = numberNightShift + numberCctvShift;
-            aDayShiftsTotal = (i < weekday) ? aDayShiftsTotal : aDayShiftsTotal + 2; // 이것도 수정 해야함
+            aDayShiftsTotal = (i < weekday) ? aDayShiftsTotal : aDayShiftsTotal + 2; // re
             let possiblePeople = [];
             let day = i;
 
@@ -433,7 +432,7 @@
                 {
                     if(!zeroPointMembers.length)
                     {
-                        possiblePeople = checkPossiblePeople(day);
+                        possiblePeople = checkPossibleMembers(day);
                         for(let k = j; k < aDayShiftsTotal; k++)
                         {
                             todayWorker[k] = pickAndControlInfo(possiblePeople, shift[i][k]);
@@ -450,7 +449,7 @@
             }
             else
             {
-                possiblePeople = checkPossiblePeople(day);
+                possiblePeople = checkPossibleMembers(day);
                 for(let j = 0; j < aDayShiftsTotal; j++)
                 {
                     todayWorker[j] = pickAndControlInfo(possiblePeople, shift[i][j]);
@@ -462,55 +461,10 @@
 
         checkFair();
         
-        console.log(shift);
         // Create data
-        const data = createData(shift);
-        console.log(data);
-
-        renderingTable(data);
+        data = createData(shift);
     }
+    main();
 
-    function renderingTable(data)
-    {
-        const root = document.querySelector('.table-shift');
-
-        const table = document.createElement('table');
-    
-        table.classList.add('table-shift__table');
-        
-        table.innerHTML = `
-            <thead>
-                <tr></tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td></td>
-                </tr>
-            </tbody>
-        `;
-    
-        root.append(table);
-
-        table.querySelector('thead tr').textContent = "";
-        table.querySelector('tbody').textContent = "";
-
-        for(const header of data.headers)
-        {
-            table.querySelector('thead tr').insertAdjacentHTML('beforeend', `<th>${header}</th>`);
-        }
-
-        for(const row of data.rows)
-        {
-            table.querySelector('tbody').insertAdjacentHTML('beforeend', `
-                <tr>
-                    ${ row.map(col => `<td>${ col }</td>`).join("") }
-                </tr>
-            `)
-        }
-    }
-
-    btnSetShift.addEventListener("click", () =>
-    {
-        main();
-    });
+    return data;
 }

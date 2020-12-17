@@ -1,78 +1,127 @@
 <!DOCTYPE html>
 <html lang="ko">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="/style.css">
-        <title>Shift</title>
-    </head>
-    <body>
-        <div class="top">
-            <h1><a href="/">SHIFT</a></h1>
-            <nav>
-                <ul>
-                    <li><a href="/auth/setting">근무설정</a></li>
-                    <li><a href="/auth/logout">로그아웃</a></li>
-                </ul>
-            </nav>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css">
+    <title>Shift</title>
+</head>
+<body>
+    <div class="top">
+        <h1><a href="/">SHIFT</a></h1>
+        <nav>
+            <ul>
+                <li><a href="/auth/setting">근무설정</a></li>
+                <li><a href="/auth/logout">로그아웃</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="main">
+        <div id="upload">
+            <input type="file" id="upload_file"accept=".xlsx" value="Hi">
         </div>
-        <div class="main">
-                {{{button}}}
+
         <div class="table-shift"></div>
-        {{!-- <div id="test"></div> --}}
-        <div class="bottom">
-            Ja_Hwang. all rights reserved
-        </div>
-        <script>
-            function renderingTable(data)
+    </div>
+    <div class="bottom">
+        Ja_Hwang. all rights reserved
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.14.3/xlsx.full.min.js"></script>
+    <script>
+        function renderingTable(data)
+        {
+            const root = document.querySelector('.table-shift');
+            const table = document.createElement('table');
+
+            table.classList.add('table-shift__table');
+            table.innerHTML = `
+                <thead>
+                    <tr></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                    </tr>
+                </tbody>
+            `;
+
+            root.append(table);
+
+            table.querySelector('thead tr').textContent = "";
+            table.querySelector('tbody').textContent = "";
+
+            for(const header of data.headers)
             {
-                const root = document.querySelector('.table-shift');
-        
-                const table = document.createElement('table');
-            
-                table.classList.add('table-shift__table');
-                
-                table.innerHTML = `
-                    <thead>
-                        <tr></tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                `;
-            
-                root.append(table);
-        
-                table.querySelector('thead tr').textContent = "";
-                table.querySelector('tbody').textContent = "";
-        
-                for(const header of data.headers)
-                {
-                    table.querySelector('thead tr').insertAdjacentHTML('beforeend', `<th>${header}</th>`);
-                }
-        
-                for(const row of data.rows)
-                {
-                    table.querySelector('tbody').insertAdjacentHTML('beforeend', `
-                        <tr>
-                            ${ row.map(col => `<td>${ col }</td>`).join("") }
-                        </tr>
-                    `)
-                }
+                table.querySelector('thead tr').insertAdjacentHTML('beforeend', `<th>${header}</th>`);
             }
 
-            const api_url = '/api/{{script}}';
-            async function getData()
+            for(const row of data.rows)
             {
-                const response = await fetch(api_url);
-                const data = await response.json();
-                console.log(data);
-                renderingTable(data);
+                table.querySelector('tbody').insertAdjacentHTML('beforeend', `
+                    <tr>
+                        ${ row.map(col => `<td>${ col }</td>`).join("") }
+                    </tr>
+                `)
             }
+        }
 
-            getData();
-        </script>
+        let uploadFile = document.getElementById('upload_file');
+        let membersData = [];
+        const api_url = '/api/{{script}}';
+
+        uploadFile.addEventListener('change', (e) =>
+        {
+            let files = e.target.files;
+            let reader = new FileReader();
+
+            reader.readAsBinaryString(files[0]);
+            
+            reader.onload = (e) =>
+            {
+                let data = e.target.result;
+
+                let workbook = XLSX.read(data, {type: 'binary'});
+
+                workbook.SheetNames.forEach(function(item, index, array) 
+                {
+                    const members = XLSX.utils.sheet_to_json(workbook.Sheets[item]); // re members 통제로 보내기
+                    for(let i = 0; i < members.length; i++)
+                    {
+                     membersData.push(members[i].name);
+                    }
+
+                    uploadFile.remove();
+                    getData (membersData);
+                });
+            };
+        });
+
+        async function getData(data)
+        {
+            const options = 
+            {
+                method: 'POST',
+                headers:
+                {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            };
+            const response = await fetch(api_url, options);
+            const tableData = await response.json();
+
+            const root = document.querySelector('.main');
+            const button = document.createElement('button');
+
+            button.id = "btn_create_table";
+            button.textContent = "근무짜기";
+            button.addEventListener('click', ()=>
+            {
+                button.remove();
+                renderingTable(tableData);
+            });
+            root.append(button);
+        }
+    </script>
     </body>
 </html>
