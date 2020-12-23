@@ -2,101 +2,217 @@
 'use strict';
 {
     const week = 7;
-    let shift = [];
-    
-    let objShift =
-    {
-        mon : [],
-        tue : [],
-        wed : [],
-        thr : [],
-        fri : [],
-        sat : [],
-        sun : []
-    };
+    let workTypes = ["cctv", "불침번"];
+    let workTypesweekend = ["cctv", "불침번", "위병소"];
     let members = [];
-    let shiftId = 0;
-    // sheet
-    let person = ["길윤재", "황중현", "이근혁", "서동휘", "나종원", "박시현", "이관진", "임석범", "황인성", "류희성", "복병수", "김민수", "김종훈", "김정현", "백지용", "홍우진", "김민수2", "김수환", "김승진", "손건우", "강우석", "송강산", "김석희", "김선규", "박태규", "공민식", "오도경", "홍성원", "최현준", "권오복", "최재성", "김창민", "이영한" , "박준서", "김수원", "김건호", "강건호", "이정원"];
-    const shiftName = ["04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "first", "second", "third", "fourth", "guardhouse1", "guardhouse2"]; // Server data
-    const numberOfShift = ["cctv", "불침번", "위병소"];
-    let btnSetShift = document.getElementById('setShift');
 
-    class shiftInfo //re
-    {
-        constructor(id, name, score, day, who)
-        {
-            this.id = id;
-            this.name = name;
-            this.score = score;
-            this.day = day;
-            this.who = who;
-        }
-    }
+    let shift = {
+        mon : [
+            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
+            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
+            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
+            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
+            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
+            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
+            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
+            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
+            {workName: "cctv", time: "20:00 ~ 22:00", day: 0, score: 1},
+            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
+            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
+            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
+            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
+            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2}
+        ],
+        tue : [
+            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
+            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
+            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
+            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
+            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
+            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
+            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
+            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
+            {workName: "cctv", time: "20:00 ~ :2200", day: 0, score: 1},
+            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
+            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
+            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
+            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
+            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2}
+        ],
+        wed : [
+            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
+            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
+            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
+            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
+            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
+            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
+            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
+            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
+            {workName: "cctv", time: "20:00 ~ :2200", day: 0, score: 1},
+            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
+            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
+            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
+            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
+            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2}
+        ],
+        thr : [
+            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
+            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
+            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
+            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
+            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
+            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
+            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
+            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
+            {workName: "cctv", time: "20:00 ~ :2200", day: 0, score: 1},
+            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
+            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
+            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
+            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
+            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2}
+        ],
+        fri : [
+            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
+            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
+            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
+            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
+            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
+            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
+            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
+            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
+            {workName: "cctv", time: "20:00 ~ :2200", day: 0, score: 1},
+            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
+            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
+            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
+            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
+            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2}
+        ],
+        sat : [
+            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
+            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
+            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
+            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
+            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
+            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
+            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
+            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
+            {workName: "cctv", time: "20:00 ~ :2200", day: 0, score: 1},
+            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
+            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
+            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
+            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
+            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2},
+            {workName: "위병소", time: "14:00 ~ 16:00", day: 0, score: 1},
+            {workName: "위병소", time: "14:00 ~ 16:00", day: 0, score: 2}
+        ],
+        sun : [
+            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
+            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
+            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
+            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
+            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
+            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
+            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
+            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
+            {workName: "cctv", time: "20:00 ~ :2200", day: 0, score: 1},
+            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
+            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
+            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
+            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
+            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2},
+            {workName: "위병소", time: "14:00 ~ 16:00", day: 0, score: 1},
+            {workName: "위병소", time: "14:00 ~ 16:00", day: 0, score: 2}
+        ]
+    };
 
-    class memberInfo
-    {
-        constructor(id, name, score, cnt, day, sum)
-        {
-            this.id = id;
-            this.name = name
-            this.score = score;
-            this.count = cnt;
-            this.worked = [];
-            this.workId = [];
-            this.day = day;
-            this.sum = sum;
-        }
-    }
-    
-    function createShift()
+    function testCreate()
     {
         let day = 0;
+        
         let weekdayShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 2, 3, 2]; // Server data
         let friShiftScore = [3, 2, 2, 1, 2, 1, 1, 3, 2, 2, 1, 1, 3, 2]; // Server data
         let satShiftScore = [2, 2, 2, 2, 2, 3, 3, 3, 3, 1, 1, 1, 2, 2, 3, 3]; // Server data
         let sunShiftScore = [2, 2, 2, 3, 3, 3, 2, 3, 2, 2, 2, 2, 3, 2, 3, 3]; // Server data
 
-        for(const dayOfWeek in objShift)
+        for(const dayOfWeek in shift)
         {
             switch(dayOfWeek)
             {
                 case "fri":
                     for(let i = 0; i < 14; i++)
                     {
-                        objShift[dayOfWeek][i] = new shiftInfo(shiftId, shiftName[i], friShiftScore[i], day, "");
-                        shiftId++;
+                        shift[dayOfWeek][i].score = friShiftScore[i];
+                        shift[dayOfWeek][i].day = day;
+                        shift[dayOfWeek][i].who = "";
                     }
                     break;
                 case "sat":
                     for(let i = 0; i < 16; i++)
                     {
-                        objShift[dayOfWeek][i] = new shiftInfo(shiftId, shiftName[i], satShiftScore[i], day, "");
-                        shiftId++;
+                        shift[dayOfWeek][i].score = satShiftScore[i];
+                        shift[dayOfWeek][i].day = day;
+                        shift[dayOfWeek][i].who = "";
                     }
                     break;
                 case "sun":
                     for(let i = 0; i < 16; i++)
                     {
-                        objShift[dayOfWeek][i] = new shiftInfo(shiftId, shiftName[i], sunShiftScore[i], day, "");
-                        shiftId++;
+                        shift[dayOfWeek][i].score = sunShiftScore[i];
+                        shift[dayOfWeek][i].day = day;
+                        shift[dayOfWeek][i].who = "";
                     }
                     break;
                 default:
                     for(let i = 0; i < 14; i++)
                     {
-                        objShift[dayOfWeek][i] = new shiftInfo(shiftId, shiftName[i], weekdayShiftScore[i], day, "");
-                        shiftId++;
+                        shift[dayOfWeek][i].score = weekdayShiftScore[i];
+                        shift[dayOfWeek][i].day = day;
+                        shift[dayOfWeek][i].who = "";
                     }
                     break;
             }
             day++;
         }
-        console.log(objShift);
     }
 
-    createShift();
-    
+    testCreate();
+
+    // sheet
+    let person = ["길윤재", "황중현", "이근혁", "서동휘", "나종원", "박시현", "이관진", "임석범", "황인성", "류희성", "복병수", "김민수", "김종훈", "김정현", "백지용", "홍우진", "김민수2", "김수환", "김승진", "손건우", "강우석", "송강산", "김석희", "김선규", "박태규", "공민식", "오도경", "홍성원", "최현준", "권오복", "최재성", "김창민", "이영한" , "박준서", "김수원", "김건호", "강건호", "이정원"];
+    let btnSetShift = document.getElementById('setShift');
+    let numberOfShift = 0; // 근무 개수
+
+    for(const dayOfWeek in shift)
+    {
+        numberOfShift += shift[dayOfWeek].length;
+    }
+
+    class shiftInfo //re
+    {
+        constructor(name, time, score, day)
+        {
+            this.name = name;
+            this.time = time;
+            this.score = score;
+            this.day = day;
+        }
+    }
+
+    class memberInfo
+    {
+        constructor(id, name)
+        {
+            this.id = id;
+            this.name = name
+            this.score = 0;
+            this.count = 0;
+            this.worked = [];
+            this.workId = [];
+            this.day = 0;
+            this.sum = 0;
+        }
+    }
+
     function loadMembers(zeroPoint) // 나중에 엑셀
     {
         let tempPerson = person;
@@ -104,7 +220,7 @@
         {
             for(let i = 0; i < tempPerson.length; i++)
             {
-                members[i] = new memberInfo(i, tempPerson[i], 0, 0, 0, 0);
+                members[i] = new memberInfo(i, tempPerson[i]);
                 zeroPoint[i] = members[i];    
             }
         }
@@ -124,7 +240,7 @@
 
             for(let i = 0; i < tempPerson.length; i++)
             {
-                tempPerson[i] = new memberInfo(members.length, tempPerson[i], 0, 0, 0, 0);
+                tempPerson[i] = new memberInfo(members.length, tempPerson[i]);
                 members.push(tempPerson[i]);
                 zeroPoint.push(tempPerson[i]);
             }
@@ -170,21 +286,20 @@
     function controlInfo(selectedPeople, shift)
     {
         let workedCnt = selectedPeople.worked.length;
-        let workIdCnt = selectedPeople.workId.length;
 
+        shift.who = selectedPeople.name;
         selectedPeople.score = shift.score;
         selectedPeople.sum += shift.score;
         selectedPeople.day = shift.day;
         selectedPeople.count++;
         selectedPeople.worked[workedCnt] = shift.name;
-        selectedPeople.workId[workIdCnt] = shift.id;
     }
 
     function checkPossiblePeople(day)
     {
         let possible = [];
         let len = members.length;
-        let maxCount = Math.ceil(shiftId / len);
+        let maxCount = Math.ceil(numberOfShift / len);
 
         // Check Possible
         for(let i = 0; i < len; i++)
@@ -236,14 +351,14 @@
         return less;
     }
 
-    function pickAndControlInfo(selectedPeople, shift)
+    function pickMember(selectedPeople, shift)
     {
         let randomPerson = 0;
         let pass = false;
         let repeatCnt = 0;
         let pickedPerson = [];
 
-        if(shift.score === 2) // 2점 근무는 이전에 무슨 근무를 했던지 상관없이 들어감
+        if(shift.score === 2) // 2점 근무는 이전에 무슨 근무를 했던지 상관없이 들어감 // re 현재 점수가 0점인 사람도 추가
         {
             randomPerson = Math.floor(Math.random() * selectedPeople.length - 1) + 1;
         }
@@ -390,94 +505,52 @@
         console.log("-------------------------------------------");
     }
 
-    function createData(shift)
-    {
-        let  data =
-        {
-            headers: ["요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"],
-            rows: Array.from(Array(shiftName.length), () => Array(week).fill(null))
-        }
-
-        /*for(const dayOfWeek in objShift)
-        {
-            for(let i = 0; i < objShift[dayOfWeek].length; i++)
-            {
-                data.rows[j][i] = objShift[dayOfWeek][i].who;
-            }
-        }*/
-
-        for(let i = 0; i < week; i++)
-        {
-            for(let j = 0; j < shift[i].length; j++)
-            {
-                data.rows[j][i] = shift[i][j].who;
-            }
-        }
-
-        // data.rows[n][0]은 근무이름
-        for(let i = 0; i < data.rows.length; i++)
-        {
-            data.rows[i].unshift(shiftName[i]);
-        }
-
-        return data;
-    }
-
-    function main() // Change name (ex: shifting?)
+    function main()
     {
         let zeroPointMembers = [];
         loadMembers(zeroPointMembers); // 나중에 휴가자들
         let day = 0;
-        let yoill = ["Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"];
-        
-        for(const dayOfWeek in objShift)
+        for(const dayOfWeek in shift)
         {
-            let todayWorker = []; // re
-            let possiblePeople = [];
+            let possiblePeople = []; // possible members
+            let todayWorker = []; // re 필요없음
 
             if(zeroPointMembers.length)
             {
-                for(let i = 0; i < objShift[dayOfWeek].length; i++)
+                for(let i = 0; i < shift[dayOfWeek].length; i++)
                 {
                     if(!zeroPointMembers.length)
                     {
                         possiblePeople = checkPossiblePeople(day);
-                        for(let j = i; j < objShift[dayOfWeek].length; j++)
+                        for(let j = i; j < shift[dayOfWeek].length; j++)
                         {
-                            todayWorker[j] = pickAndControlInfo(possiblePeople, objShift[dayOfWeek][j]);
-                            objShift[dayOfWeek][j].who = todayWorker[j];
+                            todayWorker[j] = pickMember(possiblePeople, shift[dayOfWeek][i]);
                         }
                         break;
                     }
                     else
                     {
-                        todayWorker[i] = pickAndControlInfo(zeroPointMembers, objShift[dayOfWeek][i]);
-                        objShift[dayOfWeek][i].who = todayWorker[i];
+                        todayWorker[i] = pickMember(zeroPointMembers, shift[dayOfWeek][i]);
                     }
                 }
             }
             else
             {
                 possiblePeople = checkPossiblePeople(day);
-                for(let i = 0; i < objShift[dayOfWeek].length; i++)
+                for(let i = 0; i < shift[dayOfWeek].length; i++)
                 {
-                    todayWorker[i] = pickAndControlInfo(possiblePeople, objShift[dayOfWeek][i]);
-                    objShift[dayOfWeek][i].who = todayWorker[i];
+                    todayWorker[i] = pickMember(possiblePeople, shift[dayOfWeek][i]);
                 }
             }
-            console.log(`${yoill[day]} : ${todayWorker}`);
+            console.log(`${dayOfWeek} : ${todayWorker}`);
 
             day++;
         }
-        
-        checkFair();
+
+        renderingTable(shift.mon);
 
         console.log(shift);
-        // Create data
-        // const data = createData(shift);
-        // console.log(data);
-
-        // renderingTable(data);
+        checkFair();
     }
 
     function renderingTable(data)
@@ -487,35 +560,43 @@
         const table = document.createElement('table');
     
         table.classList.add('table-shift__table');
-        
+
+        // 여기서 근무 종류로 일단 틀을 만들어놈
         table.innerHTML = `
             <thead>
-                <tr></tr>
+                <th class="work_cctv" colspan=2>cctv</th>
+                <th class="work_night" colspan=2>불침번</th>
             </thead>
             <tbody>
-                <tr>
-                    <td></td>
+                <tr id=rows>
+                    <td class=time>시간</td>
+                    <td class=cctv>이름</td>
+                    <td class=time>시간</td>
+                    <td class=work>이름</td>
                 </tr>
             </tbody>
         `;
-    
+
         root.append(table);
 
-        table.querySelector('thead tr').textContent = "";
-        table.querySelector('tbody').textContent = "";
+        let rowId = 0;
 
-        for(const header of data.headers)
+        for(const worker of data)
         {
-            table.querySelector('thead tr').insertAdjacentHTML('beforeend', `<th>${header}</th>`);
-        }
-
-        for(const row of data.rows)
-        {
-            table.querySelector('tbody').insertAdjacentHTML('beforeend', `
-                <tr>
-                    ${ row.map(col => `<td>${ col }</td>`).join("") }
-                </tr>
-            `)
+            if(worker.workName === "cctv")
+            {
+                table.querySelector('tbody').insertAdjacentHTML('beforeend', `
+                    <tr id="${rowId}">
+                        <td>${worker.time}</td>
+                        <td>${worker.who}</td>
+                    </tr>
+                `);
+                rowId++
+            }
+            else
+            {
+                // 불침번
+            }
         }
     }
 

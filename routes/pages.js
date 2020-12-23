@@ -8,7 +8,6 @@ router.get('/', (req, res) =>
     {
         return res.render('index', 
         {
-            button: true,
             isLogin: true
         });
     }

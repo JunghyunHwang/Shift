@@ -1,0 +1,10 @@
+.work_name
+{
+    column-span: 2;
+}
+
+table, th, tr, td
+{
+    border: 1px solid gray;
+    border-collapse: collapse;
+}
