@@ -21,6 +21,8 @@
             <input type="file" id="upload_file"accept=".xlsx" value="Hi">
         </div>
 
+        <div id="thisWeek"></div>
+
         <div class="table-shift"></div>
     </div>
     <div class="bottom">
@@ -28,46 +30,166 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.14.3/xlsx.full.min.js"></script>
     <script>
-        function renderingTable(data)
+        let shift = {};
+        let workTypes = [];
+        let workTypesweekend = [];
+        let thisWeek = [];
+
+        function renderDateButton(date)
         {
-            const root = document.querySelector('.table-shift');
-            const table = document.createElement('table');
+            let todayWorker = {};
 
-            table.classList.add('table-shift__table');
-            table.innerHTML = `
-                <thead>
-                    <tr></tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td></td>
-                    </tr>
-                </tbody>
-            `;
-
-            root.append(table);
-
-            table.querySelector('thead tr').textContent = "";
-            table.querySelector('tbody').textContent = "";
-
-            for(const header of data.headers)
+            for(const dayOfWeek in shift)
             {
-                table.querySelector('thead tr').insertAdjacentHTML('beforeend', `<th>${header}</th>`);
+                if(shift[dayOfWeek][0].day === date)
+                {
+                    switch(dayOfWeek)
+                    {
+                        case "sat":
+                            for(const work of workTypesweekend)
+                            {
+                                todayWorker[work.workName] = [];
+                            }
+                            break;
+                        case "sun":
+                            for(const work of workTypesweekend)
+                            {
+                                todayWorker[work.workName] = [];
+                            }
+                            break;
+                        default:
+                            for(const work of workTypes)
+                            {
+                                todayWorker[work.workName] = [];
+                            }
+                            break;
+                    }
+
+                    for(const workName in todayWorker)
+                    {
+                        for(let i = 0; i < shift[dayOfWeek].length; i++)
+                        {
+                            if(workName === shift[dayOfWeek][i].workName)
+                            {
+                                todayWorker[workName].push(shift[dayOfWeek][i]);
+                            }
+                        }
+                    }
+                }
             }
 
-            for(const row of data.rows)
+            renderingTable(todayWorker);
+        }
+
+        function createDate()
+        {
+            uploadFile.remove();
+            let week = document.getElementById('thisWeek');
+            
+            if(week.textContent)
             {
-                table.querySelector('tbody').insertAdjacentHTML('beforeend', `
-                    <tr>
-                        ${ row.map(col => `<td>${ col }</td>`).join("") }
-                    </tr>
-                `)
+                week.textContent = null;
+            }
+
+            for(let i = 0; i < thisWeek.length; i++)
+            {
+                let date = document.createElement('button');
+                date.textContent = thisWeek[i];
+                date.classList.add('thisWeek_date');
+                week.append(date);
+            }
+
+            let classDate = document.querySelectorAll('.thisWeek_date');
+
+            for(let i = 0; i < classDate.length; i++)
+            {
+                classDate[i].addEventListener('click', () =>
+                {
+                    renderDateButton(classDate[i].textContent);
+                });
+            }
+        }
+
+        function renderingTable(todayWorker)
+        {
+            let tableLen = 0;
+
+            for(const work in todayWorker)
+            {
+                if(todayWorker[work].length > tableLen)
+                {
+                    tableLen = todayWorker[work].length;
+                }
+            }
+            
+            let isItTable = document.querySelector('.table-shift__table');
+
+            if(isItTable)
+            {
+                isItTable.remove();
+            }
+
+            const root = document.querySelector('.table-shift');
+            const table = document.createElement('table');
+        
+            table.classList.add('table-shift__table');
+            root.append(table);
+
+            // Draw table
+            let tableHeader = "<thead>";
+
+            for(const workName in todayWorker)
+            {
+                tableHeader += `<th class="work_name" colspan=3>${workName}</th>`;
+            }
+
+            tableHeader += `
+            </thead>
+            `;
+            table.innerHTML = tableHeader;
+            
+            let tableBody = "<tbody><tr class='header'>";
+
+            let numberOfWorkTypes = Object.keys(todayWorker).length;
+            for(let i = 0; i < numberOfWorkTypes; i++)
+            {
+                tableBody += `
+                <td class="header_time">시간</td>
+                <td class="header_name">이름</td>
+                <td class="header_sign_here">서명</td>
+                `;
+            }
+
+            tableBody += "</tr></tbody>";
+            table.innerHTML += tableBody;
+
+            for(let i = 0; i < tableLen; i++)
+            {
+                let row = "<tr>"
+                for(const worker in todayWorker)
+                {
+                    if(todayWorker[worker][i] === undefined)
+                    {
+                        row += `
+                        <td class="empty" colspan=3></td>
+                        `;
+                    }
+                    else
+                    {
+                        row += `
+                        <td class="time">${todayWorker[worker][i].time}</td>
+                        <td class="name">${todayWorker[worker][i].who}</td>
+                        <td class="sign_here"></td>
+                        `;
+                    }
+                }
+                row += "</tr>";
+                table.querySelector('tbody').insertAdjacentHTML('beforeend', row);
             }
         }
 
         let uploadFile = document.getElementById('upload_file');
         let membersData = [];
-        const api_url = '/api/{{script}}';
 
         uploadFile.addEventListener('change', (e) =>
         {
@@ -82,7 +204,7 @@
 
                 let workbook = XLSX.read(data, {type: 'binary'});
 
-                workbook.SheetNames.forEach(function(item, index, array) 
+                workbook.SheetNames.forEach(function(item, index, array)
                 {
                     const members = XLSX.utils.sheet_to_json(workbook.Sheets[item]); // re members 통제로 보내기
                     for(let i = 0; i < members.length; i++)
@@ -90,13 +212,14 @@
                      membersData.push(members[i].name);
                     }
 
-                    uploadFile.remove();
                     getData (membersData);
                 });
             };
         });
 
-        async function getData(data)
+        const api_url = '/api/{{user}}';
+
+        async function getData(membersData)
         {
             const options = 
             {
@@ -105,22 +228,17 @@
                 {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(membersData)
             };
             const response = await fetch(api_url, options);
-            const tableData = await response.json();
-
-            const root = document.querySelector('.main');
-            const button = document.createElement('button');
-
-            button.id = "btn_create_table";
-            button.textContent = "근무짜기";
-            button.addEventListener('click', ()=>
-            {
-                button.remove();
-                renderingTable(tableData);
-            });
-            root.append(button);
+            const shiftData = await response.json();
+            
+            thisWeek = shiftData.week;
+            shift = shiftData.shift;
+            console.log(shift);
+            workTypes = shiftData.work.workTypes; // 개수 많을걸 [0]으로
+            workTypesweekend = shiftData.work.workTypesWeekend;
+            createDate();
         }
     </script>
     </body>

@@ -17,15 +17,12 @@ router.get('/', (req, res) =>
     }
 });
 
-router.post('/api/:userId', dataController.getTableData);
+router.post('/api/:userId', dataController.getShiftData);
 
 router.get('/user/:userId', (req, res) =>
 {
     const userId = req.params.userId;
-    res.render('personal',
-    {
-        script: userId
-    });
+    res.render('personal', {user: userId});
 });
 
 router.get('/login', (req, res) =>
