@@ -9,21 +9,20 @@
     <body>
         <div class="top">
             <h1><a href="/">SHIFT</a></h1>
-            <nav>
-                <ul>
-                    {{#if isLogined}}
-                        <li><a href="/auth/logout">로그아웃</a></li>
-                        {{else}}
-                        <li><a href="/login">로그인</a></li>
-                        <li><a href="/signup">회원가입</a></li>
-                    {{/if}}
-                </ul>
-            </nav>
         </div>
         <div class="main">
+        <div id="shift_setting">
+                <div id="_guide"></div>
+                <form action="/auth/setting" method="POST" id="_settingForm">
+                </form>
+                <div id="page_count"></div>
+                <button id="next_info">다음</button>
+            </div>
+            <div id="check_shift"></div>
         </div>
         <div class="bottom">
             {{!-- Ja_Hwang. all rights reserved --}}
         </div>
+        <script src="/setting.js"></script>
     </body>
 </html>

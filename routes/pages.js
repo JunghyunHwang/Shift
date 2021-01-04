@@ -1,4 +1,5 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 const dataController = require('../controllers/getdata');
 
@@ -8,7 +9,7 @@ router.get('/', (req, res) =>
     {
         return res.render('index', 
         {
-            isLogin: true
+            isLogined: true
         });
     }
     else
@@ -23,6 +24,11 @@ router.get('/user/:userId', (req, res) =>
 {
     const userId = req.params.userId;
     res.render('personal', {user: userId});
+});
+
+router.get('/setting', (req, res) =>
+{
+    res.render('setting');
 });
 
 router.get('/login', (req, res) =>

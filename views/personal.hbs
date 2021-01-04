@@ -11,14 +11,14 @@
         <h1><a href="/">SHIFT</a></h1>
         <nav>
             <ul>
-                <li><a href="/auth/setting">근무설정</a></li>
+                <li><a href="/setting">근무설정</a></li>
                 <li><a href="/auth/logout">로그아웃</a></li>
             </ul>
         </nav>
     </div>
     <div class="main">
         <div id="upload">
-            <input type="file" id="upload_file"accept=".xlsx" value="Hi">
+            <input type="file" id="upload_file" multiple accept=".xlsx">
         </div>
 
         <div id="thisWeek"></div>
@@ -26,7 +26,7 @@
         <div class="table-shift"></div>
     </div>
     <div class="bottom">
-        Ja_Hwang. all rights reserved
+        {{!-- Ja_Hwang. all rights reserved --}}
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.14.3/xlsx.full.min.js"></script>
     <script>
@@ -113,6 +113,7 @@
         function renderingTable(todayWorker)
         {
             let tableLen = 0;
+            console.log(todayWorker);
 
             for(const work in todayWorker)
             {
@@ -166,9 +167,9 @@
             for(let i = 0; i < tableLen; i++)
             {
                 let row = "<tr>"
-                for(const worker in todayWorker)
+                for(const work in todayWorker)
                 {
-                    if(todayWorker[worker][i] === undefined)
+                    if(todayWorker[work][i] === undefined)
                     {
                         row += `
                         <td class="empty" colspan=3></td>
@@ -177,8 +178,8 @@
                     else
                     {
                         row += `
-                        <td class="time">${todayWorker[worker][i].time}</td>
-                        <td class="name">${todayWorker[worker][i].who}</td>
+                        <td class="time">${todayWorker[work][i].time}</td>
+                        <td class="name">${todayWorker[work][i].who}</td>
                         <td class="sign_here"></td>
                         `;
                     }
@@ -194,27 +195,89 @@
         uploadFile.addEventListener('change', (e) =>
         {
             let files = e.target.files;
-            let reader = new FileReader();
-
-            reader.readAsBinaryString(files[0]);
+            let f;
+            let temp = [];
+            let members = [];
             
-            reader.onload = (e) =>
+            for(let i = 0; i < files.length; i++)
             {
-                let data = e.target.result;
+                f = files[i];
+                let reader = new FileReader();
 
-                let workbook = XLSX.read(data, {type: 'binary'});
-
-                workbook.SheetNames.forEach(function(item, index, array)
+                reader.onload = (e) =>
                 {
-                    const members = XLSX.utils.sheet_to_json(workbook.Sheets[item]); // re members 통제로 보내기
-                    for(let i = 0; i < members.length; i++)
-                    {
-                     membersData.push(members[i].name);
-                    }
+                    let data = e.target.result;
 
-                    getData (membersData);
-                });
-            };
+                    let workbook = XLSX.read(data, {type: 'binary'});
+
+                    workbook.SheetNames.forEach(function(item, index, array)
+                    {
+                        const membersData = XLSX.utils.sheet_to_json(workbook.Sheets[item]);
+
+                        if(!temp.length)
+                        {
+                            temp = membersData;
+                        }
+                        else if(membersData > temp)
+                        {
+                            for(const tempMember of temp)
+                            {
+                                for(const member of membersData)
+                                {
+                                    if(member.name === tempMember.name)
+                                    {
+                                        members.push(Object.assign(member, tempMember));
+                                        let cutNum = membersData.indexOf(member);
+                                        membersData.splice(cutNum, 1);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
+                                }
+                            }
+
+                            for(const member of membersData)
+                            {
+                                members.push(member);
+                            }
+                            console.log(members);
+                            getData(members);
+                        }
+                        else
+                        {
+                            for(const member of membersData)
+                            {
+                                for(const tempMember of temp)
+                                {
+                                    if(member.name === tempMember.name)
+                                    {
+                                        members.push(Object.assign(member, tempMember));
+                                        let cutNum = temp.indexOf(tempMember);
+                                        temp.splice(cutNum, 1);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
+                                }
+                            }
+
+                            for(const tempMember of temp)
+                            {
+                                members.push(tempMember);
+                            }
+                            console.log(members);
+
+                            getData(members);
+                        }
+                    });
+                };
+
+                reader.readAsBinaryString(f);
+            }
         });
 
         const api_url = '/api/{{user}}';

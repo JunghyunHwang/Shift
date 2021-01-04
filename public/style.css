@@ -24,11 +24,6 @@ div.top h1
     font-weight: lighter;
 }
 
-div.top nav ul
-{
-
-}
-
 div.top nav li
 {
     list-style: none;
@@ -74,6 +69,15 @@ table, th, td
     border-collapse: collapse;
 }
 
+.check_shift_table
+{
+    width: 100%;
+    table-layout: fixed;
+    margin-left: auto;
+    margin-right: auto;
+    border-collapse: collapse;
+}
+
 thead, th
 {
     padding: 10px;
@@ -85,4 +89,67 @@ tbody, td
     width: 100px;
     padding: 10px;
     text-align: center;
+}
+
+#shift_setting
+{
+    height: 300px;
+}
+
+#_guide
+{
+    margin: 20px;
+}
+
+.input_setting
+{
+    margin: 20px;
+}
+
+#page_count
+{
+    margin: 20px;
+}
+
+#next_info
+{
+    margin: auto;
+    border-style: none;
+    padding: 10px 20px;
+    background-color: #2d3436;
+    font: 15px;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#workName
+{
+    margin: 20px auto;
+    display: block;
+}
+
+#work_per_day
+{
+    margin: 20px;
+    display: block;
+}
+
+#work_per_day input{
+    width: 80px;
+}
+
+#input_PerDayWeekend
+{
+    margin: auto;
+}
+
+#time_interval
+{
+    margin: 10px auto;
+}
+
+#_work
+{
+    margin: 10px;
 }
