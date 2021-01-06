@@ -58,6 +58,7 @@ button#setShift
 table, th, td
 {
     border: 1px solid #bcbcbc;
+    border-collapse: collapse;
 }
 
 .table-shift__table
@@ -149,7 +150,12 @@ tbody, td
     margin: 10px auto;
 }
 
-#_work
+#input_score
 {
     margin: 10px;
+}
+
+td #check_score_empty
+{
+    border-collapse: collapse;
 }

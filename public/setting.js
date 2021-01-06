@@ -20,9 +20,12 @@
         sat:[],
         sun:[]
     };
-    let workDayOfWeek = [];
-    let workWeekend = [];
-    let page = 10;
+    let workTypes = 
+    {
+        dayOfWeek:[],
+        weekend:[]
+    };
+    let page = 1;
     let temp = [];
     let testshift = {
         mon : [
@@ -148,12 +151,10 @@
     {
         // 이것들 이동시켜야함
         let valueWorkName = document.querySelectorAll('#workName');
-        let checkDayOfWeek = document.querySelectorAll('#check_dayOfWeek');
-        let checkWeekend = document.querySelectorAll('#check_weekend');
         let valueStartHour = document.querySelectorAll('#start_hour');
         let valueStartMinute = document.querySelectorAll('#start_minute');
         let valueTimeInterval = document.querySelectorAll('#time_interval');
-        let _workTotal = document.querySelectorAll('#_work');
+        let inputScore = document.querySelectorAll('#input_score');
         let formCheck = "";
 
         switch(page)
@@ -193,12 +194,13 @@
                 break;
             case 3:
                 pageCnt.textContent = `${page} / 10`;
+                let checkDayOfWeek = document.querySelectorAll('#check_dayOfWeek');
 
                 for(const box of checkDayOfWeek)
                 {
                     if(box.checked)
                     {
-                        workDayOfWeek.push({workName: box.name, num: 0});
+                        workTypes.dayOfWeek.push({workName: box.name, num: 0, duo: 0});
                     }
                 }
 
@@ -215,30 +217,65 @@
                 break;
             case 4:
                 pageCnt.textContent = `${page} / 10`;
+                let checkWeekend = document.querySelectorAll('#check_weekend');
 
-                for(let i = 0; i < checkWeekend.length; i++)
+                for(const box of checkWeekend)
                 {
-                    if(checkWeekend[i].checked)
+                    if(box.checked)
                     {
-                        workWeekend[i] = {workName: checkWeekend[i].name, num: 0};
-                    }
-                    else
-                    {
-                        continue;
+                        workTypes.weekend.push({workName: box.name, num: 0, duo: 0});
                     }
                 }
-                
+
+                formCheck = "";
+
+                for(const Value of temp)
+                {
+                    formCheck += `<input type="checkbox" class="input_setting" name='${Value}' id="check_duo"/> ${Value}`;
+                }
+
+                shiftSetting.innerHTML = formCheck;
+                _guide.textContent = "이 중 2명 이상 같이 하는 근무를 선택해 주세요.";
+                page++;
+                break;
+            case 5:
+                pageCnt.textContent = `${page} / 10`;
+                let checkDuo = document.querySelectorAll('#check_duo');
+                let duoWorkName = [];
+
+                for(const value of checkDuo)
+                {
+                    if(value.checked)
+                    {
+                        duoWorkName.push(value.name);
+                    }
+                }
+
+                for(const workName of duoWorkName)
+                {
+                    for(const type in workTypes)
+                    {
+                        for(const work of workTypes[type])
+                        {
+                            if(work.workName === workName)
+                            {
+                                work.duo = 2;
+                            }
+                        }
+                    }
+                }
+
                 let inputPerDay = ""
 
-                for(const Work of workDayOfWeek)
+                for(const work of workTypes.dayOfWeek)
                 {
                     inputPerDay += `
-                    <label id="work_per_day">${Work.workName}
-                        <input type="text" class="input_setting" name="${Work.workName}" id="input_WorkPerDay" placeholder="하루근무개수">
+                    <label id="work_per_day">${work.workName}
+                        <input type="text" class="input_setting" name="${work.workName}" id="input_WorkPerDay" placeholder="하루근무개수">
                         <div id=set_time>
-                            <input type="text" name="${Work.workName}" id="start_hour" placeholder="시작 시간">시
-                            <input type="text" name="${Work.workName}" id="start_minute" placeholder="몇분">분
-                            <select name="name="${Work.workName}"" id="time_interval" size=1>
+                            <input type="text" name="${work.workName}" id="start_hour" placeholder="시작 시간">시
+                            <input type="text" name="${work.workName}" id="start_minute" placeholder="몇분">분
+                            <select name="name="${work.workName}"" id="time_interval" size=1>
                                 <option value=1>1시간씩</option>
                                 <option value=2>2시간씩</option>
                                 <option value=3>3시간씩</option>
@@ -252,7 +289,7 @@
                 _guide.textContent = "평일 근무 개수, 근무 시작 시간과 몇 시간씩 근무하는지 선택해주세요.";
                 page++;
                 break;
-            case 5:
+            case 6:
                 pageCnt.textContent = `${page} / 10`;
 
                 let valueWorkPerDay = document.querySelectorAll('#input_WorkPerDay');
@@ -264,28 +301,28 @@
                     minute = (minute === 30) ? 0.5 : 0; //시작 시간이 무조건 30분 단위라는 가정하에만
                     let firstWorkTime = hour + minute;
 
-                    for(const Work of workDayOfWeek)
+                    for(const work of workTypes.dayOfWeek)
                     {
-                        if(valueWorkPerDay[i].name === Work.workName)
+                        if(valueWorkPerDay[i].name === work.workName)
                         {
-                            Work.num = Number(valueWorkPerDay[i].value);
-                            Work.firstWorkTime = firstWorkTime;
-                            Work.timeInterval = Number(valueTimeInterval[i].value);
+                            work.num = Number(valueWorkPerDay[i].value);
+                            work.firstWorkTime = firstWorkTime;
+                            work.timeInterval = Number(valueTimeInterval[i].value);
                         }
                     }
                 }
 
                 let inputPerDayWeekend = ""
 
-                for(const Work of workWeekend)
+                for(const work of workTypes.weekend)
                 {
                     inputPerDayWeekend += `
-                    <label id="work_per_day">${Work.workName}
-                        <input type="text" class="input_setting" name="${Work.workName}" id="input_PerDayWeekend" placeholder="하루근무개수">
+                    <label id="work_per_day">${work.workName}
+                        <input type="text" class="input_setting" name="${work.workName}" id="input_PerDayWeekend" placeholder="하루근무개수">
                         <div id=set_time>
-                            <input type="text" name="${Work.workName}" id="start_hour" placeholder="시작 시간">시
-                            <input type="text" name="${Work.workName}" id="start_minute" placeholder="몇분">분
-                            <select name="${Work.workName}" id="time_interval" size=1>
+                            <input type="text" name="${work.workName}" id="start_hour" placeholder="시작 시간">시
+                            <input type="text" name="${work.workName}" id="start_minute" placeholder="몇분">분
+                            <select name="${work.workName}" id="time_interval" size=1>
                                 <option value=1>1시간씩</option>
                                 <option value=2>2시간씩</option>
                                 <option value=3>3시간씩</option>
@@ -300,7 +337,7 @@
                 _guide.textContent = "주말 근무 개수, 근무 시작 시간과 몇 시간씩 근무하는지 선택해주세요.";
                 page++;
                 break;
-            case 6:
+            case 7:
                 pageCnt.textContent = `${page} / 10`;
 
                 let valuePerDayWeekend = document.querySelectorAll('#input_PerDayWeekend');
@@ -312,25 +349,25 @@
                     minute = (minute === 30) ? 0.5 : 0; //시작 시간이 무조건 30분 단위라는 가정하에만
                     let firstWorkTime = hour + minute;
 
-                    for(const Work of workWeekend)
+                    for(const work of workTypes.weekend)
                     {
-                        if(valuePerDayWeekend[i].name === Work.workName)
+                        if(valuePerDayWeekend[i].name === work.workName)
                         {
-                            Work.num = Number(valuePerDayWeekend[i].value);
-                            Work.firstWorkTime = firstWorkTime;
-                            Work.timeInterval = Number(valueTimeInterval[i].value);
+                            work.num = Number(valuePerDayWeekend[i].value);
+                            work.firstWorkTime = firstWorkTime;
+                            work.timeInterval = Number(valueTimeInterval[i].value);
                         }
                     }
                 }
                 createShiftData();
                 
                 let inputDayScore = "";
-                let dayOfWeek = shiftData.mon;
+                let mon = shiftData.mon;
 
-                for(const work of dayOfWeek)
+                for(const work of mon)
                 {
                     inputDayScore += `
-                    <div id="_work">
+                    <div id="input_score">
                         ${work.workName} ${work.time}
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1> 1점
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=2> 2점
@@ -344,13 +381,14 @@
                 _guide.textContent = "평일(월 ~ 목) 근무의 점수를 설정해 주세요. (점수가 높을수록 힘든 근무 입니다.)";
                 page++;
                 break;
-            case 7:
+            case 8:
                 pageCnt.textContent = `${page} / 10`;
 
                 // 평일 근무 점수를 월요일에 저장
-                for(let i = 0; i < _workTotal.length; i++)
+                
+                for(let i = 0; i < inputScore.length; i++)
                 {
-                    let dayWorkScore = _workTotal[i].querySelectorAll('#work_score');
+                    let dayWorkScore = inputScore[i].querySelectorAll('#work_score');
                     for(const score of dayWorkScore)
                     {
                         if(score.checked)
@@ -389,7 +427,7 @@
                 for(const work of friday)
                 {
                     inputFriScore += `
-                    <div id="_work">
+                    <div id="input_score">
                         ${work.workName} ${work.time}
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1> 1점
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=2> 2점
@@ -402,13 +440,13 @@
                 _guide.textContent = "금요일 근무의 점수를 설정해 주세요. (점수가 높을수록 힘든 근무 입니다.)";
                 page++;
                 break;
-            case 8:
+            case 9:
                 pageCnt.textContent = `${page} / 10`;
 
                 // 금요일근무 점수 저장
-                for(let i = 0; i < _workTotal.length; i++)
+                for(let i = 0; i < inputScore.length; i++)
                 {
-                    let FriWorkScore = _workTotal[i].querySelectorAll('#work_score');
+                    let FriWorkScore = inputScore[i].querySelectorAll('#work_score');
                     for(const score of FriWorkScore)
                     {
                         if(score.checked)
@@ -424,7 +462,7 @@
                 for(const work of satDay)
                 {
                     inputSatScore += `
-                    <div id="_work">
+                    <div id="input_score">
                         ${work.workName} ${work.time}
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1> 1점
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=2> 2점
@@ -437,13 +475,13 @@
                 _guide.textContent = "토요일 근무의 점수를 설정해 주세요. (점수가 높을수록 힘든 근무 입니다.)";
                 page++;
                 break;
-            case 9:
+            case 10:
                 pageCnt.textContent = `${page} / 10`;
 
                 // 토요일근무 점수 저장
-                for(let i = 0; i < _workTotal.length; i++)
+                for(let i = 0; i < inputScore.length; i++)
                 {
-                    let satWorkScore = _workTotal[i].querySelectorAll('#work_score');
+                    let satWorkScore = inputScore[i].querySelectorAll('#work_score');
                     for(const score of satWorkScore)
                     {
                         if(score.checked)
@@ -459,7 +497,7 @@
                 for(const work of sunDay)
                 {
                     inputSunScore += `
-                    <div id="_work">
+                    <div id="input_score">
                         ${work.workName} ${work.time}
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1> 1점
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=2> 2점
@@ -472,13 +510,13 @@
                 _guide.textContent = "일요일 근무의 점수를 설정해 주세요. (점수가 높을수록 힘든 근무 입니다.)";
                 page++;
                 break;
-            case 10:
+            case 11:
                 
                 // 일요일근무 점수 저장
-                /*
-                for(let i = 0; i < _workTotal.length; i++)
+                
+                for(let i = 0; i < inputScore.length; i++)
                 {
-                    let sunWorkScore = _workTotal[i].querySelectorAll('#work_score');
+                    let sunWorkScore = inputScore[i].querySelectorAll('#work_score');
                     for(const score of sunWorkScore)
                     {
                         if(score.checked)
@@ -487,7 +525,9 @@
                         }
                     }
                 }
-                console.log(shiftData);*/
+                console.log(shiftData);
+                console.log(workTypes.dayOfWeek);
+                console.log(workTypes.weekend);
 
                 // 확인 시켜 주기
                 let settingForm = document.querySelector('#shift_setting');
@@ -496,7 +536,7 @@
                     settingForm.remove();
                 }
 
-                checkShiftData(testshift);
+                checkShiftData(shiftData);
                 break;
             default:
                 alert("홈페이지로 돌아가 주세요");
@@ -504,45 +544,51 @@
         }
     }
 
-    function checkShiftData(testshift)
+    function checkShiftData(shiftData)
     {
         const root = document.querySelector('#check_shift');
         const table = document.createElement('table');
         table.classList.add('check_shift__table');
         root.append(table);
+        const week = ["시간/요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"];
+        let tableLen = 0;
+        let dayOftotalWork = [];
+
+        for(const dayOfWeek in shiftData)
+        {
+            if(shiftData[dayOfWeek].length > tableLen)
+            {
+                tableLen = shiftData[dayOfWeek].length;
+                dayOftotalWork = shiftData[dayOfWeek];
+            }
+        }
 
         // Draw table
-        table.innerHTML = `
-            <thead>
-                <th>요일/시간</th>
-                <th>월요일</th>
-                <th>화요일</th>
-                <th>수요일</th>
-                <th>목요일</th>
-                <th>금요일</th>
-                <th>토요일</th>
-                <th>일요일</th>
-            </thead>
-            <tbody>
-            </tbody>
-        `;
+        let tableHeaders = "<thead>";
 
-        for(let i = 0; i < testshift.mon.length; i++)
+        for(const header of week)
         {
-            let row = "<tr>";
-            row += `<td>${testshift.mon[i].workName}${testshift.mon[i].time}</td>`;
-            for(const dayOfWeek in testshift)
+            tableHeaders += `<th class="week">${header}</th>`;
+        }
+
+        tableHeaders += `</thead><tbody></tbody>`;
+        table.innerHTML = tableHeaders;
+
+        for(let i = 0; i < tableLen; i++)
+        {
+            let row = "<tr>"
+            row += `<td>${dayOftotalWork[i].workName}${dayOftotalWork[i].time}</td>`;
+
+            for(const dayOfWeek in shiftData)
             {
-                if(testshift[dayOfWeek][i].score === undefined)
+                if(shiftData[dayOfWeek][i] == undefined)
                 {
-                    row += `
-                        <td colspan=7></td>
-                    `;
+                    row += `<td id="check_score_empty">X</td>`;
                 }
                 else
                 {
                     row += `
-                        <td>${testshift[dayOfWeek][i].score}점</td>
+                        <td>${shiftData[dayOfWeek][i].score}점</td>
                     `;
                 }
             }
@@ -559,12 +605,12 @@
         let workMinute = "00";
         let workTime = "";
 
-        for(const Work of typesOfWork)
+        for(const work of typesOfWork)
         {
-            for(let i = 0; i < Work.num; i++)
+            for(let i = 0; i < work.num; i++)
             {
-                startTime = Work.firstWorkTime + i * Work.timeInterval;
-                endTime = startTime + Work.timeInterval;
+                startTime = work.firstWorkTime + i * work.timeInterval;
+                endTime = startTime + work.timeInterval;
                 startTime = (startTime >= 24) ? startTime -= 24 : startTime;
                 endTime = (endTime >= 24) ? endTime -= 24 : endTime;
 
@@ -572,9 +618,9 @@
                 {
                     workMinute = "30"; // re
                     startTime = Math.floor(startTime);
-                    endTime = startTime + Work.timeInterval;
+                    endTime = startTime + work.timeInterval;
                     startTime = (startTime / 10 < 1) ? `0${startTime}` : String(startTime);
-                    workTime = `${startTime}:${workMinute} ~ ${startTime + Work.timeInterval}:${workMinute}`;
+                    workTime = `${startTime}:${workMinute} ~ ${startTime + work.timeInterval}:${workMinute}`;
                 }
                 else
                 {
@@ -583,7 +629,7 @@
                     workTime = `${startTime}:${workMinute} ~ ${endTime}:${workMinute}`;
                 }
 
-                value = {workName: Work.workName, time: workTime, day: 0, score: 0};
+                value = {workName: work.workName, time: workTime, day: 0, score: 0, duo: work.duo};
                 shiftData[dayOfWeek].push(value);
             }
         }
@@ -596,13 +642,13 @@
             switch(dayOfWeek)
             {
                 case "sat":
-                    createTimeData(workWeekend, dayOfWeek);
+                    createTimeData(workTypes.weekend, dayOfWeek);
                     break;
                 case "sun":
-                    createTimeData(workWeekend, dayOfWeek);
+                    createTimeData(workTypes.weekend, dayOfWeek);
                     break;
                 default:
-                    createTimeData(workDayOfWeek, dayOfWeek);
+                    createTimeData(workTypes.dayOfWeek, dayOfWeek);
                     break;
             }
         }

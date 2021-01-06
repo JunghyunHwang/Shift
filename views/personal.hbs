@@ -67,11 +67,11 @@
 
                     for(const workName in todayWorker)
                     {
-                        for(let i = 0; i < shift[dayOfWeek].length; i++)
+                        for(const work of shift[dayOfWeek])
                         {
-                            if(workName === shift[dayOfWeek][i].workName)
+                            if(workName === work.workName)
                             {
-                                todayWorker[workName].push(shift[dayOfWeek][i]);
+                                todayWorker[workName].push(work);
                             }
                         }
                     }
@@ -137,17 +137,15 @@
             root.append(table);
 
             // Draw table
-            let tableHeader = "<thead>";
+            let tableHeaders = "<thead>";
 
             for(const workName in todayWorker)
             {
-                tableHeader += `<th class="work_name" colspan=3>${workName}</th>`;
+                tableHeaders += `<th class="work_name" colspan=3>${workName}</th>`;
             }
 
-            tableHeader += `
-            </thead>
-            `;
-            table.innerHTML = tableHeader;
+            tableHeaders += "</thead>";
+            table.innerHTML = tableHeaders;
             
             let tableBody = "<tbody><tr class='header'>";
 
