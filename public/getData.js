@@ -298,6 +298,16 @@
         thisWeek = shiftData.thisWeek;
         workTypes = shiftData.workTypes;
         shift = shiftData.shift;
+        console.log(workTypes);
+        
+        for(const type in workTypes)
+        {
+            workTypes[type].sort(function(a, b)
+            {
+                return b['num'] - a['num'];
+            });
+        }
+        console.log(workTypes);
 
         createDate();
     }

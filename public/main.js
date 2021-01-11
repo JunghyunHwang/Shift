@@ -1,7 +1,7 @@
 /* 근무 짜는 프로그램*/
 'use strict';
 
-exports.getData = (shiftData, membersData, shiftType, lastpick) =>
+exports.getData = (membersData, shiftData, shiftType, lastpick) =>
 {
     // Get date
     let lastRenderWeek = 0;
@@ -55,6 +55,7 @@ exports.getData = (shiftData, membersData, shiftType, lastpick) =>
         }
     }
 
+    
     let shift = // 이거 안하고 데이터베이스 받은거 그대로 쓰면 요일 순서가 바뀜
     {
         mon: shiftData.mon,
@@ -65,6 +66,7 @@ exports.getData = (shiftData, membersData, shiftType, lastpick) =>
         sat: shiftData.sat,
         sun: shiftData.sun
     }
+    
     let members = membersData;
 
     function setShift() // re

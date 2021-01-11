@@ -41,11 +41,10 @@ exports.getShiftData = (req, res) =>
                     const shiftInfo = JSON.parse(shiftData[0].data);
                     const shiftType = JSON.parse(shiftData[0].shift_type);
                     const works = JSON.parse(shiftData[0].worktypes);
-
-                    const data = shift.getData(shiftInfo, membersData, shiftType, lastPick);
+                    
+                    const data = shift.getData(membersData, shiftInfo, shiftType, lastPick);
                     const pickedMember = data[0];
                     const thisWeek = data[1];
-                    console.log(pickedMember);
                     
                     res.json({
                         thisWeek: thisWeek,
