@@ -1,13 +1,20 @@
 'use strict'
 {
-    let shiftSetting = document.getElementById('_settingForm');
+    let shiftSetting = document.getElementById('setting_form');
     shiftSetting.innerHTML = `
-    <input type="text" class="input_setting" name="numOfWorktypes" id="numOfWorktypes">
+    <select name="" id="numOfWorktypes" size=1>
+        <option value=1>1가지</option>
+        <option value=2>2가지</option>
+        <option value=3>3가지</option>
+        <option value=4>4가지</option>
+        <option value=5>5가지</option>
+        <option value=6>6가지</option>
+    </select>
     `;
     let _guide = document.getElementById('_guide');
-    _guide.textContent = "몇 가지 종류의 근무가 있습니까?";
+    _guide.textContent = "총 몇 가지 종류의 근무가 있습니까?"; // re 젤 앞에 중대 이름
     let pageCnt = document.getElementById('page_count');
-    pageCnt.textContent = "0 / 5";
+    pageCnt.textContent = "0 / 11";
     let btnNext = document.getElementById('next_info');
     let numOfWorktypes = 0;
     let shiftData = 
@@ -20,10 +27,11 @@
         sat:[],
         sun:[]
     };
+    let shiftType = "";
     let workTypes = 
     {
-        dayOfWeek:[],
-        weekend:[]
+        dayOfWeek: [],
+        weekend: []
     };
     let page = 1;
     let temp = [];
@@ -146,7 +154,6 @@
         ]
     };
 
-
     function createInputBox() // page switch
     {
         // 이것들 이동시켜야함
@@ -160,7 +167,7 @@
         switch(page)
         {
             case 1:
-                pageCnt.textContent = `${page} / 10`;
+                pageCnt.textContent = `${page} / 11`;
                 numOfWorktypes = Number(document.getElementById('numOfWorktypes').value);
                 let formWorkName = "";
         
@@ -174,7 +181,7 @@
                 page++;
                 break;
             case 2:
-                pageCnt.textContent = `${page} / 10`;
+                pageCnt.textContent = `${page} / 11`;
                 
                 for(const input of valueWorkName)
                 {
@@ -193,7 +200,7 @@
                 page++;
                 break;
             case 3:
-                pageCnt.textContent = `${page} / 10`;
+                pageCnt.textContent = `${page} / 11`;
                 let checkDayOfWeek = document.querySelectorAll('#check_dayOfWeek');
 
                 for(const box of checkDayOfWeek)
@@ -216,7 +223,7 @@
                 page++;
                 break;
             case 4:
-                pageCnt.textContent = `${page} / 10`;
+                pageCnt.textContent = `${page} / 11`;
                 let checkWeekend = document.querySelectorAll('#check_weekend');
 
                 for(const box of checkWeekend)
@@ -239,7 +246,7 @@
                 page++;
                 break;
             case 5:
-                pageCnt.textContent = `${page} / 10`;
+                pageCnt.textContent = `${page} / 11`;
                 let checkDuo = document.querySelectorAll('#check_duo');
                 let duoWorkName = [];
 
@@ -275,7 +282,7 @@
                         <div id=set_time>
                             <input type="text" name="${work.workName}" id="start_hour" placeholder="시작 시간">시
                             <input type="text" name="${work.workName}" id="start_minute" placeholder="몇분">분
-                            <select name="name="${work.workName}"" id="time_interval" size=1>
+                            <select name="${work.workName}" id="time_interval" size=1>
                                 <option value=1>1시간씩</option>
                                 <option value=2>2시간씩</option>
                                 <option value=3>3시간씩</option>
@@ -290,7 +297,7 @@
                 page++;
                 break;
             case 6:
-                pageCnt.textContent = `${page} / 10`;
+                pageCnt.textContent = `${page} / 11`;
 
                 let valueWorkPerDay = document.querySelectorAll('#input_WorkPerDay');
 
@@ -338,7 +345,7 @@
                 page++;
                 break;
             case 7:
-                pageCnt.textContent = `${page} / 10`;
+                pageCnt.textContent = `${page} / 11`;
 
                 let valuePerDayWeekend = document.querySelectorAll('#input_PerDayWeekend');
 
@@ -369,7 +376,7 @@
                     inputDayScore += `
                     <div id="input_score">
                         ${work.workName} ${work.time}
-                        <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1> 1점
+                        <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1 checked> 1점
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=2> 2점
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=3> 3점
                     </div>
@@ -382,7 +389,7 @@
                 page++;
                 break;
             case 8:
-                pageCnt.textContent = `${page} / 10`;
+                pageCnt.textContent = `${page} / 11`;
 
                 // 평일 근무 점수를 월요일에 저장
                 
@@ -418,8 +425,6 @@
                             }
                     }
                 }
-
-                console.log(shiftData);
                 
                 let inputFriScore = "";
                 let friday = shiftData.fri;
@@ -430,7 +435,7 @@
                     <div id="input_score">
                         ${work.workName} ${work.time}
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1> 1점
-                        <input type="radio" name="${work.workName}${work.time}" id="work_score" value=2> 2점
+                        <input type="radio" name="${work.workName}${work.time}" id="work_score" value=2 checked> 2점
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=3> 3점
                     </div>
                     `;
@@ -441,7 +446,7 @@
                 page++;
                 break;
             case 9:
-                pageCnt.textContent = `${page} / 10`;
+                pageCnt.textContent = `${page} / 11`;
 
                 // 금요일근무 점수 저장
                 for(let i = 0; i < inputScore.length; i++)
@@ -466,7 +471,7 @@
                         ${work.workName} ${work.time}
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1> 1점
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=2> 2점
-                        <input type="radio" name="${work.workName}${work.time}" id="work_score" value=3> 3점
+                        <input type="radio" name="${work.workName}${work.time}" id="work_score" value=3 checked> 3점
                     </div>
                     `;
                 }
@@ -476,7 +481,7 @@
                 page++;
                 break;
             case 10:
-                pageCnt.textContent = `${page} / 10`;
+                pageCnt.textContent = `${page} / 11`;
 
                 // 토요일근무 점수 저장
                 for(let i = 0; i < inputScore.length; i++)
@@ -499,7 +504,7 @@
                     inputSunScore += `
                     <div id="input_score">
                         ${work.workName} ${work.time}
-                        <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1> 1점
+                        <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1 checked> 1점
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=2> 2점
                         <input type="radio" name="${work.workName}${work.time}" id="work_score" value=3> 3점
                     </div>
@@ -511,9 +516,9 @@
                 page++;
                 break;
             case 11:
-                
+                pageCnt.textContent = `${page} / 11`;
+
                 // 일요일근무 점수 저장
-                
                 for(let i = 0; i < inputScore.length; i++)
                 {
                     let sunWorkScore = inputScore[i].querySelectorAll('#work_score');
@@ -525,21 +530,45 @@
                         }
                     }
                 }
-                console.log(shiftData);
-                console.log(workTypes.dayOfWeek);
-                console.log(workTypes.weekend);
+
+                let inputShiftType = `
+                <input type="radio" name="shift_types" id="several_times" value=1> 예
+                <input type="radio" name="shift_types" id="several_times" value=2> 아니요
+                `;
+
+                shiftSetting.innerHTML = inputShiftType;
+                _guide.textContent = "한 인원이 하루에 근무를 여러번 들어 갈 수 있습니까?";
+                page++;
+                break;
+            case 12:
+                let valueShiftType = document.querySelectorAll('#several_times');
+
+                for(const radio of valueShiftType)
+                {
+                    if(radio.checked)
+                    {
+                        shiftType = radio.value;
+                    }
+                }
 
                 // 확인 시켜 주기
+                
                 let settingForm = document.querySelector('#shift_setting');
                 if(settingForm.innerHTML)
                 {
                     settingForm.remove();
                 }
-
+                
+                console.log(shiftData);
                 checkShiftData(shiftData);
                 break;
             default:
-                alert("홈페이지로 돌아가 주세요");
+                const settingWrong = `
+                <div id="settingWrong">
+                    <h4><a href"/">홈페이지로 돌아가 주세요</a></h4>
+                </div>
+                `
+                shiftSetting.innerHTML = settingWrong;
                 break;
         }
     }
@@ -549,7 +578,6 @@
         const root = document.querySelector('#check_shift');
         const table = document.createElement('table');
         table.classList.add('check_shift__table');
-        root.append(table);
         const week = ["시간/요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"];
         let tableLen = 0;
         let dayOftotalWork = [];
@@ -562,6 +590,8 @@
                 dayOftotalWork = shiftData[dayOfWeek];
             }
         }
+
+        root.append(table);
 
         // Draw table
         let tableHeaders = "<thead>";
@@ -577,7 +607,7 @@
         for(let i = 0; i < tableLen; i++)
         {
             let row = "<tr>"
-            row += `<td>${dayOftotalWork[i].workName}${dayOftotalWork[i].time}</td>`;
+            row += `<td>${dayOftotalWork[i].workName} ${dayOftotalWork[i].time}</td>`;
 
             for(const dayOfWeek in shiftData)
             {
@@ -595,9 +625,37 @@
             row += "</tr>";
             table.querySelector('tbody').insertAdjacentHTML('beforeend', row);
         }
+
+        // create submit button
+        const formSendData = document.createElement('form');
+        const shiftInfo = document.createElement('input');
+        const btnSubmit = document.createElement('button');
+        let shift =
+        {
+            Type: shiftType,
+            shiftTypes: workTypes,
+            shift_info: shiftData
+        };
+        const jsonShift = JSON.stringify(shift);
+
+        formSendData.action = '/auth/setting';
+        formSendData.method = 'POST';
+        formSendData.id = 'submit_form';
+
+        shiftInfo.type = 'hidden';
+        shiftInfo.name = 'shift_info';
+        shiftInfo.value = jsonShift;
+
+        btnSubmit.type = 'submit'
+        btnSubmit.textContent = '완료';
+        btnSubmit.id = 'btn_submit';
+
+        formSendData.insertAdjacentElement('beforeend', shiftInfo);
+        formSendData.insertAdjacentElement('beforeend', btnSubmit);
+        root.append(formSendData);
     }
 
-    function createTimeData(typesOfWork, dayOfWeek)
+    function setShiftValues(typesOfWork, dayOfWeek)
     {
         let value ={};
         let startTime = 0;
@@ -628,8 +686,16 @@
                     endTime = (endTime / 10 < 1) ? `0${endTime}` : String(endTime);
                     workTime = `${startTime}:${workMinute} ~ ${endTime}:${workMinute}`;
                 }
+                
+                if(work.duo)
+                {
+                    value = {workName: work.workName, time: workTime, day: 0, score: 0, duo: work.duo, who: []};
+                }
+                else
+                {
+                    value = {workName: work.workName, time: workTime, day: 0, score: 0, duo: work.duo, who: ""};
+                }
 
-                value = {workName: work.workName, time: workTime, day: 0, score: 0, duo: work.duo};
                 shiftData[dayOfWeek].push(value);
             }
         }
@@ -642,17 +708,16 @@
             switch(dayOfWeek)
             {
                 case "sat":
-                    createTimeData(workTypes.weekend, dayOfWeek);
+                    setShiftValues(workTypes.weekend, dayOfWeek);
                     break;
                 case "sun":
-                    createTimeData(workTypes.weekend, dayOfWeek);
+                    setShiftValues(workTypes.weekend, dayOfWeek);
                     break;
                 default:
-                    createTimeData(workTypes.dayOfWeek, dayOfWeek);
+                    setShiftValues(workTypes.dayOfWeek, dayOfWeek);
                     break;
             }
         }
-        console.log(shiftData);
     }
 
     btnNext.addEventListener('click', () =>

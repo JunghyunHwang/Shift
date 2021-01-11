@@ -18,7 +18,7 @@ router.get('/', (req, res) =>
     }
 });
 
-router.post('/api/:userId', dataController.getShiftData);
+router.post('/api/shift', dataController.getShiftData);
 
 router.get('/user/:userId', (req, res) =>
 {
@@ -26,7 +26,7 @@ router.get('/user/:userId', (req, res) =>
     res.render('personal', {user: userId});
 });
 
-router.get('/setting', (req, res) =>
+router.get('/setting/shift', (req, res) =>
 {
     res.render('setting');
 });

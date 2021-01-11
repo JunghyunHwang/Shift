@@ -1,10 +1,28 @@
 /* 근무 짜는 프로그램*/
 'use strict';
 
-exports.getData = (shiftData, membersData, lastpick) =>
+exports.getData = (shiftData, membersData, shiftType, lastpick) =>
 {
     // Get date
-    let lastRenderWeek = new Date(lastpick);
+    let lastRenderWeek = 0;
+    
+    if(lastpick === null)
+    {
+        let now = new Date();
+        let year = now.getFullYear();
+        let month = now.getMonth();
+        let date = now.getDate();
+        let dayOfWeek = now.getDay();
+        let diff = 7 - dayOfWeek;
+
+        date += diff;
+        lastRenderWeek = new Date(year, month, date);
+    }
+    else
+    {
+        lastRenderWeek = new Date(lastpick);
+    }
+
     let currentDate = new Date();
     let dateDiff = (lastRenderWeek.getTime() - currentDate.getTime()) / (1000*60*60*24);
     let thisWeek = [];
@@ -37,8 +55,6 @@ exports.getData = (shiftData, membersData, lastpick) =>
         }
     }
 
-    console.log(thisWeek);
-
     let shift = // 이거 안하고 데이터베이스 받은거 그대로 쓰면 요일 순서가 바뀜
     {
         mon: shiftData.mon,
@@ -51,7 +67,7 @@ exports.getData = (shiftData, membersData, lastpick) =>
     }
     let members = membersData;
 
-    function setShiftday() // re
+    function setShift() // re
     {
         let day = 0;
 
@@ -60,27 +76,27 @@ exports.getData = (shiftData, membersData, lastpick) =>
             switch(dayOfWeek)
             {
                 case "fri":
-                    for(let i = 0; i < shift[dayOfWeek].length; i++)
+                    for(const work of shift[dayOfWeek])
                     {
-                        shift[dayOfWeek][i].day = thisWeek[day];
+                        work.day = thisWeek[day];
                     }
                     break;
                 case "sat":
-                    for(let i = 0; i < shift[dayOfWeek].length; i++)
+                    for(const work of shift[dayOfWeek])
                     {
-                        shift[dayOfWeek][i].day = thisWeek[day];
+                        work.day = thisWeek[day];
                     }
                     break;
                 case "sun":
-                    for(let i = 0; i < shift[dayOfWeek].length; i++)
+                    for(const work of shift[dayOfWeek])
                     {
-                        shift[dayOfWeek][i].day = thisWeek[day];
+                        work.day = thisWeek[day];
                     }
                     break;
                 default:
-                    for(let i = 0; i < shift[dayOfWeek].length; i++)
+                    for(const work of shift[dayOfWeek])
                     {
-                        shift[dayOfWeek][i].day = thisWeek[day];
+                        work.day = thisWeek[day];
                     }
                     break;
             }
@@ -88,7 +104,8 @@ exports.getData = (shiftData, membersData, lastpick) =>
         }
     }
 
-    setShiftday();
+    setShift();
+
     let totalShifts = 0;
 
     for(const dayOfWeek in shift)
@@ -98,7 +115,14 @@ exports.getData = (shiftData, membersData, lastpick) =>
 
     function controlInfo(selectedPeople, shift)
     {
-        shift.who = selectedPeople.name;
+        if(shift.duo)
+        {
+            shift.who.push(selectedPeople.name);
+        }
+        else
+        {
+            shift.who = selectedPeople.name;
+        }
         selectedPeople.score = shift.score;
         selectedPeople.sum += shift.score;
         selectedPeople.day = shift.day;
@@ -183,7 +207,8 @@ exports.getData = (shiftData, membersData, lastpick) =>
             }
         }
 
-        for(let i = 0; i < selectedPeople.length; i++) // 가장 적게 한 인원들 구함
+        // 가장 적게 한 인원들 구함
+        for(let i = 0; i < selectedPeople.length; i++) 
         {
             if(leastCnt === selectedPeople[i].count)
             {
@@ -193,20 +218,19 @@ exports.getData = (shiftData, membersData, lastpick) =>
         return less;
     }
 
-    function pickMember(selectedPeople, shift)
+    function pickName(shift, selectedPeople)
     {
-        let randomPerson = 0;
         let pass = false;
+        let randomPerson = 0;
         let pickedPerson = [];
         let tempPeople = [];
-        let todaySlave ="";
 
         for(const member of selectedPeople)
         {
             tempPeople.push(member);
         }
 
-        if(shift.score === 2 || tempPeople.count === 0)
+        if(shift.score === 2 || tempPeople.length === 1) // re tempPeople 이 조건 절대 안걸림
         {
             randomPerson = Math.floor(Math.random() * tempPeople.length - 1) + 1;
         }
@@ -238,14 +262,46 @@ exports.getData = (shiftData, membersData, lastpick) =>
                 }
             }
         }
+        
+        return tempPeople[randomPerson].name;
+    }
+
+    function pickMember(shift, selectedPeople)
+    {
+        let membersName = "";
+        let todaySlave = ""; //re 필요없음
+
+        if(shift.duo)
+        {
+            membersName = pickName(shift, selectedPeople);
+
+            for(let i = 0; i < selectedPeople.length; i++)
+            {
+                if(selectedPeople[i].name === membersName)
+                {
+                    todaySlave = selectedPeople[i].name;
+                    controlInfo(selectedPeople[i], shift);
+                    selectedPeople.splice(i, 1);
+                    break;
+                }
+            }
+        }
+
+        if(!selectedPeople.length)
+        {
+            debugger;
+            selectedPeople = checkPossiblePeople(shift.day);
+        }
+
+        membersName = pickName(shift, selectedPeople);
 
         for(let i = 0; i < selectedPeople.length; i++)
         {
-            if(selectedPeople[i].name === tempPeople[randomPerson].name)
+            if(selectedPeople[i].name === membersName)
             {
                 todaySlave = selectedPeople[i].name;
                 controlInfo(selectedPeople[i], shift);
-                selectedPeople.splice(i, 1); // Bug 1
+                selectedPeople.splice(i, 1);
                 break;
             }
         }
@@ -337,18 +393,18 @@ exports.getData = (shiftData, membersData, lastpick) =>
                 if(!possibleMembers.length)
                 {
                     possibleMembers = checkPossiblePeople(thisWeek[day]);
-                    today.push(pickMember(possibleMembers, work));
+                    today.push(pickMember(work, possibleMembers));
                 }
                 else
                 {
-                    today.push(pickMember(possibleMembers, work));
+                    today.push(pickMember(work, possibleMembers));
                 }
             }
             
-            console.log(`${dayOfWeek} : ${today}`);
+            // console.log(`${dayOfWeek} : ${today}`);
             day++;
         }
-        checkFair();
+        // checkFair();
     }
 
     main();
