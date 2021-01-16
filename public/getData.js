@@ -1,7 +1,7 @@
 'use strict'
 {    
     let shift = {};
-    let workTypes = {};
+    let typesOfShift = {};
     let thisWeek = [];
 
     function renderDateButton(date)
@@ -15,19 +15,19 @@
                 switch(dayOfWeek)
                 {
                     case "sat":
-                        for(const work of workTypes.weekend)
+                        for(const work of typesOfShift.weekend)
                         {
                             todayWorker[work.workName] = [];
                         }
                         break;
                     case "sun":
-                        for(const work of workTypes.weekend)
+                        for(const work of typesOfShift.weekend)
                         {
                             todayWorker[work.workName] = [];
                         }
                         break;
                     default:
-                        for(const work of workTypes.dayOfWeek)
+                        for(const work of typesOfShift.weekday)
                         {
                             todayWorker[work.workName] = [];
                         }
@@ -64,11 +64,11 @@
         {
             let date = document.createElement('button');
             date.textContent = thisWeek[i];
-            date.classList.add('thisWeek_date');
+            date.classList.add('btn_date');
             week.append(date);
         }
 
-        let classDate = document.querySelectorAll('.thisWeek_date');
+        let classDate = document.querySelectorAll('.btn_date');
 
         for(let i = 0; i < classDate.length; i++)
         {
@@ -79,15 +79,15 @@
         }
     }
 
-    function renderingTable(todayWorkers)
+    function renderingTable(todayWorkTypes)
     {
         let tableLen = 0;
 
-        for(const work in todayWorkers)
+        for(const work in todayWorkTypes)
         {
-            if(todayWorkers[work].length > tableLen)
+            if(todayWorkTypes[work].length > tableLen)
             {
-                tableLen = todayWorkers[work].length;
+                tableLen = todayWorkTypes[work].length;
             }
         }
         
@@ -109,16 +109,16 @@
         let tableHeader = "<thead>";
         let numDuoWork = 0;
 
-        for(const workTypes in todayWorkers)
+        for(const workType in todayWorkTypes) // re change name workType
         {
-            if(todayWorkers[workTypes][0].duo)
+            if(todayWorkTypes[workType][0].duo)
             {
-                tableHeader += `<th class="work_name" colspan=${3 * todayWorkers[workTypes][0].duo}>${workTypes}</th>`;
+                tableHeader += `<th class="work_name" colspan=${3 * todayWorkTypes[workType][0].duo}>${workType}</th>`;
                 numDuoWork++;
             }
             else
             {
-                tableHeader += `<th class="work_name" colspan=3>${workTypes}</th>`;
+                tableHeader += `<th class="work_name" colspan=3>${workType}</th>`;
             }
         }
 
@@ -130,7 +130,7 @@
         // Draw body
         let tableBody = "<tbody><tr class='header'>";
 
-        let numberOfWorkTypes = Object.keys(todayWorkers).length + numDuoWork;
+        let numberOfWorkTypes = Object.keys(todayWorkTypes).length + numDuoWork;
 
         for(let i = 0; i < numberOfWorkTypes; i++)
         {
@@ -147,14 +147,14 @@
         for(let i = 0; i < tableLen; i++)
         {
             let row = "<tr>"
-            for(const workTypes in todayWorkers)
+            for(const workType in todayWorkTypes)
             {
-                if(todayWorkers[workTypes][i] === undefined)
+                if(todayWorkTypes[workType][i] === undefined)
                 {
-                    if(todayWorkers[workTypes][0].duo)
+                    if(todayWorkTypes[workType][0].duo)
                     {
                         row += `
-                        <td class="empty" colspan=${3 * todayWorkers[workTypes][0].duo}></td>
+                        <td class="empty" colspan=${3 * todayWorkTypes[workType][0].duo}></td>
                         `;
                     }
                     else
@@ -164,13 +164,13 @@
                         `;
                     }
                 }
-                else if(todayWorkers[workTypes][i].duo)
+                else if(todayWorkTypes[workType][i].duo)
                 {
-                    for(let j = 0; j < todayWorkers[workTypes][i].duo; j++)
+                    for(let j = 0; j < todayWorkTypes[workType][i].duo; j++)
                     {
                         row += `
-                        <td class="time">${todayWorkers[workTypes][i].time}</td>
-                        <td class="name">${todayWorkers[workTypes][i].who[j]}</td>
+                        <td class="time">${todayWorkTypes[workType][i].time}</td>
+                        <td class="name">${todayWorkTypes[workType][i].who[j]}</td>
                         <td class="sign_here"></td>
                         `;
                     }
@@ -178,8 +178,8 @@
                 else
                 {
                     row += `
-                    <td class="time">${todayWorkers[workTypes][i].time}</td>
-                    <td class="name">${todayWorkers[workTypes][i].who}</td>
+                    <td class="time">${todayWorkTypes[workType][i].time}</td>
+                    <td class="name">${todayWorkTypes[workType][i].who}</td>
                     <td class="sign_here"></td>
                     `;
                 }
@@ -296,18 +296,16 @@
         const shiftData = await response.json();
 
         thisWeek = shiftData.thisWeek;
-        workTypes = shiftData.workTypes;
+        typesOfShift = shiftData.typesOfShift;
         shift = shiftData.shift;
-        console.log(workTypes);
         
-        for(const type in workTypes)
+        for(const type in typesOfShift)
         {
-            workTypes[type].sort(function(a, b)
+            typesOfShift[type].sort(function(a, b)
             {
                 return b['num'] - a['num'];
             });
         }
-        console.log(workTypes);
 
         createDate();
     }

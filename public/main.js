@@ -1,12 +1,17 @@
 /* 근무 짜는 프로그램*/
 'use strict';
 
-exports.getData = (membersData, shiftData, shiftType, lastpick) =>
+exports.getData = (membersData, shiftInfo) =>
 {
-    // Get date
+    const typesOfShift = shiftInfo.typesOfShift;
+    const score = shiftInfo.score;
+    const severalTimes = shiftInfo.severalTimes;
+    const lastPick = shiftInfo.lastPick;
+
+    // Get thisweek
     let lastRenderWeek = 0;
     
-    if(lastpick === null)
+    if(lastPick === null)
     {
         let now = new Date();
         let year = now.getFullYear();
@@ -20,7 +25,7 @@ exports.getData = (membersData, shiftData, shiftType, lastpick) =>
     }
     else
     {
-        lastRenderWeek = new Date(lastpick);
+        lastRenderWeek = new Date(lastPick);
     }
 
     let currentDate = new Date();
@@ -55,54 +60,112 @@ exports.getData = (membersData, shiftData, shiftType, lastpick) =>
         }
     }
 
-    
-    let shift = // 이거 안하고 데이터베이스 받은거 그대로 쓰면 요일 순서가 바뀜
-    {
-        mon: shiftData.mon,
-        tue: shiftData.tue,
-        wed: shiftData.wed,
-        thr: shiftData.thr,
-        fri: shiftData.fri,
-        sat: shiftData.sat,
-        sun: shiftData.sun
-    }
-    
     let members = membersData;
 
-    function setShift() // re
+    // Set Object shift
+
+    for(const type in typesOfShift)
+    {
+        typesOfShift[type].sort(function(a, b)
+        {
+            return b['num'] - a['num'];
+        });
+    }
+
+    let shift =
+    {
+        mon: [],
+        tue: [],
+        wed: [],
+        thr: [],
+        fri: [],
+        sat: [],
+        sun: []
+    }
+
+
+    function setDayOfWeekArry(id, day, dayOfWeek, shiftType)
+    {
+        let value ={};
+        let workMinute = "00";
+        let workTime = "";
+
+        for(const work of shiftType)
+        {
+            for(let i = 0; i < work.num; i++)
+            {
+                let startTime = work.firstWorkTime + i * work.timeInterval;
+                let endTime = startTime + work.timeInterval;
+                startTime = (startTime >= 24) ? startTime -= 24 : startTime;
+                endTime = (endTime >= 24) ? endTime -= 24 : endTime;
+
+                if(startTime % 1) // decimal
+                {
+                    workMinute = "30"; // re
+                    startTime = Math.floor(startTime);
+                    endTime = startTime + work.timeInterval;
+                    startTime = (startTime / 10 < 1) ? `0${startTime}` : String(startTime);
+                    workTime = `${startTime}:${workMinute} ~ ${startTime + work.timeInterval}:${workMinute}`;
+                }
+                else
+                {
+                    startTime = (startTime / 10 < 1) ? `0${startTime}` : String(startTime);
+                    endTime = (endTime / 10 < 1) ? `0${endTime}` : String(endTime);
+                    workTime = `${startTime}:${workMinute} ~ ${endTime}:${workMinute}`;
+                }
+                
+                if(work.duo)
+                {
+                    value = {id: id, workName: work.workName, time: workTime, day: thisWeek[day], score: 0, duo: work.duo, who: []};
+                }
+                else
+                {
+                    value = {id: id, workName: work.workName, time: workTime, day: thisWeek[day], score: 0, duo: work.duo, who: ""};
+                }
+
+                shift[dayOfWeek].push(value);
+                id++;
+            }
+        }
+
+        return id;
+    }
+
+    function setShift()
     {
         let day = 0;
+        let id = 0;
 
         for(const dayOfWeek in shift)
         {
             switch(dayOfWeek)
             {
-                case "fri":
-                    for(const work of shift[dayOfWeek])
-                    {
-                        work.day = thisWeek[day];
-                    }
-                    break;
                 case "sat":
-                    for(const work of shift[dayOfWeek])
-                    {
-                        work.day = thisWeek[day];
-                    }
+                    id = setDayOfWeekArry(id, day, dayOfWeek, typesOfShift.weekend);
                     break;
                 case "sun":
-                    for(const work of shift[dayOfWeek])
-                    {
-                        work.day = thisWeek[day];
-                    }
+                    id = setDayOfWeekArry(id, day, dayOfWeek, typesOfShift.weekend);
                     break;
                 default:
-                    for(const work of shift[dayOfWeek])
-                    {
-                        work.day = thisWeek[day];
-                    }
+                    id = setDayOfWeekArry(id, day, dayOfWeek, typesOfShift.weekday);
                     break;
             }
             day++;
+        }
+        shiftScore();
+    }
+
+    function shiftScore()
+    {
+        let i = 0;
+
+        for(const dayOfWeek in shift)
+        {
+            for(const work of shift[dayOfWeek])
+            {
+                work.score = score[i];
+                i++;
+            }
         }
     }
 
@@ -112,7 +175,17 @@ exports.getData = (membersData, shiftData, shiftType, lastpick) =>
 
     for(const dayOfWeek in shift)
     {
-        totalShifts += shift[dayOfWeek].length;
+        for(const work of shift[dayOfWeek])
+        {
+            if(work.duo)
+            {
+                totalShifts += work.duo;
+            }
+            else
+            {
+                totalShifts++;
+            }
+        }
     }
 
     function controlInfo(selectedPeople, shift)
@@ -125,19 +198,34 @@ exports.getData = (membersData, shiftData, shiftType, lastpick) =>
         {
             shift.who = selectedPeople.name;
         }
+        // 다른 근무와 연관이 되어 있다면
         selectedPeople.score = shift.score;
         selectedPeople.sum += shift.score;
         selectedPeople.day = shift.day;
         selectedPeople.count++;
     }
 
-    function checkPossiblePeople(day)
+    function checkPossibleMembers(day)
     {
         let possible = [];
         let lessWorkers = [];
         let maxCount = Math.ceil(totalShifts / members.length);
-        let minCount = (day === thisWeek[6]) ? 1 : 0; // 1이랑 0도 magicnumber 말고 다른걸로
-        let today = new Date(day); // 1월 1일 00시00분 으로 되는 버그 있음 (일이 2자리수가 되면 시간이 09:00로됨, 1자리수 일은 00:00로 됨)
+        let worked = 0;
+
+        for(const dayOfWeek in shift)
+        {
+            if(shift[dayOfWeek][0].day === day)
+            {
+                break;
+            }
+            else
+            {
+                worked += shift[dayOfWeek].length;
+            }
+        }
+
+        let minCount = Math.floor(worked / members.length);
+        let today = new Date(day); // (일이 2자리수가 되면 시간이 09:00로됨, 1자리수 일은 00:00로 됨)
         today.setHours(0);
         let currentDate = today.getDate();
 
@@ -220,7 +308,7 @@ exports.getData = (membersData, shiftData, shiftType, lastpick) =>
         return less;
     }
 
-    function pickName(shift, selectedPeople)
+    function pickName(work, selectedPeople)
     {
         let pass = false;
         let randomPerson = 0;
@@ -232,7 +320,7 @@ exports.getData = (membersData, shiftData, shiftType, lastpick) =>
             tempPeople.push(member);
         }
 
-        if(shift.score === 2 || tempPeople.length === 1) // re tempPeople 이 조건 절대 안걸림
+        if(work.score === 2 || tempPeople.length === 1)
         {
             randomPerson = Math.floor(Math.random() * tempPeople.length - 1) + 1;
         }
@@ -242,7 +330,7 @@ exports.getData = (membersData, shiftData, shiftType, lastpick) =>
             {
                 randomPerson = Math.floor(Math.random() * tempPeople.length - 1) + 1;
 
-                if(tempPeople[randomPerson].score === shift.score)
+                if(tempPeople[randomPerson].score === work.score)
                 {
                     pickedPerson.push(tempPeople[randomPerson]);
                     tempPeople.splice(randomPerson, 1);
@@ -268,21 +356,40 @@ exports.getData = (membersData, shiftData, shiftType, lastpick) =>
         return tempPeople[randomPerson].name;
     }
 
-    function pickMember(shift, selectedPeople)
+    function pickMember(work, selectedPeople)
     {
         let membersName = "";
         let todaySlave = ""; //re 필요없음
 
-        if(shift.duo)
+        if(work.who !== "")
         {
-            membersName = pickName(shift, selectedPeople);
+            if(Array.isArray(work.who))
+            {
+                if(work.who.length > 0)
+                {
+                    todaySlave = work.who;
+                    return todaySlave;
+                    // return;
+                }
+            }
+            else
+            {
+                todaySlave = work.who;
+                return todaySlave;
+                // return;
+            }
+        }
+
+        if(work.duo)
+        {
+            membersName = pickName(work, selectedPeople);
 
             for(let i = 0; i < selectedPeople.length; i++)
             {
                 if(selectedPeople[i].name === membersName)
                 {
                     todaySlave = selectedPeople[i].name;
-                    controlInfo(selectedPeople[i], shift);
+                    controlInfo(selectedPeople[i], work);
                     selectedPeople.splice(i, 1);
                     break;
                 }
@@ -292,19 +399,35 @@ exports.getData = (membersData, shiftData, shiftType, lastpick) =>
         if(!selectedPeople.length)
         {
             debugger;
-            selectedPeople = checkPossiblePeople(shift.day);
+            selectedPeople = checkPossibleMembers(work.day);
         }
 
-        membersName = pickName(shift, selectedPeople);
+        membersName = pickName(work, selectedPeople);
 
         for(let i = 0; i < selectedPeople.length; i++)
         {
             if(selectedPeople[i].name === membersName)
             {
                 todaySlave = selectedPeople[i].name;
-                controlInfo(selectedPeople[i], shift);
+                controlInfo(selectedPeople[i], work);
                 selectedPeople.splice(i, 1);
                 break;
+            }
+        }
+
+        // relation work
+        if(work.relation)
+        {
+            for(const dayOfWeek in shift)
+            {
+                for(const relation of shift[dayOfWeek])
+                {
+                    // Duo 일때
+                    if(relation.id === work.relation)
+                    {
+                        relation.who = work.who;
+                    }
+                }
             }
         }
 
@@ -320,18 +443,24 @@ exports.getData = (membersData, shiftData, shiftType, lastpick) =>
         let avg = 0;
         let hardWorkers = [];
         let easyWokers = [];
+        let maxMembers = []
 
-        for(let i = 0; i < members.length; i++)
+        for(const member of members)
         {
-            totalScore += members[i].sum;
+            totalScore += member.sum;
 
-            if(members[i].sum > 7) // 숫자는 나중에 변수로
+            if(member.sum > 7) // 숫자는 나중에 변수로
             {
-                hardWorkers.push(members[i]);
+                hardWorkers.push(member);
             }
-            else if(members[i].sum < 4) // 숫자는 나중에 변수로
+            else if(member.sum < 4) // 숫자는 나중에 변수로
             {
-                easyWokers.push(members[i]);
+                easyWokers.push(member);
+            }
+
+            if(member.count >= 3)
+            {
+                maxMembers.push(member);
             }
         }
 
@@ -352,22 +481,23 @@ exports.getData = (membersData, shiftData, shiftType, lastpick) =>
         console.log("-------------------------------------------");
         console.log(`분산 값 : ${variance}`);
         console.log("-------------------------------------------");
+
         console.log(`Hard worker 총 인원 : ${hardWorkers.length}`);
-
-        for(let i = 0; i < hardWorkers.length; i++)
+        for(const worker of hardWorkers)
         {
-            console.log(`name: ${hardWorkers[i].name}, count ${hardWorkers[i].count}, sum : ${hardWorkers[i].sum}`);
+            console.log(`name: ${worker.name}, count ${worker.count}, sum : ${worker.sum}`);
         }
 
         console.log("-------------------------------------------");
+
         console.log(`easy worker 총 인원 : ${easyWokers.length}`);
-
-        for(let i = 0; i < easyWokers.length; i++)
+        for(const worker of easyWokers)
         {
-            console.log(`name: ${easyWokers[i].name}, count: ${easyWokers[i].count}, sum : ${easyWokers[i].sum}`);
+            console.log(`name: ${worker.name}, count ${worker.count}, sum : ${worker.sum}`);
         }
 
         console.log("-------------------------------------------");
+        console.log(maxMembers.length);
     }
 
     function main()
@@ -387,14 +517,14 @@ exports.getData = (membersData, shiftData, shiftType, lastpick) =>
             let possibleMembers = [];
             let today = []; // re 필요없음
 
-            possibleMembers = checkPossiblePeople(thisWeek[day]);
+            possibleMembers = checkPossibleMembers(thisWeek[day]);
 
             // pick a memeber
             for(const work of shift[dayOfWeek])
             {
                 if(!possibleMembers.length)
                 {
-                    possibleMembers = checkPossiblePeople(thisWeek[day]);
+                    possibleMembers = checkPossibleMembers(thisWeek[day]);
                     today.push(pickMember(work, possibleMembers));
                 }
                 else
@@ -403,12 +533,13 @@ exports.getData = (membersData, shiftData, shiftType, lastpick) =>
                 }
             }
             
-            // console.log(`${dayOfWeek} : ${today}`);
+            console.log(`${dayOfWeek} : ${today}`);
             day++;
         }
-        // checkFair();
+        checkFair();
     }
 
     main();
+    console.log(shift.sat[14]);
     return [shift, thisWeek];
 }

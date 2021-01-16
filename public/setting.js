@@ -27,132 +27,14 @@
         sat:[],
         sun:[]
     };
-    let shiftType = "";
-    let workTypes = 
+    let severalTimes; // boolean
+    let typesOfShift =
     {
-        dayOfWeek: [],
+        weekday: [],
         weekend: []
     };
     let page = 1;
     let temp = [];
-    let testshift = {
-        mon : [
-            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
-            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
-            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
-            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
-            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
-            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
-            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
-            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
-            {workName: "cctv", time: "20:00 ~ 22:00", day: 0, score: 1},
-            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
-            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
-            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
-            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
-            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2}
-        ],
-        tue : [
-            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
-            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
-            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
-            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
-            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
-            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
-            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
-            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
-            {workName: "cctv", time: "20:00 ~ 22:00", day: 0, score: 1},
-            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
-            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
-            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
-            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
-            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2}
-        ],
-        wed : [
-            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
-            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
-            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
-            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
-            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
-            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
-            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
-            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
-            {workName: "cctv", time: "20:00 ~ 22:00", day: 0, score: 1},
-            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
-            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
-            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
-            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
-            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2}
-        ],
-        thr : [
-            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
-            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
-            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
-            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
-            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
-            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
-            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
-            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
-            {workName: "cctv", time: "20:00 ~ 22:00", day: 0, score: 1},
-            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
-            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
-            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
-            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
-            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2}
-        ],
-        fri : [
-            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
-            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
-            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
-            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
-            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
-            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
-            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
-            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
-            {workName: "cctv", time: "20:00 ~ 22:00", day: 0, score: 1},
-            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
-            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
-            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
-            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
-            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2}
-        ],
-        sat : [
-            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
-            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
-            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
-            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
-            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
-            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
-            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
-            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
-            {workName: "cctv", time: "20:00 ~ 22:00", day: 0, score: 1},
-            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
-            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
-            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
-            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
-            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2},
-            {workName: "위병소", time: "14:00 ~ 16:00", day: 0, score: 1},
-            {workName: "위병소", time: "14:00 ~ 16:00", day: 0, score: 2}
-        ],
-        sun : [
-            {workName: "cctv", time: "04:00 ~ 06:00", day: 0, score: 3},
-            {workName: "cctv", time: "06:00 ~ 08:00", day: 0, score: 2},
-            {workName: "cctv", time: "08:00 ~ 10:00", day: 0, score: 1},
-            {workName: "cctv", time: "10:00 ~ 12:00", day: 0, score: 3},
-            {workName: "cctv", time: "12:00 ~ 14:00", day: 0, score: 2},
-            {workName: "cctv", time: "14:00 ~ 16:00", day: 0, score: 1},
-            {workName: "cctv", time: "16:00 ~ 18:00", day: 0, score: 3},
-            {workName: "cctv", time: "18:00 ~ 20:00", day: 0, score: 2},
-            {workName: "cctv", time: "20:00 ~ 22:00", day: 0, score: 1},
-            {workName: "cctv", time: "22:00 ~ 00:00", day: 0, score: 3},
-            {workName: "불침번", time: "22:00 ~ 00:00", day: 0, score: 2},
-            {workName: "불침번", time: "00:00 ~ 02:00", day: 0, score: 1},
-            {workName: "불침번", time: "02:00 ~ 04:00", day: 0, score: 1},
-            {workName: "불침번", time: "04:00 ~ 06:00", day: 0, score: 2},
-            {workName: "위병소", time: "14:00 ~ 16:00", day: 0, score: 1},
-            {workName: "위병소", time: "14:00 ~ 16:00", day: 0, score: 2}
-        ]
-    };
 
     function createInputBox() // page switch
     {
@@ -207,7 +89,7 @@
                 {
                     if(box.checked)
                     {
-                        workTypes.dayOfWeek.push({workName: box.name, num: 0, duo: 0});
+                        typesOfShift.weekday.push({workName: box.name, num: 0, duo: 0});
                     }
                 }
 
@@ -230,7 +112,7 @@
                 {
                     if(box.checked)
                     {
-                        workTypes.weekend.push({workName: box.name, num: 0, duo: 0});
+                        typesOfShift.weekend.push({workName: box.name, num: 0, duo: 0});
                     }
                 }
 
@@ -260,9 +142,9 @@
 
                 for(const workName of duoWorkName)
                 {
-                    for(const type in workTypes)
+                    for(const type in typesOfShift)
                     {
-                        for(const work of workTypes[type])
+                        for(const work of typesOfShift[type])
                         {
                             if(work.workName === workName)
                             {
@@ -274,7 +156,7 @@
 
                 let inputPerDay = ""
 
-                for(const work of workTypes.dayOfWeek)
+                for(const work of typesOfShift.weekday)
                 {
                     inputPerDay += `
                     <label id="work_per_day">${work.workName}
@@ -308,7 +190,7 @@
                     minute = (minute === 30) ? 0.5 : 0; //시작 시간이 무조건 30분 단위라는 가정하에만
                     let firstWorkTime = hour + minute;
 
-                    for(const work of workTypes.dayOfWeek)
+                    for(const work of typesOfShift.weekday)
                     {
                         if(valueWorkPerDay[i].name === work.workName)
                         {
@@ -321,7 +203,7 @@
 
                 let inputPerDayWeekend = ""
 
-                for(const work of workTypes.weekend)
+                for(const work of typesOfShift.weekend)
                 {
                     inputPerDayWeekend += `
                     <label id="work_per_day">${work.workName}
@@ -356,7 +238,7 @@
                     minute = (minute === 30) ? 0.5 : 0; //시작 시간이 무조건 30분 단위라는 가정하에만
                     let firstWorkTime = hour + minute;
 
-                    for(const work of workTypes.weekend)
+                    for(const work of typesOfShift.weekend)
                     {
                         if(valuePerDayWeekend[i].name === work.workName)
                         {
@@ -366,7 +248,16 @@
                         }
                     }
                 }
-                createShiftData();
+                
+                for(const type in typesOfShift)
+                {
+                    typesOfShift[type].sort(function(a, b)
+                    {
+                        return b['num'] - a['num'];
+                    });
+                }
+
+                setShiftData();
                 
                 let inputDayScore = "";
                 let mon = shiftData.mon;
@@ -532,8 +423,8 @@
                 }
 
                 let inputShiftType = `
-                <input type="radio" name="shift_types" id="several_times" value=1> 예
-                <input type="radio" name="shift_types" id="several_times" value=2> 아니요
+                <input type="radio" name="shift_types" id="several_times" value=true> 예
+                <input type="radio" name="shift_types" id="several_times" value=false> 아니요
                 `;
 
                 shiftSetting.innerHTML = inputShiftType;
@@ -547,7 +438,7 @@
                 {
                     if(radio.checked)
                     {
-                        shiftType = radio.value;
+                        severalTimes = JSON.parse(radio.value);
                     }
                 }
 
@@ -559,7 +450,6 @@
                     settingForm.remove();
                 }
                 
-                console.log(shiftData);
                 checkShiftData(shiftData);
                 break;
             default:
@@ -570,6 +460,72 @@
                 `
                 shiftSetting.innerHTML = settingWrong;
                 break;
+        }
+    }
+
+    function setShiftValues(typesOfWork, dayOfWeek)
+    {
+        let value ={};
+        let startTime = 0;
+        let endTime = 0;
+        let workMinute = "00";
+        let workTime = "";
+
+        for(const shiftType of typesOfWork)
+        {
+            for(let i = 0; i < shiftType.num; i++)
+            {
+                startTime = shiftType.firstWorkTime + i * shiftType.timeInterval;
+                endTime = startTime + shiftType.timeInterval;
+                startTime = (startTime >= 24) ? startTime -= 24 : startTime;
+                endTime = (endTime >= 24) ? endTime -= 24 : endTime;
+
+                if(startTime % 1)
+                {
+                    workMinute = "30"; // re
+                    startTime = Math.floor(startTime);
+                    endTime = startTime + shiftType.timeInterval;
+                    startTime = (startTime / 10 < 1) ? `0${startTime}` : String(startTime);
+                    workTime = `${startTime}:${workMinute} ~ ${startTime + shiftType.timeInterval}:${workMinute}`;
+                }
+                else
+                {
+                    startTime = (startTime / 10 < 1) ? `0${startTime}` : String(startTime);
+                    endTime = (endTime / 10 < 1) ? `0${endTime}` : String(endTime);
+                    workTime = `${startTime}:${workMinute} ~ ${endTime}:${workMinute}`;
+                }
+                
+                if(shiftType.duo)
+                {
+                    value = {workName: shiftType.workName, time: workTime, day: 0, score: 0, duo: shiftType.duo, who: []};
+                }
+                else
+                {
+                    value = {workName: shiftType.workName, time: workTime, day: 0, score: 0, duo: shiftType.duo, who: ""};
+                }
+
+                shiftData[dayOfWeek].push(value);
+            }
+        }
+    }
+
+    function setShiftData()
+    {
+        // Set object shift values
+        for(const dayOfWeek in shiftData)
+        {
+            switch(dayOfWeek)
+            {
+                case "sat":
+                    setShiftValues(typesOfShift.weekend, dayOfWeek);
+                    break;
+                case "sun":
+                    setShiftValues(typesOfShift.weekend, dayOfWeek);
+                    break;
+                default:
+                    setShiftValues(typesOfShift.weekday, dayOfWeek);
+                    break;
+            }
         }
     }
 
@@ -626,15 +582,31 @@
             table.querySelector('tbody').insertAdjacentHTML('beforeend', row);
         }
 
-        // create submit button
+        sendData();
+    }
+
+    function sendData()
+    {
+        // Set score data
+        let score = [];
+        for(const dayOfWeek in shiftData)
+        {
+            for(const work of shiftData[dayOfWeek])
+            {
+                score.push(work.score);
+            }
+        }
+
+        const root = document.querySelector('#check_shift');
         const formSendData = document.createElement('form');
         const shiftInfo = document.createElement('input');
         const btnSubmit = document.createElement('button');
+
         let shift =
         {
-            Type: shiftType,
-            shiftTypes: workTypes,
-            shift_info: shiftData
+            severalTimes: severalTimes,
+            shift_info: typesOfShift,
+            score_info: score
         };
         const jsonShift = JSON.stringify(shift);
 
@@ -653,71 +625,6 @@
         formSendData.insertAdjacentElement('beforeend', shiftInfo);
         formSendData.insertAdjacentElement('beforeend', btnSubmit);
         root.append(formSendData);
-    }
-
-    function setShiftValues(typesOfWork, dayOfWeek)
-    {
-        let value ={};
-        let startTime = 0;
-        let endTime = 0;
-        let workMinute = "00";
-        let workTime = "";
-
-        for(const work of typesOfWork)
-        {
-            for(let i = 0; i < work.num; i++)
-            {
-                startTime = work.firstWorkTime + i * work.timeInterval;
-                endTime = startTime + work.timeInterval;
-                startTime = (startTime >= 24) ? startTime -= 24 : startTime;
-                endTime = (endTime >= 24) ? endTime -= 24 : endTime;
-
-                if(startTime % 1)
-                {
-                    workMinute = "30"; // re
-                    startTime = Math.floor(startTime);
-                    endTime = startTime + work.timeInterval;
-                    startTime = (startTime / 10 < 1) ? `0${startTime}` : String(startTime);
-                    workTime = `${startTime}:${workMinute} ~ ${startTime + work.timeInterval}:${workMinute}`;
-                }
-                else
-                {
-                    startTime = (startTime / 10 < 1) ? `0${startTime}` : String(startTime);
-                    endTime = (endTime / 10 < 1) ? `0${endTime}` : String(endTime);
-                    workTime = `${startTime}:${workMinute} ~ ${endTime}:${workMinute}`;
-                }
-                
-                if(work.duo)
-                {
-                    value = {workName: work.workName, time: workTime, day: 0, score: 0, duo: work.duo, who: []};
-                }
-                else
-                {
-                    value = {workName: work.workName, time: workTime, day: 0, score: 0, duo: work.duo, who: ""};
-                }
-
-                shiftData[dayOfWeek].push(value);
-            }
-        }
-    }
-
-    function createShiftData()
-    {
-        for(const dayOfWeek in shiftData)
-        {
-            switch(dayOfWeek)
-            {
-                case "sat":
-                    setShiftValues(workTypes.weekend, dayOfWeek);
-                    break;
-                case "sun":
-                    setShiftValues(workTypes.weekend, dayOfWeek);
-                    break;
-                default:
-                    setShiftValues(workTypes.dayOfWeek, dayOfWeek);
-                    break;
-            }
-        }
     }
 
     btnNext.addEventListener('click', () =>

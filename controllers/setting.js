@@ -12,10 +12,11 @@ const db = mysql.createConnection(
 
 exports.shiftSetting = (req, res) =>
 {
-    const shiftInfo = JSON.parse(req.body.shift_info);
-    const workTypes = JSON.stringify(shiftInfo.shiftTypes);
-    const shiftType = JSON.parse(shiftInfo.Type);
-    const shift = JSON.stringify(shiftInfo.shift_info);
+    const shift = JSON.parse(req.body.shift_info);
+    const severalTimes = shift.severalTimes;
+    const shiftInfo = JSON.stringify(shift.shift_info);
+    const scoreInfo = JSON.stringify(shift.score_info);
+
     const token = req.cookies.jwt;
 
     // cookie 값 없을때 처리
@@ -31,7 +32,7 @@ exports.shiftSetting = (req, res) =>
     */
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
-
+    console.log(scoreInfo);
     db.query('SELECT id FROM user WHERE user_id=?', [userId], (err, result) =>
     {
         if(err)
@@ -41,9 +42,9 @@ exports.shiftSetting = (req, res) =>
         else
         {
             const com_id = result[0].id;
-            const sql = 'INSERT INTO shift_tb SET ?, created=NOW()';
+            const sql = 'INSERT INTO shift_info SET ?, created=NOW()';
 
-            db.query(sql, {data: shift, shift_type: shiftType, com_id: com_id}, (errShift, results) =>
+            db.query(sql, {types_shift: shiftInfo, several_times: severalTimes, com_id: com_id}, (errShift, results) =>
             {
                 if(errShift)
                 {
@@ -52,8 +53,8 @@ exports.shiftSetting = (req, res) =>
                 }
                 else
                 {
-                    const workTypesSQL = 'INSERT INTO worktypes SET ?, created=NOW()';
-                    db.query(workTypesSQL, {worktypes: workTypes, com_id: com_id}, (errworkTypes, result2) => // re change name result2
+                    const workTypesSQL = 'INSERT INTO score SET ?, created=NOW()';
+                    db.query(workTypesSQL, {shift_score: scoreInfo, com_id: com_id}, (errworkTypes, result2) => // re change name result2
                     {
                         if(errworkTypes)
                         {
@@ -62,7 +63,7 @@ exports.shiftSetting = (req, res) =>
                         else
                         {
                             console.log("Good job");
-                            res.status(200).redirect(`/user/${userId}`);
+                            res.status(200).redirect(`/`);
                         }
                     });
                 }

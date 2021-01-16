@@ -50,7 +50,7 @@ exports.login = async (req, res) =>
                 }
                 
                 res.cookie('jwt', token, cookieOptions);
-                res.status(200).redirect(`/user/${id}`);
+                res.status(200).redirect('/');
             }
         });
     } 
