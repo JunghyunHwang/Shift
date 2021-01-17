@@ -212,6 +212,7 @@ exports.getData = (membersData, shiftInfo) =>
         let maxCount = Math.ceil(totalShifts / members.length);
         let worked = 0;
 
+        // How many members should have worked
         for(const dayOfWeek in shift)
         {
             if(shift[dayOfWeek][0].day === day)
@@ -229,7 +230,7 @@ exports.getData = (membersData, shiftInfo) =>
         today.setHours(0);
         let currentDate = today.getDate();
 
-        // Check Possible
+        // Check Possible members
         for(const member of members)
         {
             let dayOfMember = new Date(member.day);
@@ -308,19 +309,34 @@ exports.getData = (membersData, shiftInfo) =>
         return less;
     }
 
-    function pickName(work, selectedPeople)
+    function pickName(shift, selectedPeople)
     {
         let pass = false;
         let randomPerson = 0;
         let pickedPerson = [];
         let tempPeople = [];
+        let zeroPointMembers = [];
 
         for(const member of selectedPeople)
         {
-            tempPeople.push(member);
+            if(member.count === 0)
+            {
+                zeroPointMembers.push(member);
+            }
+            else
+            {
+                tempPeople.push(member);
+            }
         }
 
-        if(work.score === 2 || tempPeople.length === 1)
+        // Pick Number
+        if(zeroPointMembers.length)
+        {
+            randomPerson = Math.floor(Math.random() * zeroPointMembers.length - 1) + 1;
+            return zeroPointMembers[randomPerson].name;
+        }
+
+        if(shift.score === 2 || tempPeople.length === 1)
         {
             randomPerson = Math.floor(Math.random() * tempPeople.length - 1) + 1;
         }
@@ -330,7 +346,7 @@ exports.getData = (membersData, shiftInfo) =>
             {
                 randomPerson = Math.floor(Math.random() * tempPeople.length - 1) + 1;
 
-                if(tempPeople[randomPerson].score === work.score)
+                if(tempPeople[randomPerson].score === shift.score)
                 {
                     pickedPerson.push(tempPeople[randomPerson]);
                     tempPeople.splice(randomPerson, 1);
@@ -365,7 +381,7 @@ exports.getData = (membersData, shiftInfo) =>
         {
             if(Array.isArray(work.who))
             {
-                if(work.who.length > 0)
+                if(work.who.length !== 0)
                 {
                     todaySlave = work.who;
                     return todaySlave;
@@ -380,6 +396,7 @@ exports.getData = (membersData, shiftInfo) =>
             }
         }
 
+        // 그럼 duo가 연결 되어있을때는
         if(work.duo)
         {
             membersName = pickName(work, selectedPeople);
@@ -420,12 +437,17 @@ exports.getData = (membersData, shiftInfo) =>
         {
             for(const dayOfWeek in shift)
             {
+                if(shift[dayOfWeek][0].id > work.relation)
+                {
+                    break;
+                }
+
                 for(const relation of shift[dayOfWeek])
                 {
-                    // Duo 일때
                     if(relation.id === work.relation)
                     {
                         relation.who = work.who;
+                        break;
                     }
                 }
             }
@@ -540,6 +562,5 @@ exports.getData = (membersData, shiftInfo) =>
     }
 
     main();
-    console.log(shift.sat[14]);
     return [shift, thisWeek];
 }

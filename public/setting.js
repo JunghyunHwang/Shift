@@ -258,7 +258,7 @@
                 }
 
                 setShiftData();
-                
+                console.log(shiftData);
                 let inputDayScore = "";
                 let mon = shiftData.mon;
 
@@ -451,6 +451,7 @@
                 }
                 
                 checkShiftData(shiftData);
+                console.log(shiftData);
                 break;
             default:
                 const settingWrong = `
@@ -463,7 +464,7 @@
         }
     }
 
-    function setShiftValues(typesOfWork, dayOfWeek)
+    function setShiftValues(id, typesOfWork, dayOfWeek)
     {
         let value ={};
         let startTime = 0;
@@ -497,33 +498,38 @@
                 
                 if(shiftType.duo)
                 {
-                    value = {workName: shiftType.workName, time: workTime, day: 0, score: 0, duo: shiftType.duo, who: []};
+                    value = {id: id, workName: shiftType.workName, time: workTime, day: 0, score: 0, duo: shiftType.duo, who: []};
                 }
                 else
                 {
-                    value = {workName: shiftType.workName, time: workTime, day: 0, score: 0, duo: shiftType.duo, who: ""};
+                    value = {id: id, workName: shiftType.workName, time: workTime, day: 0, score: 0, duo: shiftType.duo, who: ""};
                 }
 
                 shiftData[dayOfWeek].push(value);
+                id++;
             }
         }
+
+        return id;
     }
 
     function setShiftData()
     {
         // Set object shift values
+        let id = 0;
+
         for(const dayOfWeek in shiftData)
         {
             switch(dayOfWeek)
             {
                 case "sat":
-                    setShiftValues(typesOfShift.weekend, dayOfWeek);
+                    id = setShiftValues(id, typesOfShift.weekend, dayOfWeek);
                     break;
                 case "sun":
-                    setShiftValues(typesOfShift.weekend, dayOfWeek);
+                    id = setShiftValues(id, typesOfShift.weekend, dayOfWeek);
                     break;
                 default:
-                    setShiftValues(typesOfShift.weekday, dayOfWeek);
+                    id = setShiftValues(id, typesOfShift.weekday, dayOfWeek);
                     break;
             }
         }
@@ -589,6 +595,7 @@
     {
         // Set score data
         let score = [];
+
         for(const dayOfWeek in shiftData)
         {
             for(const work of shiftData[dayOfWeek])
@@ -597,11 +604,6 @@
             }
         }
 
-        const root = document.querySelector('#check_shift');
-        const formSendData = document.createElement('form');
-        const shiftInfo = document.createElement('input');
-        const btnSubmit = document.createElement('button');
-
         let shift =
         {
             severalTimes: severalTimes,
@@ -609,6 +611,11 @@
             score_info: score
         };
         const jsonShift = JSON.stringify(shift);
+
+        const root = document.querySelector('#check_shift');
+        const formSendData = document.createElement('form');
+        const shiftInfo = document.createElement('input');
+        const btnSubmit = document.createElement('button');
 
         formSendData.action = '/auth/setting';
         formSendData.method = 'POST';
