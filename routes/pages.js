@@ -7,9 +7,14 @@ router.get('/', (req, res) =>
 {
     if(req.headers.cookie)
     {
+        const token = req.cookies.jwt;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+        
         return res.render('index', 
         {
-            isLogined: true
+            isLogined: true,
+            userId: userId
         });
     }
     else

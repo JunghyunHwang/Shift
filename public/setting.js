@@ -27,14 +27,54 @@
         sat:[],
         sun:[]
     };
-    let severalTimes; // boolean
     let typesOfShift =
     {
         weekday: [],
         weekend: []
     };
+    let severalTimes; // boolean
     let page = 1;
+    let fig = 0;
     let temp = [];
+    // let relation = {};
+    let relation = {
+        0: 5,
+        1: 6,
+        2: 7,
+        3: 8,
+        4: 9,
+        14: 19,
+        15: 20,
+        16: 21,
+        17: 22,
+        18: 23,
+        28: 33,
+        29: 34,
+        30: 35,
+        31: 36,
+        32: 37,
+        42: 47,
+        43: 48,
+        44: 49,
+        45: 50,
+        46: 51,
+        56: 61,
+        57: 62,
+        58: 63,
+        59: 64,
+        60: 65,
+        70: 75,
+        71: 76,
+        72: 77,
+        73: 78,
+        74: 79,
+        85: 90,
+        86: 91,
+        87: 92,
+        88: 93,
+        89: 94
+    };
+    let boolRelation;
 
     function createInputBox() // page switch
     {
@@ -55,7 +95,7 @@
         
                 for(let i = 0; i < numOfWorktypes; i++)
                 {
-                    formWorkName += `<input type="text" class="input_setting" name="workName" id="workName"></input>`;
+                    formWorkName += `<input type="text" class="input_setting" name="workName" id="workName">`;
                 }
 
                 shiftSetting.innerHTML = formWorkName;
@@ -123,12 +163,13 @@
                     formCheck += `<input type="checkbox" class="input_setting" name='${Value}' id="check_duo"/> ${Value}`;
                 }
 
-                shiftSetting.innerHTML = formCheck;
+                shiftSetting.innerHTML = formCheck; 
                 _guide.textContent = "이 중 2명 이상 같이 하는 근무를 선택해 주세요.";
                 page++;
                 break;
             case 5:
                 pageCnt.textContent = `${page} / 11`;
+
                 let checkDuo = document.querySelectorAll('#check_duo');
                 let duoWorkName = [];
 
@@ -251,35 +292,219 @@
                 
                 for(const type in typesOfShift)
                 {
-                    typesOfShift[type].sort(function(a, b)
+                    typesOfShift[type].sort((a, b) =>
                     {
                         return b['num'] - a['num'];
                     });
                 }
 
                 setShiftData();
-                console.log(shiftData);
-                let inputDayScore = "";
-                let mon = shiftData.mon;
 
-                for(const work of mon)
-                {
-                    inputDayScore += `
-                    <div id="input_score">
-                        ${work.workName} ${work.time}
-                        <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1 checked> 1점
-                        <input type="radio" name="${work.workName}${work.time}" id="work_score" value=2> 2점
-                        <input type="radio" name="${work.workName}${work.time}" id="work_score" value=3> 3점
-                    </div>
-                    `;
-                }
+                let inputRelation = `
+                <input type="radio" name="relation" id="relation_work" value=true> 예
+                <input type="radio" name="relation" id="relation_work" value=false> 아니요
+                `;
 
-                shiftSetting.innerHTML = inputDayScore;
-
-                _guide.textContent = "평일(월 ~ 목) 근무의 점수를 설정해 주세요. (점수가 높을수록 힘든 근무 입니다.)";
+                shiftSetting.innerHTML = inputRelation;
+                _guide.textContent = "하루에 여러 근무를 들어가냐";
                 page++;
                 break;
             case 8:
+                pageCnt.textContent = `${page} / 11`; // 11 => let total
+                let checkRelation = document.querySelectorAll('#relation_work');
+
+                if(checkRelation.length)
+                {
+                    for(const value of checkRelation)
+                    {
+                        if(value.checked)
+                        {
+                            boolRelation = JSON.parse(value.value);
+                            break;
+                        }
+                    }
+
+                    if(boolRelation) // re else 있는거랑 함수로 파라미터로 booRelation 보냄
+                    {
+                        switch(fig)
+                        {
+                            case 0:
+                                createRelation(shiftData.mon);
+                                break;
+                            case 1:
+                                createRelation(shiftData.tue);
+                                break;
+                            case 2:
+                                createRelation(shiftData.wed);
+                                break;
+                            case 3:
+                                createRelation(shiftData.thr);
+                                break;
+                            case 4:
+                                createRelation(shiftData.fri);
+                                break;
+                            case 5:
+                                createRelation(shiftData.sat);
+                                break;
+                            case 6:
+                                createRelation(shiftData.sun);
+                                break;
+                            default:
+                                alert("Unknown type...");
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        console.log(relation);
+                        let inputDayScore = "";
+
+                        // 여기서 if relation 넣으면 됨 ex) 만약 relation 값이 있다면 연결 되어있는 근무랑 같이 화면 출력
+                        for(const work of shiftData.mon)
+                        {
+                            inputDayScore += `
+                            <div id="input_score">
+                                ${work.workName} ${work.time}
+                                <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1 checked> 1점
+                                <input type="radio" name="${work.workName}${work.time}" id="work_score" value=2> 2점
+                                <input type="radio" name="${work.workName}${work.time}" id="work_score" value=3> 3점
+                            </div>
+                            `;
+                        }
+        
+                        shiftSetting.innerHTML = inputDayScore;
+        
+                        _guide.textContent = "평일(월 ~ 목) 근무의 점수를 설정해 주세요. (점수가 높을수록 힘든 근무 입니다.)";
+                        page++;
+                    }
+                }
+                else
+                {
+                    if(boolRelation)
+                    {
+                        let valueRelation = document.querySelectorAll("#input_relation");
+
+                        for(const input of valueRelation)
+                        {
+                            if(input.children[0].value === "")
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                let base = Number(input.children[0].value);
+                                let target = Number(input.children[1].value);
+                                relation[base] = target;
+                            }
+                        }
+
+                        switch(fig)
+                        {
+                            case 0:
+                                createRelation(shiftData.mon);
+                                break;
+                            case 1:
+                                createRelation(shiftData.tue);
+                                break;
+                            case 2:
+                                createRelation(shiftData.wed);
+                                break;
+                            case 3:
+                                createRelation(shiftData.thr);
+                                break;
+                            case 4:
+                                createRelation(shiftData.fri);
+                                break;
+                            case 5:
+                                createRelation(shiftData.sat);
+                                break;
+                            case 6:
+                                createRelation(shiftData.sun);
+                                break;
+                            default:
+                                alert("Unknown type...");
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        let valueRelation = document.querySelectorAll("#input_relation");
+
+                        for(const input of valueRelation)
+                        {
+                            if(input.children[0].value === "")
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                let base = Number(input.children[0].value);
+                                let target = Number(input.children[1].value);
+                                relation[base] = target;
+                            }
+                        }
+                        console.log(relation);
+
+                        for(const dayOfWeek in shiftData)
+                        {
+                            for(const work of shiftData[dayOfWeek])
+                            {
+                                let len = shiftData[dayOfWeek].length;
+
+                                for(const baseId in relation)
+                                {
+                                    if(Number(baseId) === work.id)
+                                    {
+                                        work.relation = relation[baseId];
+                                        break;
+                                    }
+                                    else if(Number(baseId) > shiftData[dayOfWeek][len - 1].id)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        let inputDayScore = "";
+
+                        // 여기서 if relation 넣으면 됨 ex) 만약 relation 값이 있다면 연결 되어있는 근무랑 같이 화면 출력
+                        for(const work of shiftData.mon)
+                        {
+                            if(work.relation)
+                            {
+                                let workId = work.relation;
+                                const relationWork = shiftData.mon[workId];
+                                inputDayScore += `
+                                <div id="input_score">
+                                    ${work.workName} ${work.time} || ${relationWork.workName} ${relationWork.time}
+                                    <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1 checked> 1점
+                                    <input type="radio" name="${work.workName}${work.time}" id="work_score" value=2> 2점
+                                    <input type="radio" name="${work.workName}${work.time}" id="work_score" value=3> 3점
+                                </div>
+                                `;
+                            }
+                            else
+                            {
+                                inputDayScore += `
+                                <div id="input_score">
+                                    ${work.workName} ${work.time}
+                                    <input type="radio" name="${work.workName}${work.time}" id="work_score" value=1 checked> 1점
+                                    <input type="radio" name="${work.workName}${work.time}" id="work_score" value=2> 2점
+                                    <input type="radio" name="${work.workName}${work.time}" id="work_score" value=3> 3점
+                                </div>
+                                `;
+                            }
+                        }
+        
+                        shiftSetting.innerHTML = inputDayScore;
+        
+                        _guide.textContent = "평일(월 ~ 목) 근무의 점수를 설정해 주세요. (점수가 높을수록 힘든 근무 입니다.)";
+                        page++;
+                    }
+                }
+                break;
+            case 9:
                 pageCnt.textContent = `${page} / 11`;
 
                 // 평일 근무 점수를 월요일에 저장
@@ -336,7 +561,7 @@
                 _guide.textContent = "금요일 근무의 점수를 설정해 주세요. (점수가 높을수록 힘든 근무 입니다.)";
                 page++;
                 break;
-            case 9:
+            case 10:
                 pageCnt.textContent = `${page} / 11`;
 
                 // 금요일근무 점수 저장
@@ -371,7 +596,7 @@
                 _guide.textContent = "토요일 근무의 점수를 설정해 주세요. (점수가 높을수록 힘든 근무 입니다.)";
                 page++;
                 break;
-            case 10:
+            case 11:
                 pageCnt.textContent = `${page} / 11`;
 
                 // 토요일근무 점수 저장
@@ -406,7 +631,7 @@
                 _guide.textContent = "일요일 근무의 점수를 설정해 주세요. (점수가 높을수록 힘든 근무 입니다.)";
                 page++;
                 break;
-            case 11:
+            case 12:
                 pageCnt.textContent = `${page} / 11`;
 
                 // 일요일근무 점수 저장
@@ -422,16 +647,16 @@
                     }
                 }
 
-                let inputShiftType = `
-                <input type="radio" name="shift_types" id="several_times" value=true> 예
-                <input type="radio" name="shift_types" id="several_times" value=false> 아니요
+                let inputWorkType = `
+                <input type="radio" name="work_types" id="several_times" value=true> 예
+                <input type="radio" name="work_types" id="several_times" value=false> 아니요
                 `;
 
-                shiftSetting.innerHTML = inputShiftType;
+                shiftSetting.innerHTML = inputWorkType;
                 _guide.textContent = "한 인원이 하루에 근무를 여러번 들어 갈 수 있습니까?";
                 page++;
                 break;
-            case 12:
+            case 13:
                 let valueShiftType = document.querySelectorAll('#several_times');
 
                 for(const radio of valueShiftType)
@@ -463,6 +688,78 @@
                 break;
         }
     }
+
+    function createRelation(dayOfWeek)
+    {
+
+        let inputRelation = "";
+
+        for(const work of dayOfWeek)
+        {
+            inputRelation += `
+            <div id="ex_relation">
+                ${work.id}번 ${work.workName} ${work.time}
+            </div>
+            `;
+        }
+
+        let inputCnt = dayOfWeek.length / 2;
+
+        for(let i = 0; i < inputCnt; i++)
+        {
+            inputRelation += `
+            <div id="input_relation">
+                <input type="text" class="input_setting" id="_base">과
+                <input type="text" class="input_setting" id="_target">
+            </div>
+            `
+        }
+
+        shiftSetting.innerHTML = inputRelation;
+        switch(fig)
+        {
+            case 0:
+                _guide.textContent = "(월요일)연관이 있는 근무를 적어주세요";
+                break;
+            case 1:
+                _guide.textContent = "(화요일)연관이 있는 근무를 적어주세요";
+                break;
+            case 2:
+                _guide.textContent = "(수요일)연관이 있는 근무를 적어주세요";
+                break;
+            case 3:
+                _guide.textContent = "(목요일)연관이 있는 근무를 적어주세요";
+                break;
+            case 4:
+                _guide.textContent = "(금요일)연관이 있는 근무를 적어주세요";
+                break;
+            case 5:
+                _guide.textContent = "(토요일)연관이 있는 근무를 적어주세요";
+                break;
+            case 6:
+                _guide.textContent = "(일요일)연관이 있는 근무를 적어주세요";
+                boolRelation = false;
+                break;
+        }
+        fig++;
+    }
+
+    /* // 위에 질문 받는 법
+    let valueRelation = document.querySelectorAll("#input_relation");
+
+    for(const input of valueRelation)
+    {
+        if(input.children[0].value === "")
+        {
+            continue;
+        }
+        else
+        {
+            let base = input.children[0].value;
+            let target = input.children[1].value;
+            relation[base] = target;   
+        }
+    }*/
 
     function setShiftValues(id, typesOfWork, dayOfWeek)
     {

@@ -415,7 +415,6 @@ exports.getData = (membersData, shiftInfo) =>
 
         if(!selectedPeople.length)
         {
-            debugger;
             selectedPeople = checkPossibleMembers(work.day);
         }
 
