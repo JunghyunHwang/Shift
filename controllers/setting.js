@@ -13,26 +13,26 @@ const db = mysql.createConnection(
 exports.shiftSetting = (req, res) =>
 {
     const shift = JSON.parse(req.body.shift_info);
-    const severalTimes = shift.severalTimes;
     const shiftInfo = JSON.stringify(shift.shift_info);
-    const scoreInfo = JSON.stringify(shift.score_info);
+    let tempRelation;
 
-    const token = req.cookies.jwt;
-
-    // cookie 값 없을때 처리
-    /*
-    if()
+    if(shift.relation_info === null)
     {
-
+        tempRelation = null;
     }
     else
     {
-
+        tempRelation = JSON.stringify(shift.relation_info);
     }
-    */
+
+    const relationInfo = tempRelation;
+    const token = req.cookies.jwt;
+
+    // token cookie 값 없을때 처리
+    
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
-    console.log(scoreInfo);
+    
     db.query('SELECT id FROM user WHERE user_id=?', [userId], (err, result) =>
     {
         if(err)
@@ -44,7 +44,7 @@ exports.shiftSetting = (req, res) =>
             const com_id = result[0].id;
             const sql = 'INSERT INTO shift_info SET ?, created=NOW()';
 
-            db.query(sql, {types_shift: shiftInfo, several_times: severalTimes, com_id: com_id}, (errShift, results) =>
+            db.query(sql, {types_shift: shiftInfo, com_id: com_id}, (errShift, results) =>
             {
                 if(errShift)
                 {
@@ -53,19 +53,26 @@ exports.shiftSetting = (req, res) =>
                 }
                 else
                 {
-                    const workTypesSQL = 'INSERT INTO score SET ?, created=NOW()';
-                    db.query(workTypesSQL, {shift_score: scoreInfo, com_id: com_id}, (errworkTypes, result2) => // re change name result2
+                    if(relationInfo !== null)
                     {
-                        if(errworkTypes)
+                        const workTypesSQL = 'INSERT INTO relation SET ?, created=NOW()';
+                        db.query(workTypesSQL, {relation: relationInfo, com_id: com_id}, (errRel, result2) => // re change name result2
                         {
-                            console.log(errworkTypes);
-                        }
-                        else
-                        {
-                            console.log("Good job");
-                            res.status(200).redirect(`/`);
-                        }
-                    });
+                            if(errRel)
+                            {
+                                console.log(errRel);
+                            }
+                            else
+                            {
+                                console.log("Good job");
+                                res.status(200).redirect(`/`);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        res.status(200).redirect(`/`);
+                    }
                 }
             });
         }

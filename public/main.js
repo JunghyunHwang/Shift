@@ -4,8 +4,7 @@
 exports.getData = (membersData, shiftInfo) =>
 {
     const typesOfShift = shiftInfo.typesOfShift;
-    const score = shiftInfo.score;
-    const severalTimes = shiftInfo.severalTimes;
+    const relation = shiftInfo.relation;
     const lastPick = shiftInfo.lastPick;
 
     // Get thisweek
@@ -83,7 +82,6 @@ exports.getData = (membersData, shiftInfo) =>
         sun: []
     }
 
-
     function setDayOfWeekArry(id, day, dayOfWeek, shiftType)
     {
         let value ={};
@@ -116,15 +114,36 @@ exports.getData = (membersData, shiftInfo) =>
                 
                 if(work.duo)
                 {
-                    value = {id: id, workName: work.workName, time: workTime, day: thisWeek[day], score: 0, duo: work.duo, who: []};
+                    value = {id: id, workName: work.workName, time: workTime, day: thisWeek[day], duo: work.duo, who: []};
                 }
                 else
                 {
-                    value = {id: id, workName: work.workName, time: workTime, day: thisWeek[day], score: 0, duo: work.duo, who: ""};
+                    value = {id: id, workName: work.workName, time: workTime, day: thisWeek[day], duo: work.duo, who: ""};
                 }
 
                 shift[dayOfWeek].push(value);
                 id++;
+            }
+        }
+
+        if(relation !== null)
+        {
+            let len = shift[dayOfWeek].length;
+
+            for(const work of shift[dayOfWeek])
+            {
+                for(const baseId in relation)
+                {
+                    if(Number(baseId) === work.id)
+                    {
+                        work.relation = relation[baseId];
+                        break;
+                    }
+                    else if(Number(baseId) > shift[dayOfWeek][len - 1].id)
+                    {
+                        break;
+                    }
+                }
             }
         }
 
@@ -152,21 +171,6 @@ exports.getData = (membersData, shiftInfo) =>
             }
             day++;
         }
-        shiftScore();
-    }
-
-    function shiftScore()
-    {
-        let i = 0;
-
-        for(const dayOfWeek in shift)
-        {
-            for(const work of shift[dayOfWeek])
-            {
-                work.score = score[i];
-                i++;
-            }
-        }
     }
 
     setShift();
@@ -190,6 +194,8 @@ exports.getData = (membersData, shiftInfo) =>
 
     function controlInfo(selectedPeople, shift)
     {
+        let work = `${shift.workName}${shift.time}`;
+
         if(shift.duo)
         {
             shift.who.push(selectedPeople.name);
@@ -199,8 +205,7 @@ exports.getData = (membersData, shiftInfo) =>
             shift.who = selectedPeople.name;
         }
         // 다른 근무와 연관이 되어 있다면
-        selectedPeople.score = shift.score;
-        selectedPeople.sum += shift.score;
+        selectedPeople.worked.push(work);
         selectedPeople.day = shift.day;
         selectedPeople.count++;
     }
@@ -315,13 +320,13 @@ exports.getData = (membersData, shiftInfo) =>
         let randomPerson = 0;
         let pickedPerson = [];
         let tempPeople = [];
-        let zeroPointMembers = [];
+        let zeroCntMembers = [];
 
         for(const member of selectedPeople)
         {
             if(member.count === 0)
             {
-                zeroPointMembers.push(member);
+                zeroCntMembers.push(member);
             }
             else
             {
@@ -330,13 +335,13 @@ exports.getData = (membersData, shiftInfo) =>
         }
 
         // Pick Number
-        if(zeroPointMembers.length)
+        if(zeroCntMembers.length)
         {
-            randomPerson = Math.floor(Math.random() * zeroPointMembers.length - 1) + 1;
-            return zeroPointMembers[randomPerson].name;
+            randomPerson = Math.floor(Math.random() * zeroCntMembers.length - 1) + 1;
+            return zeroCntMembers[randomPerson].name;
         }
 
-        if(shift.score === 2 || tempPeople.length === 1)
+        if(tempPeople.length === 1)
         {
             randomPerson = Math.floor(Math.random() * tempPeople.length - 1) + 1;
         }
@@ -345,21 +350,29 @@ exports.getData = (membersData, shiftInfo) =>
             while(!pass)
             {
                 randomPerson = Math.floor(Math.random() * tempPeople.length - 1) + 1;
+                let workedShifts = tempPeople[randomPerson].worked;
+                let isSameWork = false;
+                let workName = `${shift.workName}${shift.time}`;
 
-                if(tempPeople[randomPerson].score === shift.score)
+                for(const worked of workedShifts)
                 {
+                    if(worked === workName)
+                    {
+                        isSameWork = true;
+                        break;
+                    }
+                }
+
+                if(isSameWork)
+                {
+                    pass = false;
                     pickedPerson.push(tempPeople[randomPerson]);
                     tempPeople.splice(randomPerson, 1);
-
                     if(tempPeople.length <= 0)
                     {
                         tempPeople = checkLessWorkers(pickedPerson);
                         randomPerson = Math.floor(Math.random() * tempPeople.length - 1) + 1;
                         pass = true;
-                    }
-                    else
-                    {
-                        pass = false;
                     }
                 }
                 else
@@ -434,6 +447,14 @@ exports.getData = (membersData, shiftInfo) =>
         // relation work
         if(work.relation)
         {
+            for(const member of members)
+            {
+                if(member.name === work.who)
+                {
+                    member.count++;
+                    break;
+                }
+            }
             for(const dayOfWeek in shift)
             {
                 if(shift[dayOfWeek][0].id > work.relation)
@@ -451,7 +472,6 @@ exports.getData = (membersData, shiftInfo) =>
                 }
             }
         }
-
         return todaySlave;
     }
 
@@ -527,10 +547,9 @@ exports.getData = (membersData, shiftInfo) =>
 
         for(const member of members)
         {
-            member.score = 0;
             member.count = 0;
             member.day = 0;
-            member.sum = 0;
+            member.worked = [];
         }
 
         for(const dayOfWeek in shift)
@@ -557,7 +576,7 @@ exports.getData = (membersData, shiftInfo) =>
             console.log(`${dayOfWeek} : ${today}`);
             day++;
         }
-        checkFair();
+        // checkFair();
     }
 
     main();

@@ -28,7 +28,7 @@ exports.getShiftData = (req, res) =>
         {
             const com_id = result[0].id;
             const lastPick = result[0].lastpick;
-            const sql = "SELECT shift_info.types_shift, shift_info.several_times, score.shift_score FROM shift_info LEFT JOIN score ON shift_info.com_id = score.com_id WHERE shift_info.com_id = ?";
+            const sql = "SELECT shift_info.types_shift, relation.relation FROM shift_info LEFT JOIN relation ON shift_info.com_id = relation.com_id WHERE shift_info.com_id = ?";
             
             db.query(sql, [com_id], (err, shiftData) =>
             {
@@ -41,10 +41,15 @@ exports.getShiftData = (req, res) =>
                     const shiftInfo = 
                     {
                         typesOfShift: JSON.parse(shiftData[0].types_shift),
-                        score: JSON.parse(shiftData[0].shift_score),
-                        severalTimes: JSON.parse(shiftData[0].several_times),
+                        relation: null,
                         lastPick: lastPick
                     };
+
+                    if(shiftData[0].relation !== null)
+                    {
+                        shiftInfo.relation = JSON.parse(shiftData[0].relation);
+                    }
+                    
                     const data = shift.getData(membersData, shiftInfo);
                     const pickedMember = data[0];
                     const thisWeek = data[1];
