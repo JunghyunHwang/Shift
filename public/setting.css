@@ -1,0 +1,108 @@
+#shift_setting
+{
+    height: 300px;
+}
+
+#_guide
+{
+    margin: 20px;
+}
+
+.input_setting
+{
+    margin: 20px;
+}
+
+#page_count
+{
+    margin: 20px;
+}
+
+#next_info
+{
+    margin: 20px auto;
+    border-style: none;
+    padding: 10px 20px;
+    background-color: #2d3436;
+    font: 15px;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#workName
+{
+    margin: 20px auto;
+    display: block;
+}
+
+#work_per_day
+{
+    margin: 20px;
+    display: block;
+}
+
+#work_per_day input{
+    width: 80px;
+}
+
+#input_PerDayWeekend
+{
+    margin: auto;
+}
+
+#time_interval
+{
+    margin: 10px auto;
+}
+
+#input_score
+{
+    margin: 10px;
+}
+
+td #check_score_empty
+{
+    border-collapse: collapse;
+}
+
+.check_shift__table
+{
+    margin: auto;
+    text-align: center;
+    width: 70%;
+    height: 800px;
+}
+
+.check_shift__table tbody td
+{
+    height: 30px;
+}
+
+#submit_form
+{
+    margin: 15px;
+}
+
+#btn_submit
+{
+    margin: auto;
+    border-style: none;
+    padding: 10px 40px;
+    background-color: #2d3436;
+    font: 20px;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#upload_file
+{
+    padding: 100px;
+}
+
+#num_relation
+{
+    margin: 10px;
+    width: 20px;
+}

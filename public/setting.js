@@ -13,8 +13,6 @@
     `;
     let _guide = document.getElementById('_guide');
     _guide.textContent = "총 몇 가지 종류의 근무가 있습니까?"; // re 젤 앞에 중대 이름
-    let pageCnt = document.getElementById('page_count');
-    pageCnt.textContent = "0 / 11";
     let btnNext = document.getElementById('next_info');
     let numOfWorktypes = 0;
     let shiftData = 
@@ -36,7 +34,7 @@
     let fig = 0;
     let temp = [];
     let relation = {};
-    /*let relation = {
+    /* re let relation = {
         0: 5,
         1: 6,
         2: 7,
@@ -87,7 +85,6 @@
         switch(page)
         {
             case 1:
-                pageCnt.textContent = `${page} / 11`;
                 numOfWorktypes = Number(document.getElementById('numOfWorktypes').value);
                 let formWorkName = "";
         
@@ -101,7 +98,6 @@
                 page++;
                 break;
             case 2:
-                pageCnt.textContent = `${page} / 11`;
                 
                 for(const input of valueWorkName)
                 {
@@ -120,7 +116,6 @@
                 page++;
                 break;
             case 3:
-                pageCnt.textContent = `${page} / 11`;
                 let checkDayOfWeek = document.querySelectorAll('#check_dayOfWeek');
 
                 for(const box of checkDayOfWeek)
@@ -143,7 +138,6 @@
                 page++;
                 break;
             case 4:
-                pageCnt.textContent = `${page} / 11`;
                 let checkWeekend = document.querySelectorAll('#check_weekend');
 
                 for(const box of checkWeekend)
@@ -166,7 +160,6 @@
                 page++;
                 break;
             case 5:
-                pageCnt.textContent = `${page} / 11`;
 
                 let checkDuo = document.querySelectorAll('#check_duo');
                 let duoWorkName = [];
@@ -218,7 +211,6 @@
                 page++;
                 break;
             case 6:
-                pageCnt.textContent = `${page} / 11`;
 
                 let valueWorkPerDay = document.querySelectorAll('#input_WorkPerDay');
 
@@ -266,7 +258,6 @@
                 page++;
                 break;
             case 7:
-                pageCnt.textContent = `${page} / 11`;
 
                 let valuePerDayWeekend = document.querySelectorAll('#input_PerDayWeekend');
 
@@ -312,8 +303,6 @@
 
                 break;
             case 8:
-                pageCnt.textContent = `${page} / 11`; // 11 => let total
-
                 if(boolRelation)
                 {
                     let valueRelation = document.querySelectorAll("#input_relation");
@@ -379,7 +368,6 @@
                                 relation[base] = target;
                             }
                         }
-                        console.log(relation);
     
                         for(const dayOfWeek in shiftData)
                         {

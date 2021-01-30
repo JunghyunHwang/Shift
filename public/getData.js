@@ -79,15 +79,15 @@
         }
     }
 
-    function renderingTable(todayWorkTypes)
+    function renderingTable(todayShift)
     {
         let tableLen = 0;
 
-        for(const work in todayWorkTypes)
+        for(const workName in todayShift)
         {
-            if(todayWorkTypes[work].length > tableLen)
+            if(todayShift[workName].length > tableLen)
             {
-                tableLen = todayWorkTypes[work].length;
+                tableLen = todayShift[workName].length;
             }
         }
         
@@ -100,7 +100,6 @@
 
         const root = document.querySelector('.table-shift');
         const table = document.createElement('table');
-    
         table.classList.add('table-shift__table');
         root.append(table);
 
@@ -109,16 +108,16 @@
         let tableHeader = "<thead>";
         let numDuoWork = 0;
 
-        for(const workType in todayWorkTypes) // re change name workType
+        for(const workName in todayShift)
         {
-            if(todayWorkTypes[workType][0].duo)
+            if(todayShift[workName][0].duo)
             {
-                tableHeader += `<th class="work_name" colspan=${3 * todayWorkTypes[workType][0].duo}>${workType}</th>`;
+                tableHeader += `<th class="work_name" colspan=${3 * todayShift[workName][0].duo}>${workName}</th>`;
                 numDuoWork++;
             }
             else
             {
-                tableHeader += `<th class="work_name" colspan=3>${workType}</th>`;
+                tableHeader += `<th class="work_name" colspan=3>${workName}</th>`;
             }
         }
 
@@ -130,7 +129,7 @@
         // Draw body
         let tableBody = "<tbody><tr class='header'>";
 
-        let numberOfWorkTypes = Object.keys(todayWorkTypes).length + numDuoWork;
+        let numberOfWorkTypes = Object.keys(todayShift).length + numDuoWork;
 
         for(let i = 0; i < numberOfWorkTypes; i++)
         {
@@ -147,14 +146,14 @@
         for(let i = 0; i < tableLen; i++)
         {
             let row = "<tr>"
-            for(const workType in todayWorkTypes)
+            for(const workName in todayShift)
             {
-                if(todayWorkTypes[workType][i] === undefined)
+                if(todayShift[workName][i] === undefined)
                 {
-                    if(todayWorkTypes[workType][0].duo)
+                    if(todayShift[workName][0].duo)
                     {
                         row += `
-                        <td class="empty" colspan=${3 * todayWorkTypes[workType][0].duo}></td>
+                        <td class="empty" colspan=${3 * todayShift[workName][0].duo}></td>
                         `;
                     }
                     else
@@ -164,13 +163,14 @@
                         `;
                     }
                 }
-                else if(todayWorkTypes[workType][i].duo)
+                else if(todayShift[workName][i].duo)
                 {
-                    for(let j = 0; j < todayWorkTypes[workType][i].duo; j++)
+                    let len = todayShift[workName][i].who.length;
+                    for(let j = 0; j < len; j++)
                     {
                         row += `
-                        <td class="time">${todayWorkTypes[workType][i].time}</td>
-                        <td class="name">${todayWorkTypes[workType][i].who[j]}</td>
+                        <td class="time">${todayShift[workName][i].time}</td>
+                        <td class="name">${todayShift[workName][i].who[j]}</td>
                         <td class="sign_here"></td>
                         `;
                     }
@@ -178,8 +178,8 @@
                 else
                 {
                     row += `
-                    <td class="time">${todayWorkTypes[workType][i].time}</td>
-                    <td class="name">${todayWorkTypes[workType][i].who}</td>
+                    <td class="time">${todayShift[workName][i].time}</td>
+                    <td class="name">${todayShift[workName][i].who}</td>
                     <td class="sign_here"></td>
                     `;
                 }
@@ -212,8 +212,13 @@
                 workbook.SheetNames.forEach(function(item, index, array)
                 {
                     const membersData = XLSX.utils.sheet_to_json(workbook.Sheets[item]);
-                    
-                    if(!temp.length)
+
+                    if(files.length < 2)
+                    {
+                        members = membersData;
+                        getData(members);
+                    }
+                    else if(!temp.length)
                     {
                         temp = membersData;
                     }
@@ -299,12 +304,22 @@
         typesOfShift = shiftData.typesOfShift;
         shift = shiftData.shift;
         
-        for(const type in typesOfShift)
+        for(const type in typesOfShift) // re 이 과저을 한번만 할 수 있을까?
         {
             typesOfShift[type].sort(function(a, b)
             {
                 return b['num'] - a['num'];
             });
+        }
+
+        for(const dayOfWeek in shift)
+        {
+            let todayWorker = [];
+            for(const work of shift[dayOfWeek])
+            {
+                todayWorker.push(work.who);
+            }
+            console.log(`${dayOfWeek} : ${todayWorker}`);
         }
 
         createDate();

@@ -215,7 +215,7 @@ exports.getData = (membersData, shiftInfo) =>
         let possible = [];
         let lessWorkers = [];
         let maxCount = Math.ceil(totalShifts / members.length);
-        let worked = 0;
+        let minWorked = 0;
 
         // How many members should have worked
         for(const dayOfWeek in shift)
@@ -226,11 +226,11 @@ exports.getData = (membersData, shiftInfo) =>
             }
             else
             {
-                worked += shift[dayOfWeek].length;
+                minWorked += shift[dayOfWeek].length;
             }
         }
 
-        let minCount = Math.floor(worked / members.length);
+        let minCount = Math.floor(minWorked / members.length);
         let today = new Date(day); // (일이 2자리수가 되면 시간이 09:00로됨, 1자리수 일은 00:00로 됨)
         today.setHours(0);
         let currentDate = today.getDate();
@@ -256,7 +256,7 @@ exports.getData = (membersData, shiftInfo) =>
                 {
                     lessWorkers.push(member);
                 }
-                else if(dayDiff < 1)
+                else if(dayDiff < 2)
                 {
                     continue;
                 }
@@ -477,68 +477,60 @@ exports.getData = (membersData, shiftInfo) =>
 
     function checkFair()
     {
-        let variance = 0;
-        let deviation = 0;
-        let squared = 0;
-        let totalScore = 0;
-        let avg = 0;
-        let hardWorkers = [];
-        let easyWokers = [];
-        let maxMembers = []
+        let maxMembers = [];
+        let minMembers = [];
+        let maxCount = Math.ceil(totalShifts / members.length);
+        let minCount = 0;
+        
+        console.log(`총 근무 : ${totalShifts}`);
+        console.log(`총 인원 : ${members.length}`);
+        console.log(`최대 근무 횟수 : ${maxCount}`);
+
+        if(totalShifts % members.length > 0)
+        {
+            minCount = maxCount - 1;
+            console.log(`최소 근무 횟수: ${minCount}`);
+        }
+
+        if(relation === null) // re 이걸로 미루어 보아 relation 근무는 count 하나로 봐야할듯 그러면 relatoin 있든 없든 다 계산 가능
+        {
+            let maxWorkerCount = totalShifts % members.length;
+            let minWorkerCount = members.length - maxWorkerCount;
+
+            console.log(`최대 근무 근무자수 :${maxWorkerCount}`);
+            console.log(`최소 근무 근무자수 :${minWorkerCount}`);
+        }
 
         for(const member of members)
         {
-            totalScore += member.sum;
-
-            if(member.sum > 7) // 숫자는 나중에 변수로
-            {
-                hardWorkers.push(member);
-            }
-            else if(member.sum < 4) // 숫자는 나중에 변수로
-            {
-                easyWokers.push(member);
-            }
-
-            if(member.count >= 3)
+            if(member.count >= maxCount)
             {
                 maxMembers.push(member);
             }
+            else if(member.count <= minCount)
+            {
+                minMembers.push(member);
+            }
         }
 
-        avg = totalScore / members.length;
-        avg = Number(avg.toFixed(1));
-        
-        // 표준편차
-        for(let i = 0; i < members.length; i++)
-        {
-            squared = 0;
-            squared = members[i].sum - avg;
-            squared *= squared;
-            deviation += squared;
-        }
-
-        variance = deviation / members.length;
-        variance = Number(variance.toFixed(3));
         console.log("-------------------------------------------");
-        console.log(`분산 값 : ${variance}`);
-        console.log("-------------------------------------------");
-
-        console.log(`Hard worker 총 인원 : ${hardWorkers.length}`);
-        for(const worker of hardWorkers)
+        console.log(`max worker 총 인원 : ${maxMembers.length}`);
+        /*
+        for(const worker of maxMembers)
         {
             console.log(`name: ${worker.name}, count ${worker.count}, sum : ${worker.sum}`);
         }
-
+        */
         console.log("-------------------------------------------");
-
-        console.log(`easy worker 총 인원 : ${easyWokers.length}`);
-        for(const worker of easyWokers)
+        console.log(`min worker 총 인원 : ${minMembers.length}`);
+        console.log("-------------------------------------------");
+        console.log("-------------------------------------------");
+        /*
+        for(const worker of minMembers)
         {
             console.log(`name: ${worker.name}, count ${worker.count}, sum : ${worker.sum}`);
         }
-
-        console.log("-------------------------------------------");
-        console.log(maxMembers.length);
+        */
     }
 
     function main()
@@ -555,7 +547,6 @@ exports.getData = (membersData, shiftInfo) =>
         for(const dayOfWeek in shift)
         {
             let possibleMembers = [];
-            let today = []; // re 필요없음
 
             possibleMembers = checkPossibleMembers(thisWeek[day]);
 
@@ -565,18 +556,16 @@ exports.getData = (membersData, shiftInfo) =>
                 if(!possibleMembers.length)
                 {
                     possibleMembers = checkPossibleMembers(thisWeek[day]);
-                    today.push(pickMember(work, possibleMembers));
+                    pickMember(work, possibleMembers);
                 }
                 else
                 {
-                    today.push(pickMember(work, possibleMembers));
+                    pickMember(work, possibleMembers);
                 }
             }
-            
-            console.log(`${dayOfWeek} : ${today}`);
             day++;
         }
-        // checkFair();
+        checkFair();
     }
 
     main();

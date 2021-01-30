@@ -30,7 +30,7 @@ exports.shiftSetting = (req, res) =>
 
     // token cookie 값 없을때 처리
     
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // re .env JWT_SECRET 내용 바꾸기
     const userId = decoded.id;
     
     db.query('SELECT id FROM user WHERE user_id=?', [userId], (err, result) =>
