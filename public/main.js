@@ -350,10 +350,12 @@ exports.getData = (membersData, shiftInfo) =>
             while(!pass)
             {
                 randomPerson = Math.floor(Math.random() * tempPeople.length - 1) + 1;
-                let workedShifts = tempPeople[randomPerson].worked;
-                let isSameWork = false;
-                let workName = `${shift.workName}${shift.time}`;
 
+                let workedShifts = tempPeople[randomPerson].worked;
+                let workName = `${shift.workName}${shift.time}`;
+                let isSameWork = false;
+
+                // 했던 근무인지 확인
                 for(const worked of workedShifts)
                 {
                     if(worked === workName)
@@ -368,6 +370,7 @@ exports.getData = (membersData, shiftInfo) =>
                     pass = false;
                     pickedPerson.push(tempPeople[randomPerson]);
                     tempPeople.splice(randomPerson, 1);
+
                     if(tempPeople.length <= 0)
                     {
                         tempPeople = checkLessWorkers(pickedPerson);
