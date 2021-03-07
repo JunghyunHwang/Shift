@@ -1,77 +1,63 @@
 'use strict'
 {
-    function renderDateButton(date)
+    const API_URL = '/api/shift';
+    let shift = {};
+    let workInfo = {};
+    let thisWeek = [];
+    const YOIL = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+    const WEEK = ["sun", "mon", "tue", "wed", "thr", "fri", "sat"];
+
+    function classifyByWork(date, today)
     {
         let todayWorker = {};
-        let yoil = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"];
-        let today = "";
 
-        for(let i = 0; i < thisWeek.length; i++)
+        // How many work types in today?
+        for(const work of shift[today])
         {
-            if(thisWeek[i] === date)
+            if(todayWorker[work.name])
             {
-                today = yoil[i];
+                continue;
+            }
+            else
+            {
+                todayWorker[work.name] = [];
             }
         }
 
-        for(const dayOfWeek in shift)
+        for(const workName in todayWorker)
         {
-            if(shift[dayOfWeek][0].day === date)
+            for(const work of shift[today])
             {
-                switch(dayOfWeek)
+                if(workName === work.name)
                 {
-                    case "sat":
-                        for(const work of typesOfShift.weekend)
-                        {
-                            todayWorker[work.workName] = [];
-                        }
-                        break;
-                    case "sun":
-                        for(const work of typesOfShift.weekend)
-                        {
-                            todayWorker[work.workName] = [];
-                        }
-                        break;
-                    default:
-                        for(const work of typesOfShift.weekday)
-                        {
-                            todayWorker[work.workName] = [];
-                        }
-                        break;
-                }
-
-                for(const workName in todayWorker)
-                {
-                    for(const work of shift[dayOfWeek])
-                    {
-                        if(workName === work.workName)
-                        {
-                            todayWorker[workName].push(work);
-                        }
-                    }
+                    todayWorker[workName].push(work);
                 }
             }
         }
 
-        renderingTable(todayWorker, today, date);
+        todayWorker.dayOfWeek = today;
+        todayWorker.date = date;
+
+        renderingTable(todayWorker);
     }
 
     function createDate()
     {
         uploadFile.remove();
-        let week = document.getElementById('thisWeek');
+        let btnDate = document.getElementById('thisWeek');
         
-        if(week.textContent)
+        if(btnDate.textContent)
         {
-            week.textContent = null;
+            btnDate.textContent = null;
         }
 
         for(let i = 0; i < thisWeek.length; i++)
         {
             let date = document.createElement('button');
-            date.textContent = thisWeek[i];
+            let btnDayOfWeek = WEEK.indexOf(thisWeek[i].day);
+            date.textContent = `${thisWeek[i].date} ${YOIL[btnDayOfWeek]}`;
             date.classList.add('btn_date');
-            week.append(date);
+            btnDate.append(date);
         }
 
         btnDateAddListener();
@@ -83,16 +69,25 @@
 
         for(let i = 0; i < classDate.length; i++)
         {
+            let date = classDate[i].textContent.split(" ");
+            let index = YOIL.indexOf(date[1]);
+
             classDate[i].addEventListener('click', () =>
             {
-                renderDateButton(classDate[i].textContent);
+                classifyByWork(date[0], WEEK[index]);
             });
         }
     }
 
-    function renderingTable(todayShift, today, date)
+    function renderingTable(todayShift)
     {
         let tableLen = 0;
+        let index = WEEk.indexOf(todayShift.dayOfWeek);
+        let dayOfWeek = YOIL[index];
+        let date = todayShift.date;
+
+        delete todayShift.dayOfWeek;
+        delete todayShift.date;
 
         for(const workName in todayShift)
         {
@@ -139,10 +134,7 @@
         </thead>
         `;
         table.innerHTML = tableHeader;
-
         const theaders = document.querySelector('thead');
-        let dayOfWeek = today;
-
         let title = `
         <tr>
             <th id="table_title" colspan=${totalColspan}>
@@ -159,9 +151,8 @@
         theaders.insertAdjacentHTML('afterbegin', title);
         // Draw body
         // information header
-        let tableBody = "<tbody><tr class='table_info'>";
-
         let numberOfWorkTypes = Object.keys(todayShift).length + numDuoWork;
+        let tableBody = "<tbody><tr class='table_info'>";
 
         for(let i = 0; i < numberOfWorkTypes; i++)
         {
@@ -224,10 +215,12 @@
 
         // create print button
         const parent = document.getElementById('btn-print');
+        
         if(parent.innerHTML)
         {
             parent.innerHTML = "";
         }
+
         const button = document.createElement('button');
         button.textContent = "프린트";
         button.id = 'btn_print';
@@ -264,7 +257,7 @@
         let files = e.target.files;
         let f;
         let temp = [];
-        let members = [];
+        let membersData = [];
         
         for(let i = 0; i < files.length; i++)
         {
@@ -279,29 +272,28 @@
 
                 workbook.SheetNames.forEach(function(item, index, array)
                 {
-                    const membersData = XLSX.utils.sheet_to_json(workbook.Sheets[item]);
+                    const inputData = XLSX.utils.sheet_to_json(workbook.Sheets[item]);
 
                     if(files.length < 2)
                     {
-                        members = membersData;
-                        checkPossibleWork(members);
-                        getData(members);
+                        membersData = inputData;
+                        getData(membersData);
                     }
                     else if(!temp.length)
                     {
-                        temp = membersData;
+                        temp = inputData;
                     }
-                    else if(membersData > temp)
+                    else if(inputData > temp)
                     {
                         for(const tempMember of temp)
                         {
-                            for(const member of membersData)
+                            for(const member of inputData)
                             {
                                 if(member.name === tempMember.name)
                                 {
-                                    members.push(Object.assign(member, tempMember));
-                                    let cutNum = membersData.indexOf(member);
-                                    membersData.splice(cutNum, 1);
+                                    membersData.push(Object.assign(member, tempMember));
+                                    let cutNum = inputData.indexOf(member);
+                                    inputData.splice(cutNum, 1);
                                     break;
                                 }
                                 else
@@ -312,22 +304,22 @@
                         }
 
                         // 남는 넘들임
-                        for(const member of membersData)
+                        for(const member of inputData)
                         {
-                            members.push(member);
+                            membersData.push(member);
                         }
-                        checkPossibleWork(members);
-                        getData(members);
+
+                        getData(membersData);
                     }
                     else
                     {
-                        for(const member of membersData)
+                        for(const member of inputData)
                         {
                             for(const tempMember of temp)
                             {
                                 if(member.name === tempMember.name)
                                 {
-                                    members.push(Object.assign(member, tempMember));
+                                    membersData.push(Object.assign(member, tempMember));
                                     let cutNum = temp.indexOf(tempMember);
                                     temp.splice(cutNum, 1);
                                     break;
@@ -341,11 +333,10 @@
 
                         for(const tempMember of temp)
                         {
-                            members.push(tempMember);
+                            membersData.push(tempMember);
                         }
 
-                        checkPossibleWork(members);
-                        getData(members);
+                        getData(membersData);
                     }
                 });
             };
@@ -354,26 +345,9 @@
         }
     });
 
-    function checkPossibleWork(members)
-    {
-        for(const member of members)
-        {
-            if(member.work)
-            {
-                member.pw = member.work.split(" ");
-                delete member.work;
-            }
-        }
-    }
-
-    const api_url = '/api/shift';
-    let shift = {};
-    let typesOfShift = {};
-    let thisWeek = [];
-
     async function getData(membersData)
     {
-        const options =
+        const OPTIONS =
         {
             method: 'POST',
             headers:
@@ -383,15 +357,16 @@
             body: JSON.stringify(membersData)
         };
 
-        const response = await fetch(api_url, options);
-        const shiftData = await response.json();
-        thisWeek = shiftData.thisWeek;
-        typesOfShift = shiftData.typesOfShift;
-        shift = shiftData.shift;
-        
-        for(const type in typesOfShift) // re 이 과정을 한번만 할 수 있을까?
+        const RESPONSE = await fetch(API_URL, OPTIONS);
+        const SHIFT_DATA = await RESPONSE.json();
+        thisWeek = SHIFT_DATA.thisWeek;
+        workInfo = SHIFT_DATA.work_info;
+        shift = SHIFT_DATA.shift;
+        console.log(shift);
+
+        for(const type in workInfo) // re 이 과정을 한번만 할 수 있을까?
         {
-            typesOfShift[type].sort(function(a, b)
+            workInfo[type].sort(function(a, b)
             {
                 return b['num'] - a['num'];
             });

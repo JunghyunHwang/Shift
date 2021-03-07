@@ -405,7 +405,7 @@
                 <div id="settingWrong">
                     <h4><a href"/">홈페이지로 돌아가 주세요</a></h4>
                 </div>
-                `
+                `;
                 shiftSetting.innerHTML = settingWrong;
                 break;
         }

@@ -38,7 +38,6 @@ app.set('view engine', 'hbs');
 // Define Routes
 app.use('/', require('./routes/pages'));
 app.use('/api/:userId', require('./routes/pages'));
-app.use('/user/:userId', require('./routes/pages'));
 app.use('/auth', require('./routes/auth'));
 
 app.listen(3000, () =>

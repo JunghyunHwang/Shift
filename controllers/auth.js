@@ -15,9 +15,9 @@ exports.login = async (req, res) =>
 {
     try 
     {
-        const { user_id, user_password } = req.body;
+        const { USER_ID, USER_PASSWORD } = req.body;
 
-        if(!user_id || !user_password)
+        if(!USER_ID || !USER_PASSWORD)
         {
             return res.status(400).render('login', 
             {
@@ -25,23 +25,23 @@ exports.login = async (req, res) =>
             });
         }
 
-        db.query('SELECT * FROM user WHERE user_id = ?', [user_id], async (error, results) =>
+        db.query('SELECT * FROM user WHERE user_id = ?', [USER_ID], async (error, results) =>
         {
             // id 값 틀리면 에러남
-            if(!results || !(await bcrypt.compare(user_password, results[0].user_password)))
+            if(!results.length || !(await bcrypt.compare(USER_PASSWORD, results[0].user_password)))
             {
                 res.status(401).render('login', { message: "아이디 또는 비밀번호를 확인 해주세요."});
             }
             else
             {
-                const id = results[0].user_id;
+                const ID = results[0].user_id;
 
-                const token = jwt.sign({ id: id }, process.env.JWT_SECRET,
+                const TOKEN = jwt.sign({ id: ID }, process.env.JWT_SECRET,
                 {
                     expiresIn: process.env.JWT_EXPIRES_IN
                 });
 
-                const cookieOptions = 
+                const COOKIE_OPTIONS = 
                 {
                     expires: new Date(
                         Date.now() + process.env.JWT_COOKIE_EXPIRES * 24 * 60 * 60 * 1000
@@ -49,7 +49,7 @@ exports.login = async (req, res) =>
                     httpOnly: true
                 }
                 
-                res.cookie('jwt', token, cookieOptions);
+                res.cookie('jwt', TOKEN, COOKIE_OPTIONS);
                 res.status(200).redirect('/');
             }
         });
@@ -62,9 +62,9 @@ exports.login = async (req, res) =>
 
 exports.signup = (req, res) =>
 {
-    const{ user_id, com_name, user_password, passwordConfirm } = req.body;
+    const{ USER_ID, COM_NAME, USER_PASSWORD, PASSWORD_CONFIRM } = req.body;
 
-    db.query('SELECT user_id FROM user WHERE user_id = ?', [user_id], async (error, results) =>
+    db.query('SELECT user_id FROM user WHERE user_id = ?', [USER_ID], async (error, results) =>
     {
         if(error)
         {
@@ -78,7 +78,7 @@ exports.signup = (req, res) =>
                 message: "이미 사용하고 있는 아이디 입니다."
             });
         }
-        else if(user_password !== passwordConfirm)
+        else if(USER_PASSWORD !== PASSWORD_CONFIRM)
         {
             return res.render('signup', 
             {
@@ -86,9 +86,9 @@ exports.signup = (req, res) =>
             });
         }
 
-        let hashedPassword = await bcrypt.hash(user_password, 8);
+        let hashedPassword = await bcrypt.hash(USER_PASSWORD, 8);
 
-        db.query('INSERT INTO user SET ?, created=NOW()', {user_id: user_id, com_name: com_name, user_password: hashedPassword}, (error, results) =>
+        db.query('INSERT INTO user SET ?, created=NOW()', {user_id: USER_ID, com_name: COM_NAME, user_password: hashedPassword}, (error, results) =>
         {
             if(error)
             {

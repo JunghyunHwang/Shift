@@ -13,7 +13,8 @@ const db = mysql.createConnection(
 exports.shiftSetting = (req, res) =>
 {
     const shift = JSON.parse(req.body.shift_info);
-    const shiftInfo = JSON.stringify(shift.shift_info);
+    // const shiftInfo = JSON.stringify(shift.shift_info);
+    const shiftInfo = shift.shift_info;
     let tempRelation;
 
     if(shift.relation_info === null)
@@ -32,7 +33,7 @@ exports.shiftSetting = (req, res) =>
     
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // re .env JWT_SECRET 내용 바꾸기
     const userId = decoded.id;
-    
+
     db.query('SELECT id FROM user WHERE user_id=?', [userId], (err, result) =>
     {
         if(err)
@@ -44,37 +45,80 @@ exports.shiftSetting = (req, res) =>
             const com_id = result[0].id;
             const sql = 'INSERT INTO shift_info SET ?, created=NOW()';
 
-            db.query(sql, {types_shift: shiftInfo, com_id: com_id}, (errShift, results) =>
+            for(const week in shiftInfo)
             {
-                if(errShift)
+                switch(week)
                 {
-                    console.log(errShift);
-                    // re 근무설정에 문제가 생겼습니다. 계속 이 현상이 나타나면 관리자에게 문의 해주세요.
-                }
-                else
-                {
-                    if(relationInfo !== null)
-                    {
-                        const workTypesSQL = 'INSERT INTO relation SET ?, created=NOW()';
-                        db.query(workTypesSQL, {relation: relationInfo, com_id: com_id}, (errRel, result2) => // re change name result2
+                    case "weekday":
+                        for(const workInfo of shiftInfo[week])
                         {
-                            if(errRel)
+                            db.query(sql, 
                             {
-                                console.log(errRel);
-                            }
-                            else
+                                is_weekday: true,
+                                work_name: workInfo.workName,
+                                num_of_work: workInfo.num,
+                                first_work_time: workInfo.firstWorkTime,
+                                time_interval: workInfo.timeInterval,
+                                is_duo: workInfo.duo,
+                                com_id: com_id
+                            },
+                            (errShift, results) =>
                             {
-                                console.log("Good job");
-                                res.status(200).redirect(`/`);
-                            }
-                        });
+                                if(errShift)
+                                {
+                                    console.log(errShift);
+                                    // re 근무설정에 문제가 생겼습니다. 계속 이 현상이 나타나면 관리자에게 문의 해주세요.
+                                }
+                            });
+                        }
+                        break;
+                    case "weekend":
+                        for(const workInfo of shiftInfo[week])
+                        {
+                            db.query(sql, 
+                            {
+                                is_weekday: false,
+                                work_name: workInfo.workName,
+                                num_of_work: workInfo.num,
+                                first_work_time: workInfo.firstWorkTime,
+                                time_interval: workInfo.timeInterval,
+                                is_duo: workInfo.duo,
+                                com_id: com_id
+                            },
+                            (errShift, results) =>
+                            {
+                                if(errShift)
+                                {
+                                    console.log(errShift);
+                                    // re 근무설정에 문제가 생겼습니다. 계속 이 현상이 나타나면 관리자에게 문의 해주세요.
+                                }
+                            });
+                        }
+                        break;
+                }
+            }
+
+            if(relationInfo !== null)
+            {
+                const workTypesSQL = 'INSERT INTO relation SET ?, created=NOW()';
+                db.query(workTypesSQL, {relation: relationInfo, com_id: com_id}, (errRel, result2) => // re change name result2
+                {
+                    if(errRel)
+                    {
+                        console.log(errRel);
                     }
                     else
                     {
+                        console.log("Good job");
                         res.status(200).redirect(`/`);
                     }
-                }
-            });
+                });
+            }
+            else
+            {
+                console.log("Good job");
+                res.status(200).redirect(`/`);
+            }
         }
     });
 }

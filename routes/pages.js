@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const dataController = require('../controllers/getdata');
+const dataController = require('../controllers/getData');
 
 router.get('/', (req, res) =>
 {
@@ -24,12 +24,6 @@ router.get('/', (req, res) =>
 });
 
 router.post('/api/shift', dataController.getShiftData);
-
-router.get('/user/:userId', (req, res) =>
-{
-    const userId = req.params.userId;
-    res.render('personal', {user: userId});
-});
 
 router.get('/setting/shift', (req, res) =>
 {
