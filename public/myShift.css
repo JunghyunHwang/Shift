@@ -1,0 +1,13 @@
+.btn_week
+{
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 100;
+    padding: 15px;
+    background-color: #2d3436;;
+    color: #ffffff;
+    border-style: none;
+    border-radius: 8px;
+    margin: 20px;
+    cursor: pointer;
+}

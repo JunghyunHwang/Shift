@@ -43,7 +43,7 @@ exports.shiftSetting = (req, res) =>
         else
         {
             const com_id = result[0].id;
-            const sql = 'INSERT INTO shift_info SET ?, created=NOW()';
+            const sql = 'INSERT INTO work_info SET ?, created=NOW()';
 
             for(const week in shiftInfo)
             {

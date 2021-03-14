@@ -42,5 +42,5 @@ app.use('/auth', require('./routes/auth'));
 
 app.listen(3000, () =>
 {
-    console.log("Server is running like Ninja");
+    console.log("Server is running like a Ninja");
 });

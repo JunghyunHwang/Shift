@@ -13,10 +13,112 @@ const DB = mysql.createConnection(
 
 exports.getShiftData = (req, res) =>
 {
+    const TOKEN = req.cookies.jwt;
+    const DECODED = jwt.verify(TOKEN, process.env.JWT_SECRET);
+    const USER_ID = DECODED.id;
+    const SHIFT_DATA_SQL = "SELECT last_week, this_week FROM shift WHERE com_id=?";
+
+    DB.query('SELECT id FROM user WHERE user_id=?', [USER_ID], (err, result) =>
+    {
+        let comId = result[0].id;
+
+        DB.query(SHIFT_DATA_SQL, [comId], (err, result) =>
+        {
+            res.json({
+                lastWeek: result[0].last_week,
+                thisWeek: result[0].this_week
+            });
+        });
+    });
+}
+
+exports.pickMember = (req, res) =>
+{
     const INPUT_DATA = req.body;
     const TOKEN = req.cookies.jwt;
     const DECODED = jwt.verify(TOKEN, process.env.JWT_SECRET);
     const USER_ID = DECODED.id;
+
+    function saveShiftData(shiftData, comId)
+    {
+        const GET_SHIFT_SQL = "SELECT this_week FROM shift WHERE com_id=?";
+        const INPUT_SHIFT_SQL = "INSERT INTO shift SET ?, created=NOW()";
+        const UPDATE_SHIFT_SQL = "UPDATE shift SET last_week=?, this_week=?, created=NOW() WHERE com_id=?"
+        let thisWeekShift = JSON.stringify(shiftData);
+
+        DB.query(GET_SHIFT_SQL, [comId], (err, result) =>
+        {
+            if(err)
+            {
+                console.log(err);
+            }
+            else if(!result.length)
+            {
+                DB.query(INPUT_SHIFT_SQL, {this_week: thisWeekShift, com_id: comId}, (err, inputShift) =>
+                {
+                    if(err)
+                    {
+                        console.log(err);
+                    }
+                });
+            }
+            else
+            {
+                let lastWeekShift = result[0].this_week;
+
+                DB.query(UPDATE_SHIFT_SQL, [lastWeekShift, thisWeekShift, comId], (err, updateShift) =>
+                {
+                    if(err)
+                    {
+                        console.log(err);
+                    }
+                });
+            }
+        });
+    }
+
+    function saveMemberData(membersData, comId)
+    {
+        const INPUT_MEMBERS_SQL = "INSERT INTO members SET ?";
+        const UPDATE_MEMBERS_SQL = "UPDATE members SET count=?, last_working_day=?, worked=? WHERE id=?";
+        
+        // Make function members data insert into members table
+        for(let member of membersData)
+        {
+            const WORKED = JSON.stringify(member.worked);
+            const HAS_MEMBER_SQL = "SELECT id, name, com_id FROM members WHERE name=? AND com_id=?";
+
+            DB.query(HAS_MEMBER_SQL, [member.name, comId], (err, hasMember) =>
+            {
+                if(err)
+                {
+                    console.log(err);
+                }
+                else if(hasMember.length)
+                {
+                    DB.query(UPDATE_MEMBERS_SQL, [member.count, member.date, WORKED, hasMember[0].id], (errUpdate, updateResult) =>
+                    {
+                        if(errUpdate)
+                        {
+                            console.log(updateErr);
+                        }
+                    });
+                }
+                else
+                {
+                    DB.query(INPUT_MEMBERS_SQL,
+                    {name: member.name, count: member.count, last_working_day: member.date, worked: WORKED, com_id: comId},
+                    (errMemberInput, memberInput) =>
+                    {
+                        if(errMemberInput)
+                        {
+                            console.log(errMemberInput);
+                        }
+                    });
+                }
+            });
+        }
+    }
 
     DB.query('SELECT id, last_draw FROM user WHERE user_id=?', [USER_ID], (err, result) =>
     {
@@ -28,8 +130,9 @@ exports.getShiftData = (req, res) =>
         {
             const COM_ID = result[0].id;
             const LAST_DRAW = result[0].last_draw;
-            const WORK_INFO_SQL = "SELECT is_weekday, work_name, num_of_work, first_work_time, time_interval, is_duo FROM shift_info WHERE com_id=?";
-            
+            const WORK_INFO_SQL = "SELECT is_weekday, work_name, num_of_work, first_work_time, time_interval, is_duo FROM work_info WHERE com_id=?";
+            const MEMBERS_SQL = "SELECT name, count, last_working_day, worked FROM members WHERE com_id=?";
+
             DB.query(WORK_INFO_SQL, [COM_ID], (err, workData) =>
             {
                 if(err)
@@ -79,42 +182,60 @@ exports.getShiftData = (req, res) =>
 
                     DB.query(RELATION_SQL, [COM_ID], (err, relation) =>
                     {
-                        if(relation[0] !== undefined)
+                        if(err)
+                        {
+                            console.log(err);
+                        }
+                        else if(relation[0] !== undefined)
                         {
                             SHIFT_INFO.relation = JSON.parse(relation[0].relation_info);
                         }
 
-                        // Send data
-                        const DATA = DRAW.getData(INPUT_DATA, SHIFT_INFO);
-                        const SHIFT = DATA[0];
-                        const THISWEEK = DATA[1];
-                        const MEMBERS_DATA = DATA[2];
-
-                        res.json({
-                            thisWeek: THISWEEK,
-                            work_info: SHIFT_INFO.work_info,
-                            shift: SHIFT
-                        });
-
-                        const INPUT_MEMBERS_SQL = "INSERT INTO members SET ?";
-
-                        for(let member of MEMBERS_DATA)
+                        DB.query(MEMBERS_SQL, [COM_ID], (err, memberData) =>
                         {
-                            const WORKED = JSON.stringify(member.worked);
-                            DB.query(INPUT_MEMBERS_SQL,
-                            {name: member.name, last_working_day: member.date, worked: WORKED, com_id: COM_ID},
-                            (errMemberInput, memberInput) =>
+                            if(err)
                             {
-                                if(errMemberInput)
+                                console.log(err);
+                            }
+                            else
+                            {
+                                for(let person of INPUT_DATA)
                                 {
-                                    console.log(errMemberInput);
+                                    let index = memberData.findIndex(member => member.name === person.이름);
+                                    // 만야 인덱스가 두개면 계급으로?
+                                    
+                                    if(index >= 0)
+                                    {
+                                        person.count = (memberData[index].count === null) ? 0 : memberData[index].count;
+                                        person.date = memberData[index].last_working_day;
+                                        person.worked = JSON.parse(memberData[index].worked);
+                                    }
+                                    else
+                                    {
+                                        person.count = 0;
+                                        person.date = "0";
+                                        person.worked = [];
+                                    }
                                 }
-                                else
-                                {
-                                    console.log("good");
-                                }
-                            });
-                        }
+
+                                // Send data
+                                const DATA = DRAW.getData(INPUT_DATA, SHIFT_INFO);
+                                const SHIFT = DATA[0];
+                                const THISWEEK = DATA[1];
+                                const MEMBERS_DATA = DATA[2];
+                                saveShiftData(SHIFT, COM_ID);
+                                // saveMemberData(MEMBERS_DATA, COM_ID);
+                                /*
+                                res.json({
+                                    shift: SHIFT,
+                                    thisWeek: THISWEEK,
+                                    work_info: SHIFT_INFO.work_info
+                                });
+                                console.log(MEMBERS_DATA);
+
+                                // saveShiftData(SHIFT, COM_ID);*/
+                            }
+                        });
                     });
                 }
             });

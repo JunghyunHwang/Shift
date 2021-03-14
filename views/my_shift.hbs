@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" href="/myShift.css">
+        <title>Shift</title>
+    </head>
+    <body>
+        <div class="top">
+            <h1><a href="/">Draw</a></h1>
+            <nav>
+                <ul>
+                {{#if isLogined}}
+                    <li><a href="/my_shift">내 근무</a></li>
+                    <li><a href="/auth/logout">로그아웃</a></li>
+                {{/if}}
+                </ul>
+            </nav>
+            <div id="user_name">
+                {{userId}}
+            </div>
+        </div>
+        <div class="main">
+            <div id="weeks"></div>
+
+            <div id="select_Week"></div>
+                
+            <div id="print-table">
+                <div class="table-shift"></div>
+            </div>
+
+            <div id="btn-print"></div>
+        </div>
+        <div class="bottom">
+        </div>
+        <script src="/get-shift.js"></script>
+    </body>
+</html>
