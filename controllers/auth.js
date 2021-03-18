@@ -27,7 +27,6 @@ exports.login = async (req, res) =>
 
         db.query('SELECT * FROM user WHERE user_id = ?', [USER_ID], async (error, results) =>
         {
-            // id 값 틀리면 에러남
             if(!results.length || !(await bcrypt.compare(USER_PASSWORD, results[0].user_password)))
             {
                 res.status(401).render('login', { message: "아이디 또는 비밀번호를 확인 해주세요."});

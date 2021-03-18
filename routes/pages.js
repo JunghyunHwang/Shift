@@ -22,7 +22,7 @@ router.get('/', (req, res) =>
 
 router.post('/api/pick/shift', dataController.pickMember);
 
-router.get('/api/get/shift', dataController.getShiftData);
+router.get('/api/get/shift', dataController.getMyShiftData);
 
 router.get('/my_shift', (req, res) =>
 {

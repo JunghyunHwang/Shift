@@ -11,7 +11,7 @@ const DB = mysql.createConnection(
     }
 );
 
-exports.getShiftData = (req, res) =>
+exports.getMyShiftData = (req, res) =>
 {
     const TOKEN = req.cookies.jwt;
     const DECODED = jwt.verify(TOKEN, process.env.JWT_SECRET);
@@ -24,10 +24,24 @@ exports.getShiftData = (req, res) =>
 
         DB.query(SHIFT_DATA_SQL, [comId], (err, result) =>
         {
-            res.json({
-                lastWeek: result[0].last_week,
-                thisWeek: result[0].this_week
-            });
+            if(err)
+            {
+                console.log(err);
+            }
+            else if(!result.length)
+            {
+                res.json({
+                    status: false
+                });
+            }
+            else
+            {
+                res.json({
+                    status: true,
+                    lastWeek: result[0].last_week,
+                    thisWeek: result[0].this_week
+                });
+            }
         });
     });
 }
@@ -80,11 +94,12 @@ exports.pickMember = (req, res) =>
     function saveMemberData(membersData, comId)
     {
         const INPUT_MEMBERS_SQL = "INSERT INTO members SET ?";
-        const UPDATE_MEMBERS_SQL = "UPDATE members SET count=?, last_working_day=?, worked=? WHERE id=?";
+        const UPDATE_MEMBERS_SQL = "UPDATE members SET total_count=?, last_working_day=?, worked=? WHERE id=?";
         
         // Make function members data insert into members table
         for(let member of membersData)
         {
+            const TOTAL_COUNT = member.worked.length;
             const WORKED = JSON.stringify(member.worked);
             const HAS_MEMBER_SQL = "SELECT id, name, com_id FROM members WHERE name=? AND com_id=?";
 
@@ -96,7 +111,7 @@ exports.pickMember = (req, res) =>
                 }
                 else if(hasMember.length)
                 {
-                    DB.query(UPDATE_MEMBERS_SQL, [member.count, member.date, WORKED, hasMember[0].id], (errUpdate, updateResult) =>
+                    DB.query(UPDATE_MEMBERS_SQL, [TOTAL_COUNT, member.date, WORKED, hasMember[0].id], (errUpdate, updateResult) =>
                     {
                         if(errUpdate)
                         {
@@ -107,7 +122,7 @@ exports.pickMember = (req, res) =>
                 else
                 {
                     DB.query(INPUT_MEMBERS_SQL,
-                    {name: member.name, count: member.count, last_working_day: member.date, worked: WORKED, com_id: comId},
+                    {name: member.name, total_count: TOTAL_COUNT, last_working_day: member.date, worked: WORKED, com_id: comId},
                     (errMemberInput, memberInput) =>
                     {
                         if(errMemberInput)
@@ -120,7 +135,18 @@ exports.pickMember = (req, res) =>
         }
     }
 
-    DB.query('SELECT id, last_draw FROM user WHERE user_id=?', [USER_ID], (err, result) =>
+    function saveLastDrawDate(lastDraw, comId)
+    {
+        DB.query("UPDATE user SET last_draw=? WHERE id=?", [lastDraw, comId], (err, result) =>
+        {
+            if(err)
+            {
+                console.log(err);
+            }
+        });
+    }
+
+    DB.query("SELECT id, last_draw FROM user WHERE user_id=?", [USER_ID], (err, result) =>
     {
         if(err)
         {
@@ -131,7 +157,7 @@ exports.pickMember = (req, res) =>
             const COM_ID = result[0].id;
             const LAST_DRAW = result[0].last_draw;
             const WORK_INFO_SQL = "SELECT is_weekday, work_name, num_of_work, first_work_time, time_interval, is_duo FROM work_info WHERE com_id=?";
-            const MEMBERS_SQL = "SELECT name, count, last_working_day, worked FROM members WHERE com_id=?";
+            const MEMBERS_SQL = "SELECT name, total_count, last_working_day, worked FROM members WHERE com_id=?";
 
             DB.query(WORK_INFO_SQL, [COM_ID], (err, workData) =>
             {
@@ -206,13 +232,11 @@ exports.pickMember = (req, res) =>
                                     
                                     if(index >= 0)
                                     {
-                                        person.count = (memberData[index].count === null) ? 0 : memberData[index].count;
                                         person.date = memberData[index].last_working_day;
                                         person.worked = JSON.parse(memberData[index].worked);
                                     }
                                     else
                                     {
-                                        person.count = 0;
                                         person.date = "0";
                                         person.worked = [];
                                     }
@@ -220,20 +244,20 @@ exports.pickMember = (req, res) =>
 
                                 // Send data
                                 const DATA = DRAW.getData(INPUT_DATA, SHIFT_INFO);
-                                const SHIFT = DATA[0];
-                                const THISWEEK = DATA[1];
-                                const MEMBERS_DATA = DATA[2];
-                                saveShiftData(SHIFT, COM_ID);
-                                // saveMemberData(MEMBERS_DATA, COM_ID);
-                                /*
+                                const SHIFT = DATA.shift_data;
+                                const THISWEEK = DATA.week
+                                const MEMBERS_DATA = DATA.members_data;
+                                
+                                
                                 res.json({
                                     shift: SHIFT,
                                     thisWeek: THISWEEK,
                                     work_info: SHIFT_INFO.work_info
                                 });
-                                console.log(MEMBERS_DATA);
-
-                                // saveShiftData(SHIFT, COM_ID);*/
+                                
+                                saveShiftData(SHIFT, COM_ID);
+                                // saveMemberData(MEMBERS_DATA, COM_ID);
+                                // saveLastDrawDate(THISWEEK[6].date, COM_ID);
                             }
                         });
                     });

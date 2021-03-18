@@ -35,26 +35,36 @@
     function btnWeeksAddListener()
     {
         let classWeek = document.querySelectorAll('.btn_week');
-        
-        for(let i = 0; i < classWeek.length; i++)
+
+        if(classWeek.length === 1)
         {
-            switch(i)
+            classWeek[0].addEventListener('click', () =>
             {
-                case 0:
-                    classWeek[i].addEventListener('click', () =>
-                    {
-                        createBtnDate(lastWeek);
-                    });
-                    break;
-                case 1:
-                    classWeek[i].addEventListener('click', () =>
-                    {
-                        createBtnDate(thisWeek);
-                    });
-                    break;
-                default:
-                    confirm("Unknown types");
-                    break;
+                createBtnDate(thisWeek);
+            });
+        }
+        else
+        {
+            for(let i = 0; i < classWeek.length; i++)
+            {
+                switch(i)
+                {
+                    case 0:
+                        classWeek[i].addEventListener('click', () =>
+                        {
+                            createBtnDate(lastWeek);
+                        });
+                        break;
+                    case 1:
+                        classWeek[i].addEventListener('click', () =>
+                        {
+                            createBtnDate(thisWeek);
+                        });
+                        break;
+                    default:
+                        confirm("Unknown types");
+                        break;
+                }
             }
         }
     }
@@ -142,7 +152,6 @@
 
     function renderingTable(todayShift, week)
     {
-        console.log(week);
         let tableLen = 0;
         let index = WEEK.indexOf(todayShift.dayOfWeek);
         let dayOfWeek = YOIL[index];
@@ -340,15 +349,29 @@
         const RESPONSE = await fetch(API_URL);
         const SHIFT_DATA = await RESPONSE.json();
 
-        let lastWeekShift = JSON.parse(SHIFT_DATA.lastWeek);
-        let thisWeekShift = JSON.parse(SHIFT_DATA.thisWeek);
-        shift.lastWeekShift = lastWeekShift;
-        shift.thisWeekShift = thisWeekShift;
+        if(SHIFT_DATA.status)
+        {
+            if(SHIFT_DATA.lastWeek !== null)
+            {
+                let lastWeekShift = JSON.parse(SHIFT_DATA.lastWeek);
+                shift.lastWeekShift = lastWeekShift;
+                lastWeek = createWeekDate(shift.lastWeekShift.mon[0].date);
+            }
 
-        lastWeek = createWeekDate(shift.lastWeekShift.mon[0].date);
-        thisWeek = createWeekDate(shift.thisWeekShift.mon[0].date);
+            let thisWeekShift = JSON.parse(SHIFT_DATA.thisWeek);
+            shift.thisWeekShift = thisWeekShift;
+            thisWeek = createWeekDate(shift.thisWeekShift.mon[0].date);
 
-        createBtnWeeks();
+            createBtnWeeks();
+        }
+        else
+        {
+            const ROOT = document.querySelector('#weeks');
+            let noData = document.createElement('div');
+            noData.id = "no_data";
+            noData.textContent = "이전 근무가 없습니다.";
+            ROOT.append(noData);
+        }
     }
     
     getShiftData();

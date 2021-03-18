@@ -11,3 +11,8 @@
     margin: 20px;
     cursor: pointer;
 }
+
+#no_data
+{
+    color: rgb(161, 161, 161);
+}
