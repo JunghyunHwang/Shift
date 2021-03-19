@@ -1,7 +1,7 @@
 /* 근무 짜는 프로그램*/
 'use strict';
 
-exports.getData = (membersData, shiftInfo) =>
+exports.draw_member = (membersData, shiftInfo) =>
 {
     const WEEK = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
     const WORK_INFO = shiftInfo.work_info;
@@ -13,13 +13,14 @@ exports.getData = (membersData, shiftInfo) =>
 
     class member
     {
-        constructor(rank, name, join, count, date, ban, time, worked, weekday, weekend)
+        constructor(rank, name, priority, count, date, join, ban, time, worked, weekday, weekend)
         {
             this.rank = rank;
             this.name = name;
-            this.join = join;
+            this.priority = priority;
             this.count = count;
             this.date = date;
+            this.join = join;
             this.ban = ban;
             this.time = time;
             this.worked = worked;
@@ -30,10 +31,10 @@ exports.getData = (membersData, shiftInfo) =>
         controlInfo(work)
         {
             let workName = `${work.name}${work.time}`;
-
             this.count++;
             this.date = work.date;
             this.worked.push(workName);
+            this.priority = false;
 
             if(work.duo)
             {
@@ -76,16 +77,17 @@ exports.getData = (membersData, shiftInfo) =>
         {
             let rank = person.계급;
             let name = person.이름;
-            let join = person.입대일;
+            let priority = false;
             let count = 0;
             let date = (person.date) ? person.date : "0";
+            let join = person.입대일;
             let ban = (person.ban) ? person.ban.split(" ") : [];
             let time = (person.시간) ? regxBanTime(person.시간) : [];
             let worked = (person.worked.length) ? person.worked : [];
             let weekday = person.평일.split(" ");
             let weekend = person.주말.split(" ");
 
-            person = new member(rank, name, join, count, date, ban, time, worked, weekday, weekend);
+            person = new member(rank, name, priority, count, date, join, ban, time, worked, weekday, weekend);
             members.push(person);
         }
     }
@@ -317,7 +319,7 @@ exports.getData = (membersData, shiftInfo) =>
         }
 
         let minCount = Math.floor(numOfWorked / members.length);
-        let today = new Date(date); // (일이 2자리수가 되면 시간이 09:00로됨, 1자리수 일은 00:00로 됨)
+        let today = new Date(date);     // (일이 2자리수가 되면 시간이 09:00로됨, 1자리수 일은 00:00로 됨)
         today.setHours(0);
         let currentDate = today.getDate();
 
@@ -336,23 +338,16 @@ exports.getData = (membersData, shiftInfo) =>
             {
                 continue;
             }
-            else if(member.count <= minCount)
-            {
-                if(dayDiff < minDayOff)
-                {
-                    continue;
-                }
-                else
-                {
-                    possible.push(member);
-                }
-            }
             else if(dayDiff < minDayOff)
             {
                 continue;
             }
             else
             {
+                if(member.count <= minCount)
+                {
+                    member.priority = true;
+                }
                 possible.push(member);
             }
         }
@@ -411,13 +406,13 @@ exports.getData = (membersData, shiftInfo) =>
         let pass = false;
         let randomPerson = 0;
         let selected = [];
-        let zeroCntMembers = [];
+        let priorityMembers = [];
 
         for(let member of possibleMembers)
         {
-            if(member.count === 0)
+            if(member.priority)
             {
-                zeroCntMembers.push(member);
+                priorityMembers.push(member);
             }
             else
             {
@@ -426,11 +421,11 @@ exports.getData = (membersData, shiftInfo) =>
         }
 
         // Pick member
-        if(zeroCntMembers.length)
+        if(priorityMembers.length)
         {
-            randomPerson = Math.floor(Math.random() * zeroCntMembers.length - 1) + 1;
-            zeroCntMembers[randomPerson].controlInfo(work);
-            return zeroCntMembers[randomPerson];
+            randomPerson = Math.floor(Math.random() * priorityMembers.length - 1) + 1;
+            priorityMembers[randomPerson].controlInfo(work);
+            return priorityMembers[randomPerson];
         }
         else
         {
@@ -502,7 +497,7 @@ exports.getData = (membersData, shiftInfo) =>
             let subMember = pick(work, possible);
             let subIndex = possibleMembers.findIndex(member => member.name === subMember.name);
             possibleMembers.splice(subIndex, 1);
-
+            /*
             let targetMemberJoin = new Date(pickedMember.join);
             targetMemberJoin.setHours(0);
             let subMemberJoin = new Date(subMember.join);
@@ -513,7 +508,7 @@ exports.getData = (membersData, shiftInfo) =>
             {
                 // 이거 하려면 member.who가 배열이면 안되고 meber.who.main, member.who.sub 이렇게 되어야함
                 // Make function (Who's main?) 더 짬 놓은 애를 메인으로 두는 함수
-            }
+            }*/
         }
 
         // relation work
@@ -535,39 +530,40 @@ exports.getData = (membersData, shiftInfo) =>
     function filteringMember(work, memberData)
     {
         let possible = [];
-        let isWeekday;
-        let timeReg = /(\d{2})[ :]\d{2}[ ~ ]{1,3}(\d{2}):\d{2}/g;
-        let result = timeReg.exec(work.time);
-        let startTime = result[1];
+        let possibleWork;
+        let workTimeReg = /(\d{2})[ :]\d{2}[ ~ ]{1,3}(\d{2}):\d{2}/g;
+        let result = workTimeReg.exec(work.time);
+        let workStartTime = result[1];
 
         switch(work.day)
         {
             case 'sat':
-                isWeekday = "weekend";
+                possibleWork = "weekend";
                 break;
             case 'sun':
-                isWeekday = "weekend";
+                possibleWork = "weekend";
                 break;
             default:
-                isWeekday = "weekday";
+                possibleWork = "weekday";
                 break;
         }
 
         for(let member of memberData)
         {
-            if(member.time.indexOf(startTime) >= 0)
+            if(member.time.indexOf(workStartTime) >= 0 || member[possibleWork].indexOf(work.name) < 0)
             {
                 continue;
             }
-            else if(member[isWeekday].indexOf(work.name) < 0)
+            else if(member.time.length)
             {
-                continue;
+                member.priority = true;
+                possible.push(member);
             }
             else
             {
                 possible.push(member);
             }
-        }        
+        }
 
         return possible;
     }
