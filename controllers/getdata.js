@@ -48,11 +48,6 @@ exports.getMyShiftData = (req, res) =>
 
 exports.pickMember = (req, res) =>
 {
-    const INPUT_DATA = req.body;
-    const TOKEN = req.cookies.jwt;
-    const DECODED = jwt.verify(TOKEN, process.env.JWT_SECRET);
-    const USER_ID = DECODED.id;
-
     function saveShiftData(shiftData, comId)
     {
         const GET_SHIFT_SQL = "SELECT this_week FROM shift WHERE com_id=?";
@@ -145,6 +140,11 @@ exports.pickMember = (req, res) =>
             }
         });
     }
+
+    const INPUT_DATA = req.body;
+    const TOKEN = req.cookies.jwt;
+    const DECODED = jwt.verify(TOKEN, process.env.JWT_SECRET);
+    const USER_ID = DECODED.id;
 
     DB.query("SELECT id, last_draw FROM user WHERE user_id=?", [USER_ID], (err, result) =>
     {
@@ -243,7 +243,7 @@ exports.pickMember = (req, res) =>
                                 }
 
                                 // Send data
-                                const DATA = DRAW.getData(INPUT_DATA, SHIFT_INFO);
+                                const DATA = DRAW.draw_member(INPUT_DATA, SHIFT_INFO);
                                 const SHIFT = DATA.shift_data;
                                 const THISWEEK = DATA.week
                                 const MEMBERS_DATA = DATA.members_data;
