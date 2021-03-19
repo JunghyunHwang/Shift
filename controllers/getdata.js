@@ -157,7 +157,6 @@ exports.pickMember = (req, res) =>
             const COM_ID = result[0].id;
             const LAST_DRAW = result[0].last_draw;
             const WORK_INFO_SQL = "SELECT is_weekday, work_name, num_of_work, first_work_time, time_interval, is_duo FROM work_info WHERE com_id=?";
-            const MEMBERS_SQL = "SELECT name, total_count, last_working_day, worked FROM members WHERE com_id=?";
 
             DB.query(WORK_INFO_SQL, [COM_ID], (err, workData) =>
             {
@@ -197,25 +196,28 @@ exports.pickMember = (req, res) =>
                             workInfo.weekend.push(tempData);
                         }
                     }
-                    
-                    const SHIFT_INFO = 
-                    {
-                        work_info: workInfo,
-                        relation: null,
-                        lastDraw: LAST_DRAW
-                    };
-                    const RELATION_SQL = "SELECT relation_info FROM relation WHERE com_id=?";
 
-                    DB.query(RELATION_SQL, [COM_ID], (err, relation) =>
+                    const RELATION_SQL = "SELECT relation_info FROM relation WHERE com_id=?";
+                    let relationData = null;
+
+                    DB.query(RELATION_SQL, [COM_ID], (err, result) =>
                     {
                         if(err)
                         {
                             console.log(err);
                         }
-                        else if(relation[0] !== undefined)
+                        else if(result.length)
                         {
-                            SHIFT_INFO.relation = JSON.parse(relation[0].relation_info);
+                            relationData = JSON.parse(result[0].relation_info);
                         }
+
+                        const SHIFT_INFO = 
+                        {
+                            work_info: workInfo,
+                            relation: relationData,
+                            lastDraw: LAST_DRAW
+                        };
+                        const MEMBERS_SQL = "SELECT name, total_count, last_working_day, worked FROM members WHERE com_id=?";
 
                         DB.query(MEMBERS_SQL, [COM_ID], (err, memberData) =>
                         {
@@ -248,14 +250,13 @@ exports.pickMember = (req, res) =>
                                 const THISWEEK = DATA.week
                                 const MEMBERS_DATA = DATA.members_data;
                                 
-                                
                                 res.json({
                                     shift: SHIFT,
                                     thisWeek: THISWEEK,
                                     work_info: SHIFT_INFO.work_info
                                 });
                                 
-                                saveShiftData(SHIFT, COM_ID);
+                                // saveShiftData(SHIFT, COM_ID);
                                 // saveMemberData(MEMBERS_DATA, COM_ID);
                                 // saveLastDrawDate(THISWEEK[6].date, COM_ID);
                             }
