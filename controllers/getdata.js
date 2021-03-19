@@ -199,7 +199,7 @@ exports.pickMember = (req, res) =>
 
                     const RELATION_SQL = "SELECT relation_info FROM relation WHERE com_id=?";
                     let relationData = null;
-                    
+
                     DB.query(RELATION_SQL, [COM_ID], (err, result) =>
                     {
                         if(err)
@@ -262,7 +262,7 @@ exports.pickMember = (req, res) =>
                             }
                         });
                     });
-                }   
+                }
             });
         }
     });
