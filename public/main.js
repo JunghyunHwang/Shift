@@ -7,7 +7,6 @@ exports.draw_member = (membersData, shiftInfo) =>
     const WORK_INFO = shiftInfo.work_info;
     const RELATION = shiftInfo.relation;
     const LAST_DRAW = shiftInfo.lastDraw;
-    // const LAST_DRAW = "2021-03-28";
     let members = [];
     let thisWeek = [];
 
@@ -79,7 +78,7 @@ exports.draw_member = (membersData, shiftInfo) =>
             let name = person.이름;
             let priority = false;
             let count = 0;
-            let date = (person.date) ? person.date : "0";
+            let date = (person.date) ? person.date : 0;
             let join = person.입대일;
             let ban = (person.ban) ? person.ban.split(" ") : [];
             let time = (person.시간) ? regxBanTime(person.시간) : [];
@@ -132,9 +131,8 @@ exports.draw_member = (membersData, shiftInfo) =>
                 let month = Number(nextRenderWeek.getMonth()) + 1;
                 let date = nextRenderWeek.getDate();
                 let day = nextRenderWeek.getDay();
-    
-                thisWeek[i] = 
-                {
+
+                thisWeek[i] = {
                     date: `${year}-${month}-${date}`,
                     day: WEEK[day]
                 };
@@ -152,8 +150,7 @@ exports.draw_member = (membersData, shiftInfo) =>
                 let date = nextRenderWeek.getDate();
                 let day = nextRenderWeek.getDay();
     
-                thisWeek[i] = 
-                {
+                thisWeek[i] = {
                     date: `${year}-${month}-${date}`,
                     day: WEEK[day]
                 };
@@ -216,15 +213,7 @@ exports.draw_member = (membersData, shiftInfo) =>
                 }
                 
                 value = {name: work.workName, time: workTime, date: thisWeek[day].date, day: dayOfWeek, duo: work.duo};
-
-                if(work.duo)
-                {
-                    value.who = [];
-                }
-                else
-                {
-                    value.who = "";
-                }
+                value.who = (work.duo) ? [] : "";
 
                 shift[dayOfWeek].push(value);
             }
@@ -318,7 +307,7 @@ exports.draw_member = (membersData, shiftInfo) =>
             }
         }
 
-        let minCount = Math.floor(numOfWorked / members.length);
+        // let minCount = Math.floor(numOfWorked / members.length);
         let today = new Date(date);     // (일이 2자리수가 되면 시간이 09:00로됨, 1자리수 일은 00:00로 됨)
         today.setHours(0);
         let currentDate = today.getDate();
@@ -330,24 +319,17 @@ exports.draw_member = (membersData, shiftInfo) =>
             dayOfMember.setHours(0);
             let dayDiff = (today.getTime() - dayOfMember.getTime()) / (1000*60*60*24);
 
-            if(member.count >= weeklyMaxCount)
+            if(member.count >= weeklyMaxCount || member[`${currentDate}`] || dayDiff < minDayOff)
             {
                 continue;
             }
-            else if(member[`${currentDate}`])
+            else if(dayDiff > minDayOff)
             {
-                continue;
-            }
-            else if(dayDiff < minDayOff)
-            {
-                continue;
+                member.priority = true;
+                possible.push(member);
             }
             else
             {
-                if(member.count <= minCount)
-                {
-                    member.priority = true;
-                }
                 possible.push(member);
             }
         }
@@ -460,22 +442,6 @@ exports.draw_member = (membersData, shiftInfo) =>
 
     function pickMember(work, possibleMembers)
     {   
-        // alreadyHave
-        if(work.who !== "")
-        {
-            if(Array.isArray(work.who))
-            {
-                if(work.who.length !== 0)
-                {
-                    return;
-                }
-            }
-            else // relation work
-            {
-                return;
-            }
-        }
-
         let possible = filteringMember(work, possibleMembers);
         let pickedMember = pick(work, possible);
 
@@ -497,18 +463,19 @@ exports.draw_member = (membersData, shiftInfo) =>
             let subMember = pick(work, possible);
             let subIndex = possibleMembers.findIndex(member => member.name === subMember.name);
             possibleMembers.splice(subIndex, 1);
-            /*
+            
+            // who's main?
             let targetMemberJoin = new Date(pickedMember.join);
             targetMemberJoin.setHours(0);
             let subMemberJoin = new Date(subMember.join);
             subMemberJoin.setHours(0);
-            let dateDiff = (targetMemberJoin.getTime() - subMemberJoin.getTime()) / (1000*60*60*24);
-
-            if(dateDiff < 0)
+            
+            if(targetMemberJoin > subMemberJoin)
             {
-                // 이거 하려면 member.who가 배열이면 안되고 meber.who.main, member.who.sub 이렇게 되어야함
-                // Make function (Who's main?) 더 짬 놓은 애를 메인으로 두는 함수
-            }*/
+                let temp = work.who[0];
+                work.who[0] = work.who[1];
+                work.who[1] = temp;
+            }
         }
 
         // relation work
@@ -617,7 +584,6 @@ exports.draw_member = (membersData, shiftInfo) =>
         console.log("-------------------------------------------");
         console.log(`min worker 총 인원 : ${minMembers.length}`);
         console.log("-------------------------------------------");
-        console.log("-------------------------------------------");
         /*
         for(const worker of minMembers)
         {
@@ -642,7 +608,25 @@ exports.draw_member = (membersData, shiftInfo) =>
                     possibleMembers = checkPossibleMembers(work.date);
                 }
 
-                pickMember(work, possibleMembers);
+                // alreadyHave
+                if(work.who !== "")
+                {
+                    if(Array.isArray(work.who))
+                    {
+                        if(work.who.length !== 0)
+                        {
+                            continue;
+                        }
+                    }
+                    else // relation work
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    pickMember(work, possibleMembers);
+                }
             }
         }
 

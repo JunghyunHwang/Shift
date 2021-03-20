@@ -362,7 +362,6 @@
         thisWeek = PICK_DATA.thisWeek;
         workInfo = PICK_DATA.work_info;
         shift = PICK_DATA.shift;
-        console.log(shift);
 
         for(let type in workInfo) // re 이 과정을 한번만 할 수 있을까?
         {
