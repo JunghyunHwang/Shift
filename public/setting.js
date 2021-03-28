@@ -15,8 +15,7 @@
     _guide.textContent = "총 몇 가지 종류의 근무가 있습니까?"; // re 젤 앞에 중대 이름
     let btnNext = document.getElementById('next_info');
     let numOfWorktypes = 0;
-    let shiftData = 
-    {
+    let shiftData = {
         mon:[],
         tue:[],
         wed:[],
@@ -25,15 +24,17 @@
         sat:[],
         sun:[]
     };
-    let typesOfShift =
-    {
+    let typesOfShift = {
         weekday: [],
         weekend: []
     };
     let page = 1;
-    let fig = 0;
+    let relationPage = 0;
     let temp = [];
-    let relation = {};
+    let relation = {
+        weekday: {},
+        weekend: {}
+    };
     /* re let relation = {
         0: 5,
         1: 6,
@@ -73,12 +74,17 @@
     };*/
     let boolRelation;
 
+    btnNext.addEventListener('click', () =>
+    {
+        createInputBox();
+    });
+
     function createInputBox() // page switch
     {
         // 이것들 이동시켜야함
-        let valueWorkName = document.querySelectorAll('#workName');
-        let valueStartHour = document.querySelectorAll('#start_hour');
-        let valueStartMinute = document.querySelectorAll('#start_minute');
+        let valueWorkName = document.querySelectorAll('.input_work_name');
+        let valueStartHour = document.querySelectorAll('.start_hour');
+        let valueStartMinute = document.querySelectorAll('.start_minute');
         let valueTimeInterval = document.querySelectorAll('#time_interval');
         let formCheck = "";
 
@@ -90,7 +96,7 @@
         
                 for(let i = 0; i < numOfWorktypes; i++)
                 {
-                    formWorkName += `<input type="text" class="input_setting" name="workName" id="workName">`;
+                    formWorkName += `<input type="text" class="input_work_name" name="workName">`;
                 }
 
                 shiftSetting.innerHTML = formWorkName;
@@ -176,12 +182,10 @@
                 {
                     for(const type in typesOfShift)
                     {
-                        for(const work of typesOfShift[type])
+                        let index = typesOfShift[type].findIndex(work => work.workName === workName);
+                        if(index >= 0)
                         {
-                            if(work.workName === workName)
-                            {
-                                work.duo = 2;
-                            }
+                            typesOfShift[type][index].duo = 2;
                         }
                     }
                 }
@@ -192,10 +196,10 @@
                 {
                     inputPerDay += `
                     <label id="work_per_day">${work.workName}
-                        <input type="text" class="input_setting" name="${work.workName}" id="input_WorkPerDay" placeholder="하루근무개수">
+                        <input type="text" class="input_weekday_info" name="${work.workName}" placeholder="하루근무개수">
                         <div id=set_time>
-                            <input type="text" name="${work.workName}" id="start_hour" placeholder="시작 시간">시
-                            <input type="text" name="${work.workName}" id="start_minute" placeholder="몇분">분
+                            <input type="text" class="start_hour" name="${work.workName}" placeholder="시작 시간">시
+                            <input type="text" class="start_minute" name="${work.workName}" placeholder="몇분">분
                             <select name="${work.workName}" id="time_interval" size=1>
                                 <option value=1>1시간씩</option>
                                 <option value=2>2시간씩</option>
@@ -212,7 +216,7 @@
                 break;
             case 6:
 
-                let valueWorkPerDay = document.querySelectorAll('#input_WorkPerDay');
+                let valueWorkPerDay = document.querySelectorAll('.input_weekday_info');
 
                 for(let i = 0; i < valueWorkPerDay.length; i++)
                 {
@@ -238,10 +242,10 @@
                 {
                     inputPerDayWeekend += `
                     <label id="work_per_day">${work.workName}
-                        <input type="text" class="input_setting" name="${work.workName}" id="input_PerDayWeekend" placeholder="하루근무개수">
+                        <input type="text" class="input_weekend_info" name="${work.workName}" placeholder="하루근무개수">
                         <div id=set_time>
-                            <input type="text" name="${work.workName}" id="start_hour" placeholder="시작 시간">시
-                            <input type="text" name="${work.workName}" id="start_minute" placeholder="몇분">분
+                            <input type="text" class="start_hour" name="${work.workName}" placeholder="시작 시간">시
+                            <input type="text" class="start_minute" name="${work.workName}" placeholder="몇분">분
                             <select name="${work.workName}" id="time_interval" size=1>
                                 <option value=1>1시간씩</option>
                                 <option value=2>2시간씩</option>
@@ -258,8 +262,7 @@
                 page++;
                 break;
             case 7:
-
-                let valuePerDayWeekend = document.querySelectorAll('#input_PerDayWeekend');
+                let valuePerDayWeekend = document.querySelectorAll('.input_weekend_info');
 
                 for(let i = 0; i < valuePerDayWeekend.length; i++)
                 {
@@ -287,118 +290,30 @@
                     });
                 }
 
-                boolRelation = confirm("하루에 연관된 근무들이 있냐?");
+                boolRelation = confirm("하루에 연관된 근무들이 있습니까? 예) 위병소 초번 근무를 한 사람이 불침번 초번 근무를 한다.");
 
                 if(boolRelation)
-                {
+                {   
                     setShiftData();
+                    hasRelation();
                     page++;
-                    createInputBox();
                 }
                 else
                 {
-                    page++;
-                    createInputBox();
+                    checkInfo();
                 }
-
                 break;
             case 8:
                 if(boolRelation)
                 {
-                    let valueRelation = document.querySelectorAll("#input_relation");
-
-                    for(const input of valueRelation)
-                    {
-                        if(input.children[0].value === "")
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            let base = Number(input.children[0].value);
-                            let target = Number(input.children[1].value);
-                            relation[base] = target;
-                        }
-                    }
-
-                    switch(fig)
-                    {
-                        case 0:
-                            createRelation(shiftData.mon);
-                            break;
-                        case 1:
-                            createRelation(shiftData.tue);
-                            break;
-                        case 2:
-                            createRelation(shiftData.wed);
-                            break;
-                        case 3:
-                            createRelation(shiftData.thr);
-                            break;
-                        case 4:
-                            createRelation(shiftData.fri);
-                            break;
-                        case 5:
-                            createRelation(shiftData.sat);
-                            break;
-                        case 6:
-                            createRelation(shiftData.sun);
-                            break;
-                        default:
-                            alert("Unknown type...");
-                    }
-                    break;
+                    inputRelationData();
+                    hasRelation();
                 }
                 else
                 {
-                    let valueRelation = document.querySelectorAll("#input_relation");
-
-                    if(valueRelation.length > 0)
-                    {
-                        for(const input of valueRelation)
-                        {
-                            if(input.children[0].value === "")
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                let base = Number(input.children[0].value);
-                                let target = Number(input.children[1].value);
-                                relation[base] = target;
-                            }
-                        }
-    
-                        for(const dayOfWeek in shiftData)
-                        {
-                            for(const work of shiftData[dayOfWeek])
-                            {
-                                let len = shiftData[dayOfWeek].length;
-    
-                                for(const baseId in relation)
-                                {
-                                    if(Number(baseId) === work.id)
-                                    {
-                                        work.relation = relation[baseId];
-                                        break;
-                                    }
-                                    else if(Number(baseId) > shiftData[dayOfWeek][len - 1].id)
-                                    {
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        checkInfo();
-                    }
-                    else
-                    {
-                        checkInfo();
-                    }
+                    inputRelationData();
+                    checkInfo();
                 }
-
-                page++;
                 break;
             default:
                 const settingWrong = `
@@ -411,16 +326,67 @@
         }
     }
 
+    function inputRelationData()
+    {
+        let valueRelation = document.querySelectorAll("#input_relation");
+        let relationData = {};
+
+        for(const input of valueRelation)
+        {
+            if(input.children[0].value === "")
+            {
+                continue;
+            }
+            else
+            {
+                let base = input.children[0].value;
+                let target = Number(input.children[1].value);
+                relationData[base] = target;
+            }
+        }
+
+        switch(relationPage)
+        {
+            case 0:
+                relation.weekday = relationData;
+                break;
+            case 1:
+                relation.weekend = relationData;
+                break;
+            default:
+                alert("Unknown type...");
+                break;
+        }
+
+        relationPage++;
+    }
+
+    function hasRelation()
+    {
+        switch(relationPage)
+        {
+            case 0:
+                createRelation(shiftData.mon);
+                break;
+            case 1:
+                createRelation(shiftData.sat);
+                boolRelation = false;
+                break;
+            default:
+                confirm("Unknown type");
+                break;
+        }
+    }
+
     function createRelation(dayOfWeek)
     {
-
         let inputRelation = "";
 
-        for(const work of dayOfWeek)
+        for(let i = 0; i < dayOfWeek.length; i++)
         {
             inputRelation += `
             <div id="ex_relation">
-                ${work.id}번 ${work.workName} ${work.time}
+                ${i}번 ${dayOfWeek[i].workName} ${dayOfWeek[i].time}
             </div>
             `;
         }
@@ -431,42 +397,29 @@
         {
             inputRelation += `
             <div id="input_relation">
-                <input type="text" class="input_setting" id="_base">과
-                <input type="text" class="input_setting" id="_target">
+                <input type="text" class="_base">과
+                <input type="text" class="_target">
             </div>
-            `
+            `;
         }
 
         shiftSetting.innerHTML = inputRelation;
-        switch(fig)
+
+        switch(relationPage)
         {
             case 0:
-                _guide.textContent = "(월요일)연관이 있는 근무를 적어주세요";
+                _guide.textContent = "'평일' 연관이 있는 근무를 적어주세요";
                 break;
             case 1:
-                _guide.textContent = "(화요일)연관이 있는 근무를 적어주세요";
+                _guide.textContent = "'주말' 연관이 있는 근무를 적어주세요";
                 break;
-            case 2:
-                _guide.textContent = "(수요일)연관이 있는 근무를 적어주세요";
-                break;
-            case 3:
-                _guide.textContent = "(목요일)연관이 있는 근무를 적어주세요";
-                break;
-            case 4:
-                _guide.textContent = "(금요일)연관이 있는 근무를 적어주세요";
-                break;
-            case 5:
-                _guide.textContent = "(토요일)연관이 있는 근무를 적어주세요";
-                break;
-            case 6:
-                _guide.textContent = "(일요일)연관이 있는 근무를 적어주세요";
-                boolRelation = false;
+            default:
+                confirm("Unknown type");
                 break;
         }
-        fig++;
     }
 
-    function setShiftValues(id, typesOfWork, dayOfWeek)
+    function setShiftValues(typesOfWork, dayOfWeek)
     {
         let value ={};
         let startTime = 0;
@@ -497,37 +450,34 @@
                     endTime = (endTime / 10 < 1) ? `0${endTime}` : String(endTime);
                     workTime = `${startTime}:${workMinute} ~ ${endTime}:${workMinute}`;
                 }
+
+                // value = {name: work.workName, time: workTime, date: thisWeek[day].date, day: dayOfWeek, duo: work.duo};
+                // value.who = (work.duo) ? [] : "";
                 
                 if(shiftType.duo)
                 {
-                    value = {id: id, workName: shiftType.workName, time: workTime, day: 0, score: 0, duo: shiftType.duo, who: []};
+                    value = {workName: shiftType.workName, time: workTime, day: 0, score: 0, duo: shiftType.duo, who: []};
                 }
                 else
                 {
-                    value = {id: id, workName: shiftType.workName, time: workTime, day: 0, score: 0, duo: shiftType.duo, who: ""};
+                    value = {workName: shiftType.workName, time: workTime, day: 0, score: 0, duo: shiftType.duo, who: ""};
                 }
 
                 shiftData[dayOfWeek].push(value);
-                id++;
             }
         }
-
-        return id;
     }
 
     function checkInfo()
     {
         let settingForm = document.querySelector('#shift_setting');
+        settingForm.remove();
 
-        if(settingForm.innerHTML)
-        {
-            settingForm.remove();
-        }
-
-        let relationLen = Object.keys(relation).length;
+        let isWeekdayRelation = Object.keys(relation.weekday).length;
+        let isWeekendRelation = Object.keys(relation.weekend).length;
 
         // none relation
-        if(relationLen <= 0)
+        if(!isWeekdayRelation && !isWeekendRelation)
         {
             relation = null;
         }
@@ -542,22 +492,20 @@
     }
 
     function setShiftData()
-    {
+    {   
         // Set object shiftData values
-        let id = 0;
-
         for(const dayOfWeek in shiftData)
         {
             switch(dayOfWeek)
             {
                 case "sat":
-                    id = setShiftValues(id, typesOfShift.weekend, dayOfWeek);
+                    setShiftValues(typesOfShift.weekend, dayOfWeek);
                     break;
                 case "sun":
-                    id = setShiftValues(id, typesOfShift.weekend, dayOfWeek);
+                    setShiftValues(typesOfShift.weekend, dayOfWeek);
                     break;
                 default:
-                    id = setShiftValues(id, typesOfShift.weekday, dayOfWeek);
+                    setShiftValues(typesOfShift.weekday, dayOfWeek);
                     break;
             }
         }
@@ -593,9 +541,4 @@
         formSendData.insertAdjacentElement('beforeend', btnSubmit);
         root.append(formSendData);
     }
-
-    btnNext.addEventListener('click', () =>
-    {
-        createInputBox();
-    });
 }

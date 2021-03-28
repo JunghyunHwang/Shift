@@ -1,11 +1,71 @@
 'use strict'
 {
-    const API_URL = '/api/pick/shift';
+    const PICK_API_URL = '/api/pick/shift';
+    const GET_API_URL = '/api/get/work_info';
     let shift = {};
     let workInfo = {};
     let thisWeek = [];
     const YOIL = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
     const WEEK = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+
+    async function getUserWorkInfo()
+    {
+        const RESPONSE = await fetch(GET_API_URL);
+        const WORK_INFO = await RESPONSE.json();
+        let uploadArea = document.querySelector('#upload');
+
+        if(!WORK_INFO.has_work_info)
+        {
+            uploadArea.textContent = null;
+            let banDraw = document.createElement('div');
+            banDraw.id = "ban_draw";
+            banDraw.innerHTML = `
+            <p>설정된 근무가 없습니다. <a href="/setting/shift">근무 설정</a>을 해주세요.</p>
+            `;
+
+            uploadArea.append(banDraw);
+        }
+        else if(WORK_INFO.last_draw_date !== null)
+        {
+            let lastDrawDate = new Date(WORK_INFO.last_draw_date);
+            let currentDate = new Date();
+            lastDrawDate.setHours(0);
+            currentDate.setHours(0);
+            let dateDiff = (lastDrawDate.getTime() - currentDate.getTime()) / (1000*60*60*24);
+            dateDiff = Math.ceil(dateDiff);
+            
+            if(dateDiff > 6)
+            {
+                lastDrawDate.setDate(lastDrawDate.getDate() - 6);
+                let year = lastDrawDate.getFullYear();
+                let month = Number(lastDrawDate.getMonth()) + 1;
+                let date = lastDrawDate.getDate();
+
+                uploadArea.textContent = null;
+                
+                let banDraw = document.createElement('div');
+                banDraw.id = "ban_draw";
+                banDraw.innerHTML = `
+                <p>다음 근무 작성 가능 날짜는 '${year}-${month}-${date}' 부터 입니다</p>
+                <p>작성된 마지막 근무에 최소 6일전 부터 근무를 짤 수 있습니다.</p>
+                <p>이전 근무 확인은 <a href="/my_shift">내 근무</a>에서 가능합니다.</p>
+                `;
+                
+                uploadArea.append(banDraw);
+            }
+        }
+        else
+        {
+            uploadArea.textContent = null;
+            let draw = document.createElement('input');
+            draw.type = "file";
+            draw.id = "upload_file";
+            draw.multiple = true;
+            draw.accept = ".xlsx, .cell";
+            uploadArea.append(draw);
+            createUploadArea();
+        }
+    }
 
     function classifyByWork(date, today)
     {
@@ -43,8 +103,9 @@
 
     function createDate()
     {
-        uploadFile.remove();
+        let uploadArea = document.querySelector('#upload');
         let btnDate = document.getElementById('thisWeek');
+        uploadArea.remove();
         
         if(btnDate.textContent)
         {
@@ -250,100 +311,103 @@
         });
     }
 
-    let uploadFile = document.getElementById('upload_file');
-
-    uploadFile.addEventListener('change', (e) =>
+    function createUploadArea()
     {
-        let files = e.target.files;
-        let f;
-        let temp = [];
-        let membersData = [];
-        
-        for(let i = 0; i < files.length; i++)
+        let uploadFile = document.getElementById('upload_file');
+
+        uploadFile.addEventListener('change', (e) =>
         {
-            f = files[i];
-            let reader = new FileReader();
-
-            reader.onload = (e) =>
+            let files = e.target.files;
+            let f;
+            let temp = [];
+            let membersData = [];
+            
+            for(let i = 0; i < files.length; i++)
             {
-                let data = e.target.result;
-
-                let workbook = XLSX.read(data, {type: 'binary'});
-
-                workbook.SheetNames.forEach(function(item, index, array)
+                f = files[i];
+                let reader = new FileReader();
+    
+                reader.onload = (e) =>
                 {
-                    const inputData = XLSX.utils.sheet_to_json(workbook.Sheets[item]);
-
-                    if(files.length < 2)
+                    let data = e.target.result;
+    
+                    let workbook = XLSX.read(data, {type: 'binary'});
+    
+                    workbook.SheetNames.forEach(function(item, index, array)
                     {
-                        membersData = inputData;
-                        pickMember(membersData);
-                    }
-                    else if(!temp.length)
-                    {
-                        temp = inputData;
-                    }
-                    else if(inputData > temp)
-                    {
-                        for(const tempMember of temp)
+                        const inputData = XLSX.utils.sheet_to_json(workbook.Sheets[item]);
+    
+                        if(files.length < 2)
                         {
-                            for(const member of inputData)
-                            {
-                                if(member.name === tempMember.name)
-                                {
-                                    membersData.push(Object.assign(member, tempMember));
-                                    let cutNum = inputData.indexOf(member);
-                                    inputData.splice(cutNum, 1);
-                                    break;
-                                }
-                                else
-                                {
-                                    continue;
-                                }
-                            }
+                            membersData = inputData;
+                            pickMember(membersData);
                         }
-
-                        // 남는 넘들임
-                        for(const member of inputData)
+                        else if(!temp.length)
                         {
-                            membersData.push(member);
+                            temp = inputData;
                         }
-
-                        pickMember(membersData);
-                    }
-                    else
-                    {
-                        for(const member of inputData)
+                        else if(inputData > temp)
                         {
                             for(const tempMember of temp)
                             {
-                                if(member.name === tempMember.name)
+                                for(const member of inputData)
                                 {
-                                    membersData.push(Object.assign(member, tempMember));
-                                    let cutNum = temp.indexOf(tempMember);
-                                    temp.splice(cutNum, 1);
-                                    break;
-                                }
-                                else
-                                {
-                                    continue;
+                                    if(member.name === tempMember.name)
+                                    {
+                                        membersData.push(Object.assign(member, tempMember));
+                                        let cutNum = inputData.indexOf(member);
+                                        inputData.splice(cutNum, 1);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
                                 }
                             }
-                        }
+    
+                            // 남는 넘들임
+                            for(const member of inputData)
+                            {
+                                membersData.push(member);
+                            }
 
-                        for(const tempMember of temp)
+                            pickMember(membersData);
+                        }
+                        else
                         {
-                            membersData.push(tempMember);
+                            for(const member of inputData)
+                            {
+                                for(const tempMember of temp)
+                                {
+                                    if(member.name === tempMember.name)
+                                    {
+                                        membersData.push(Object.assign(member, tempMember));
+                                        let cutNum = temp.indexOf(tempMember);
+                                        temp.splice(cutNum, 1);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
+                                }
+                            }
+    
+                            for(const tempMember of temp)
+                            {
+                                membersData.push(tempMember);
+                            }
+
+                            pickMember(membersData);
                         }
-
-                        pickMember(membersData);
-                    }
-                });
-            };
-
-            reader.readAsBinaryString(f);
-        }
-    });
+                    });
+                };
+    
+                reader.readAsBinaryString(f);
+            }
+        });
+    }
 
     async function pickMember(membersData)
     {
@@ -357,19 +421,19 @@
             body: JSON.stringify(membersData)
         };
 
-        const RESPONSE = await fetch(API_URL, OPTIONS);
+        const RESPONSE = await fetch(PICK_API_URL, OPTIONS);
         const PICK_DATA = await RESPONSE.json();
         thisWeek = PICK_DATA.thisWeek;
         workInfo = PICK_DATA.work_info;
         shift = PICK_DATA.shift;
 
-        for(let type in workInfo) // re 이 과정을 한번만 할 수 있을까?
-        {
-            workInfo[type].sort(function(a, b)
-            {
-                return b['num'] - a['num'];
-            });
-        }
+        // for(let type in workInfo) // re 이 과정을 한번만 할 수 있을까?
+        // {
+        //     workInfo[type].sort(function(a, b)
+        //     {
+        //         return b['num'] - a['num'];
+        //     });
+        // }
 
         // re
         for(let dayOfWeek in shift)
@@ -386,4 +450,6 @@
 
         createDate();
     }
+
+    getUserWorkInfo();
 }

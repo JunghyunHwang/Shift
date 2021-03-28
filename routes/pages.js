@@ -20,10 +20,6 @@ router.get('/', (req, res) =>
     }
 });
 
-router.post('/api/pick/shift', dataController.pickMember);
-
-router.get('/api/get/shift', dataController.getMyShiftData);
-
 router.get('/my_shift', (req, res) =>
 {
     if(req.headers.cookie)
@@ -43,6 +39,10 @@ router.get('/my_shift', (req, res) =>
         res.render('index');
     }
 });
+
+router.post('/api/pick/shift', dataController.pickMember);
+router.get('/api/get/shift', dataController.getMyShiftData);
+router.get('/api/get/work_info', dataController.checkUsersWorkInfo);
 
 router.get('/setting/shift', (req, res) =>
 {

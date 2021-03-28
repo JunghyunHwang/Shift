@@ -165,3 +165,17 @@ td.name
     margin: 15px;
     cursor: pointer;
 }
+
+#ban_draw
+{
+    color: gray;
+}
+
+#ban_draw p
+{
+    margin: 0px;
+}
+#ban_draw a
+{
+    text-decoration: none;
+}

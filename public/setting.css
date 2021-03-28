@@ -30,7 +30,7 @@
     cursor: pointer;
 }
 
-#workName
+.input_work_name
 {
     margin: 20px auto;
     display: block;

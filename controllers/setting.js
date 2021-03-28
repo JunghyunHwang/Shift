@@ -101,7 +101,7 @@ exports.shiftSetting = (req, res) =>
             if(relationInfo !== null)
             {
                 const workTypesSQL = 'INSERT INTO relation SET ?, created=NOW()';
-                db.query(workTypesSQL, {relation: relationInfo, com_id: com_id}, (errRel, result2) => // re change name result2
+                db.query(workTypesSQL, {relation_info: relationInfo, com_id: com_id}, (errRel, result2) => // re change name result2
                 {
                     if(errRel)
                     {

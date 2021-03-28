@@ -23,7 +23,7 @@
             // let startResult = reg.exec(shift[week].mon[0].date);
             // let endResult = reg.exec(shift[week].sun[0].date);
             // let startDate = startResult[1];
-            // let EndDate = endResult[1];
+            // let EndDate = endResult[1];      연을 제외한 날짜만 가져오는 기능
             btnWeeks.textContent = `${shift[week].mon[0].date} ~ ${shift[week].sun[0].date}`;
             btnWeeks.classList.add('btn_week');
             weeks.append(btnWeeks);

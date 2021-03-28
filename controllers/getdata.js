@@ -11,6 +11,38 @@ const DB = mysql.createConnection(
     }
 );
 
+exports.checkUsersWorkInfo = (req, res) =>
+{
+    if(req.headers.cookie)
+    {
+        const TOKEN = req.cookies.jwt;
+        const DECODED = jwt.verify(TOKEN, process.env.JWT_SECRET);
+        const USER_ID = DECODED.id;
+        const USER_INFO_SQL = "SELECT id, last_draw FROM user WHERE user_id=?";
+    
+        DB.query(USER_INFO_SQL, [USER_ID], (err, result) =>
+        {
+            if(err)
+            {
+                console.log(err);
+            }
+            else
+            {
+                const COM_ID = result[0].id;
+                const WORK_INFO_SQL = "SELECT DISTINCT com_id FROM work_info WHERE com_id=?";
+    
+                DB.query(WORK_INFO_SQL, [COM_ID], (err, workInfo) =>
+                {
+                    res.json({
+                        has_work_info: workInfo.length,
+                        last_draw_date: result[0].last_draw
+                    });
+                });
+            }
+        });
+    }
+}
+
 exports.getMyShiftData = (req, res) =>
 {
     const TOKEN = req.cookies.jwt;
@@ -166,13 +198,6 @@ exports.pickMember = (req, res) =>
                 }
                 else
                 {
-                    /*
-                    if(workData.length === 0)
-                    {
-                        console.log("Hi");
-                        return res.render('setting');
-                    }
-                    */
                     let workInfo = {};
                     workInfo.weekday = [];
                     workInfo.weekend = [];

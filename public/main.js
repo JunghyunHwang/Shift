@@ -97,7 +97,6 @@ exports.draw_member = (membersData, shiftInfo) =>
     function createThisWeek()
     {
         let lastDrawDate;
-        // let newDraw = true;
     
         if(LAST_DRAW === null)
         {
@@ -107,7 +106,7 @@ exports.draw_member = (membersData, shiftInfo) =>
             let date = now.getDate();
             let dayOfWeek = now.getDay();
             let diff = 7 - dayOfWeek;
-    
+
             date += diff;
             lastDrawDate = new Date(year, month, date);
         }
@@ -115,46 +114,21 @@ exports.draw_member = (membersData, shiftInfo) =>
         {
             lastDrawDate = new Date(LAST_DRAW);
         }
+        
+        let nextRenderWeek = lastDrawDate;
     
-        let currentDate = new Date();
-        let dateDiff = (lastDrawDate.getTime() - currentDate.getTime()) / (1000*60*60*24);
-    
-        if(dateDiff > 6) // re
+        for(let i = 0; i < 7; i++)
         {
-            // 저번주 데이터를 가져와
-            let nextRenderWeek = lastDrawDate;
-    
-            for(let i = 0; i < 7; i++)
-            {
-                nextRenderWeek.setDate(nextRenderWeek.getDate() + 1);
-                let year = nextRenderWeek.getFullYear();
-                let month = Number(nextRenderWeek.getMonth()) + 1;
-                let date = nextRenderWeek.getDate();
-                let day = nextRenderWeek.getDay();
+            nextRenderWeek.setDate(nextRenderWeek.getDate() + 1);
+            let year = nextRenderWeek.getFullYear();
+            let month = Number(nextRenderWeek.getMonth()) + 1;
+            let date = nextRenderWeek.getDate();
+            let day = nextRenderWeek.getDay();
 
-                thisWeek[i] = {
-                    date: `${year}-${month}-${date}`,
-                    day: WEEK[day]
-                };
-            }
-        }
-        else
-        {
-            let nextRenderWeek = lastDrawDate;
-    
-            for(let i = 0; i < 7; i++)
-            {
-                nextRenderWeek.setDate(nextRenderWeek.getDate() + 1);
-                let year = nextRenderWeek.getFullYear();
-                let month = Number(nextRenderWeek.getMonth()) + 1;
-                let date = nextRenderWeek.getDate();
-                let day = nextRenderWeek.getDay();
-    
-                thisWeek[i] = {
-                    date: `${year}-${month}-${date}`,
-                    day: WEEK[day]
-                };
-            }
+            thisWeek[i] = {
+                date: `${year}-${month}-${date}`,
+                day: WEEK[day]
+            };
         }
     }
     
@@ -328,6 +302,11 @@ exports.draw_member = (membersData, shiftInfo) =>
                 member.priority = true;
                 possible.push(member);
             }
+            else if(member.time.length)
+            {
+                member.priority = true;
+                possible.push(member);
+            }
             else
             {
                 possible.push(member);
@@ -385,7 +364,6 @@ exports.draw_member = (membersData, shiftInfo) =>
 
     function pick(work, possibleMembers)
     {
-        let pass = false;
         let randomPerson = 0;
         let selected = [];
         let priorityMembers = [];
@@ -411,37 +389,30 @@ exports.draw_member = (membersData, shiftInfo) =>
         }
         else
         {
-            // 했던 근무인지 확인
-            let cnt = 0;
-
-            while(!pass)
-            {
-                randomPerson = Math.floor(Math.random() * selected.length - 1) + 1;
-                let workedShifts = selected[randomPerson].worked;
-                let workName = `${work.name}${work.time}`;
-
-                if(selected.length <= cnt) // 알고리즘 잘 짜면 알 쓸 수도
-                {
-                    pass = true;
-                }
-                else if(workedShifts.indexOf(workName) < 0)
-                {
-                    pass = true;
-                }
-                else
-                {
-                    pass = false;
-                    cnt++;
-                }
-            }
+            randomPerson = Math.floor(Math.random() * selected.length - 1) + 1;
+            selected[randomPerson].controlInfo(work);
+            return selected[randomPerson];
         }
-        
-        selected[randomPerson].controlInfo(work);
-        return selected[randomPerson];
     }
 
     function pickMember(work, possibleMembers)
-    {   
+    {
+        // alreadyHave re
+        if(work.who !== "")
+        {
+            if(Array.isArray(work.who))
+            {
+                if(work.who.length !== 0)
+                {
+                    return;
+                }
+            }
+            else // relation work
+            {
+                return;
+            }
+        }
+
         let possible = filteringMember(work, possibleMembers);
         let pickedMember = pick(work, possible);
 
@@ -497,10 +468,12 @@ exports.draw_member = (membersData, shiftInfo) =>
     function filteringMember(work, memberData)
     {
         let possible = [];
+        let keepMember = [];
         let possibleWork;
         let workTimeReg = /(\d{2})[ :]\d{2}[ ~ ]{1,3}(\d{2}):\d{2}/g;
         let result = workTimeReg.exec(work.time);
         let workStartTime = result[1];
+        let workName = `${work.name}${work.time}`;
 
         switch(work.day)
         {
@@ -521,10 +494,10 @@ exports.draw_member = (membersData, shiftInfo) =>
             {
                 continue;
             }
-            else if(member.time.length)
+            else if(member.worked.indexOf(workName) >= 0)
             {
-                member.priority = true;
-                possible.push(member);
+                keepMember.push(member);
+                continue;
             }
             else
             {
@@ -532,7 +505,14 @@ exports.draw_member = (membersData, shiftInfo) =>
             }
         }
 
-        return possible;
+        if(!possible.length)
+        {
+            return keepMember;
+        }
+        else
+        {
+            return possible;
+        }
     }
 
     function checkFair()
@@ -575,21 +555,20 @@ exports.draw_member = (membersData, shiftInfo) =>
 
         console.log("-------------------------------------------");
         console.log(`max worker 총 인원 : ${maxMembers.length}`);
-        /*
+        
         for(const worker of maxMembers)
         {
-            console.log(`name: ${worker.name}, count ${worker.count}, sum : ${worker.sum}`);
+            console.log(`name: ${worker.name}, worked: ${worker.worked}`);
         }
-        */
+        
         console.log("-------------------------------------------");
         console.log(`min worker 총 인원 : ${minMembers.length}`);
         console.log("-------------------------------------------");
-        /*
+        
         for(const worker of minMembers)
         {
-            console.log(`name: ${worker.name}, count ${worker.count}, sum : ${worker.sum}`);
+            console.log(`name: ${worker.name}, worked: ${worker.worked}`);
         }
-        */
     }
 
     function main()
@@ -608,25 +587,7 @@ exports.draw_member = (membersData, shiftInfo) =>
                     possibleMembers = checkPossibleMembers(work.date);
                 }
 
-                // alreadyHave
-                if(work.who !== "")
-                {
-                    if(Array.isArray(work.who))
-                    {
-                        if(work.who.length !== 0)
-                        {
-                            continue;
-                        }
-                    }
-                    else // relation work
-                    {
-                        continue;
-                    }
-                }
-                else
-                {
-                    pickMember(work, possibleMembers);
-                }
+                pickMember(work, possibleMembers);
             }
         }
 
