@@ -11,6 +11,13 @@ const DB = mysql.createConnection(
     }
 );
 
+exports.test = (req, res) =>
+{
+    res.json({
+        answer: "Complete fetch"
+    });
+}
+
 exports.checkUsersWorkInfo = (req, res) =>
 {
     if(req.headers.cookie)

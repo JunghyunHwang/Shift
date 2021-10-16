@@ -43,6 +43,7 @@ router.get('/my_shift', (req, res) =>
 router.post('/api/pick/shift', dataController.pickMember);
 router.get('/api/get/shift', dataController.getMyShiftData);
 router.get('/api/get/work_info', dataController.checkUsersWorkInfo);
+router.get('/api/test', dataController.test);
 
 router.get('/setting/shift', (req, res) =>
 {

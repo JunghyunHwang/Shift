@@ -61,9 +61,9 @@ exports.login = async (req, res) =>
 
 exports.signup = (req, res) =>
 {
-    const{ USER_ID, COM_NAME, USER_PASSWORD, PASSWORD_CONFIRM } = req.body;
-
-    db.query('SELECT user_id FROM user WHERE user_id = ?', [USER_ID], async (error, results) =>
+    const{ user_id, com_name, user_password, passwordConfirm } = req.body;
+    
+    db.query('SELECT user_id FROM user WHERE user_id = ?', [user_id], async (error, results) =>
     {
         if(error)
         {
@@ -77,7 +77,7 @@ exports.signup = (req, res) =>
                 message: "이미 사용하고 있는 아이디 입니다."
             });
         }
-        else if(USER_PASSWORD !== PASSWORD_CONFIRM)
+        else if(user_password !== passwordConfirm)
         {
             return res.render('signup', 
             {
@@ -85,9 +85,9 @@ exports.signup = (req, res) =>
             });
         }
 
-        let hashedPassword = await bcrypt.hash(USER_PASSWORD, 8);
+        let hashedPassword = await bcrypt.hash(user_password, 8);
 
-        db.query('INSERT INTO user SET ?, created=NOW()', {user_id: USER_ID, com_name: COM_NAME, user_password: hashedPassword}, (error, results) =>
+        db.query('INSERT INTO user SET ?, created=NOW()', {user_id: user_id, com_name: com_name, user_password: hashedPassword}, (error, results) =>
         {
             if(error)
             {

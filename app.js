@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const dotenv = require('dotenv');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const fetch = require("node-fetch");
 
 const app = express();
 
@@ -40,7 +41,7 @@ app.use('/', require('./routes/pages'));
 app.use('/api/:userId', require('./routes/pages'));
 app.use('/auth', require('./routes/auth'));
 
-app.listen(3000, () =>
+app.listen(4000, () =>
 {
     console.log("Server is running like a Ninja");
 });
